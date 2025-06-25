@@ -1,0 +1,16 @@
+{
+  "name": "mtable",
+  "version": "1.0.0",
+  "description": "Smart meal planning application",
+  "main": "index.html",
+  "scripts": {
+    "start": "live-server",
+    "build": "npm run minify",
+    "test": "jest"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "live-server": "^1.2.2",
+    "jest": "^29.0.0"
+  }
+}
