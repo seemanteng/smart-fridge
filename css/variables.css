@@ -172,3 +172,25 @@
     --border-dark: #737373;
   }
 }
+
+/* Add these new variables to your existing variables.css */
+
+:root {
+  /* Smart Fridge specific variables */
+  --sidebar-width: 240px;
+  --sidebar-bg: rgba(0, 0, 0, 0.2);
+  --fridge-icon-size: 60px;
+  --card-bg-glass: rgba(255, 255, 255, 0.95);
+  --progress-circle-size: 120px;
+  --recipe-card-height: 80px;
+  --shopping-grid-min-width: 300px;
+
+  /* Smart Fridge colors */
+  --teal-gradient-start: #4ECDC4;
+  --teal-gradient-end: #44A08D;
+  --remove-btn-color: #ff6b6b;
+  --view-btn-color: #6c757d;
+  --log-btn-color: #28a745;
+  --recipe-tag-bg: #ffd43b;
+  --recipe-tag-active: #667eea;
+}

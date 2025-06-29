@@ -56,100 +56,19 @@ class Dashboard {
         localStorage.setItem(`mtable_stats_${today}`, JSON.stringify(this.todayStats));
     }
 
-    renderCalorieProgress() {
-        const current = this.todayStats.calories;
-        const target = this.goals.dailyCalories;
-        const percentage = Math.min((current / target) * 100, 100);
-        
-        // Update the circle text
-        const numberElement = document.querySelector('.circle-text .number');
-        const labelElement = document.querySelector('.circle-text .label');
-        
-        if (numberElement && labelElement) {
-            numberElement.textContent = current.toLocaleString();
-            labelElement.textContent = `of ${target.toLocaleString()} cal`;
-        }
-
-        // Update the progress circle
-        this.updateProgressCircle(percentage);
-    }
-
-    updateProgressCircle(percentage) {
+     updateProgressCircle(percentage) {
         const progressCircle = document.querySelector('.circle-progress');
         if (!progressCircle) return;
 
-        const radius = 70; // Should match SVG radius
+        // SVG circle with radius 50 (from your SVG: cx="60" cy="60" r="50")
+        const radius = 50;
         const circumference = 2 * Math.PI * radius;
         const strokeDasharray = (percentage / 100) * circumference;
         
         progressCircle.style.strokeDasharray = `${strokeDasharray} ${circumference}`;
         progressCircle.style.strokeDashoffset = '0';
-        progressCircle.style.transition = 'stroke-dasharray 1s ease-in-out';
     }
 
-    renderMacronutrients() {
-        const macros = [
-            { current: this.todayStats.protein, target: this.goals.dailyProtein, unit: 'g', name: 'Protein' },
-            { current: this.todayStats.carbs, target: this.goals.dailyCarbs, unit: 'g', name: 'Carbs' },
-            { current: this.todayStats.fat, target: this.goals.dailyFat, unit: 'g', name: 'Fat' }
-        ];
-
-        const statsCards = document.querySelectorAll('.stat-card');
-        macros.forEach((macro, index) => {
-            if (statsCards[index]) {
-                const numberEl = statsCards[index].querySelector('.stat-number');
-                const labelEl = statsCards[index].querySelector('.stat-label');
-                
-                if (numberEl && labelEl) {
-                    // Show current value with target
-                    numberEl.innerHTML = `${macro.current}${macro.unit}<br><small style="font-size: 0.7em; opacity: 0.7;">of ${macro.target}${macro.unit}</small>`;
-                    labelEl.textContent = macro.name;
-                }
-            }
-        });
-    }
-
-    renderMealBreakdown() {
-        // Check if we should show the breakdown
-        if (this.todayStats.meals.length === 0) return;
-
-        // Create or update the meal breakdown section
-        let breakdownContainer = document.querySelector('.meal-breakdown');
-        if (!breakdownContainer) {
-            // Create the breakdown container
-            const progressCard = document.querySelector('.card h3').parentNode;
-            breakdownContainer = document.createElement('div');
-            breakdownContainer.className = 'meal-breakdown';
-            breakdownContainer.innerHTML = `
-                <h4 style="margin: var(--space-4) 0 var(--space-3) 0; color: var(--text-primary);">Today's Meals</h4>
-                <div class="meals-list"></div>
-            `;
-            progressCard.appendChild(breakdownContainer);
-        }
-
-        const mealsList = breakdownContainer.querySelector('.meals-list');
-        if (!mealsList) return;
-
-        mealsList.innerHTML = this.todayStats.meals.map((meal, index) => `
-        <div class="meal-breakdown-item" style="display: flex; justify-content: space-between;
-        align-items: center; padding: var(--space-2) var(--space-3); margin-bottom: var(--space-2);
-        background: var(--bg-secondary); border-radius: var(--radius-md); border-left: 3px solid
-        var(--primary-color);">
-        <div class="meal-info">
-        <div class="meal-name" style="font-weight: 600; color:
-        var(--text-primary);">${meal.name}</div>
-        <div class="meal-stats" style="font-size: 0.875rem; color: var(--text-secondary);">
-        ${meal.calories} cal • ${meal.protein}g protein • ${meal.carbs || 0}g carbs •
-        ${meal.fat || 0}g fat
-        </div>
-        </div>
-        <button class="btn btn-sm btn-danger"
-        onclick="window.dashboard.removeMeal(${index})" style="background: #ff4444;
-        color: white; border: none; padding: var(--space-1) var(--space-2); border-radius: var(--radius-sm);
-        font-size: 0.75rem; font-weight: 600;">REMOVE</button>
-        </div>
-        `).join('');
-    }
 
    removeMeal(mealIndex) {
         if (mealIndex >= 0 && mealIndex < this.todayStats.meals.length) {
@@ -180,39 +99,6 @@ class Dashboard {
         }
     } 
 
-    renderSuggestedRecipes() {
-        // Get added recipes from localStorage instead of generating suggestions
-        const addedRecipes = this.getAddedRecipes();
-        
-        const suggestedContainer = document.querySelector('#suggested-recipes .ingredient-list');
-        if (!suggestedContainer) return;
-
-        if (addedRecipes.length === 0) {
-            suggestedContainer.innerHTML = `
-                <div class="empty-state" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
-                    <div style="font-size: 3rem; margin-bottom: 1rem;">🍽️</div>
-                    <div style="font-weight: 600; margin-bottom: 0.5rem;">No recipes added yet</div>
-                    <div>Add recipes from the Recipes tab to see cooking instructions here</div>
-                </div>
-            `;
-            return;
-        }
-
-        suggestedContainer.innerHTML = addedRecipes.map(recipe => `
-            <div class="ingredient-item recipe-suggestion" data-recipe-id="${recipe.id}">
-                <div class="ingredient-info">
-                    <div class="ingredient-name">${recipe.emoji} ${recipe.name}</div>
-                    <div class="ingredient-quantity">${recipe.calories} cal • ${recipe.nutrition ? recipe.nutrition.protein : recipe.protein || 0}g protein • ${recipe.cookTime} min</div>
-                </div>
-                <div class="recipe-actions" style="display: flex; gap: var(--space-2); align-items: center;">
-                    <button class="btn btn-sm btn-primary cook-btn" onclick="window.dashboard.showCookingInstructions(${recipe.id})">Cook</button>
-                    <button class="btn btn-sm btn-danger delete-btn" onclick="window.dashboard.removeRecipeFromDashboard(${recipe.id})" style="background: var(--danger-color); width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; padding: 0;">&times;</button>
-                </div>
-            </div>
-        `).join('');
-
-        this.generateAutoGroceryList();
-    }
 
     generateSuggestedRecipes() {
         const inventory = this.getCurrentInventory();
@@ -422,64 +308,168 @@ class Dashboard {
         this.renderAutoGroceryList();
     } 
 
-    // Render the auto grocery list
-    renderAutoGroceryList() {
-        const groceryContainer = document.querySelector('#auto-grocery-list .grocery-list-container');
-        if (!groceryContainer) return;
-        
-        const ingredients = Object.values(this.autoGroceryList || {});
-        
-        if (ingredients.length === 0) {
-            groceryContainer.innerHTML = `
-                <div class="empty-state">
-                    <div class="empty-state-icon">🛒</div>
-                    <div class="empty-state-title">No ingredients needed</div>
-                    <div class="empty-state-description">Add recipes to generate your shopping list</div>
+    renderCalorieProgress() {
+    const current = this.todayStats.calories;
+    const target = this.goals.dailyCalories;
+    const percentage = Math.min((current / target) * 100, 100);
+
+    // Update the circle text
+    const numberElement = document.querySelector('.circle-text .number');
+    const labelElement = document.querySelector('.circle-text .label');
+    if (numberElement && labelElement) {
+        numberElement.textContent = current.toLocaleString();
+        labelElement.textContent = `of ${target.toLocaleString()} cal`;
+    }
+
+    // Update consumed label
+    const consumedLabel = document.querySelector('.consumed-label');
+    if (consumedLabel) {
+        consumedLabel.textContent = 'Consumed';
+    }
+
+    // Update the progress circle
+    this.updateProgressCircle(percentage);
+    }
+
+    renderMacronutrients() {
+        const macros = [
+            { 
+                current: this.todayStats.protein, 
+                target: this.goals.dailyProtein, 
+                unit: 'g', 
+                name: 'Protein',
+                color: '#4ECDC4'
+            },
+            { 
+                current: this.todayStats.carbs, 
+                target: this.goals.dailyCarbs, 
+                unit: 'g', 
+                name: 'Carbs',
+                color: '#4ECDC4'
+            },
+            { 
+                current: this.todayStats.fat, 
+                target: this.goals.dailyFat, 
+                unit: 'g', 
+                name: 'Fat',
+                color: '#FF6B6B'
+            }
+        ];
+
+        const macrosContainer = document.querySelector('.macros-display');
+        if (macrosContainer) {
+            macrosContainer.innerHTML = macros.map(macro => {
+                const percentage = macro.target > 0 ? Math.round((macro.current / macro.target) * 100) : 0;
+                return `
+                    <div class="macro-item">
+                        <div class="macro-info">
+                            <span class="macro-label" style="color: ${macro.color};">${macro.name}</span>
+                            <span class="macro-value">${Math.round(macro.current * 10) / 10}</span>
+                        </div>
+                        <span class="macro-percent">${percentage}%</span>
+                    </div>
+                `;
+            }).join('');
+        }
+    }
+
+    // Update renderMealBreakdown method
+    renderMealBreakdown() {
+        const mealsList = document.querySelector('#meals-breakdown');
+        if (!mealsList) return;
+
+        if (this.todayStats.meals.length === 0) {
+            mealsList.innerHTML = '';
+            return;
+        }
+
+        mealsList.innerHTML = this.todayStats.meals.map((meal, index) => `
+            <div class="meal-item">
+                <div class="meal-info">
+                    <span class="meal-name">${meal.name}</span>
+                    <span class="meal-stats">${meal.calories} cal • ${meal.protein}g protein • ${meal.carbs || 0}g carbs • ${meal.fat || 0}g fat</span>
+                </div>
+                <button class="remove-btn" onclick="window.dashboard.removeMeal(${index})">REMOVE</button>
+            </div>
+        `).join('');
+    }
+
+    // Update renderSuggestedRecipes method
+    renderSuggestedRecipes() {
+        const addedRecipes = this.getAddedRecipes();
+        const suggestedContainer = document.querySelector('#recipe-suggestions');
+        if (!suggestedContainer) return;
+
+        if (addedRecipes.length === 0) {
+            suggestedContainer.innerHTML = `
+                <div class="empty-state" style="text-align: center; padding: 2rem; color: var(--text-secondary);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🍽</div>
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;">No recipes added yet</div>
+                    <div style="font-size: 0.9rem;">Add recipes from the Recipes tab to see cooking instructions here</div>
                 </div>
             `;
             return;
         }
+
+        suggestedContainer.innerHTML = addedRecipes.slice(0, 2).map(recipe => `
+            <div class="recipe-card-small">
+                <div class="recipe-image">${recipe.emoji || '🍽'}</div>
+                <div class="recipe-info">
+                    <h3>${recipe.name}</h3>
+                    <div class="recipe-actions">
+                        <button class="btn-secondary" onclick="window.dashboard.showCookingInstructions(${recipe.id})">View Recipe</button>
+                        <button class="btn-primary" onclick="window.dashboard.logRecipeAsCooked(${recipe.id})">Log Meal</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        this.generateAutoGroceryList();
+    }
+
+    // Update renderAutoGroceryList method
+    renderAutoGroceryList() {
+        const groceryContainer = document.querySelector('#auto-grocery-grid');
+        if (!groceryContainer) return;
+
+        const ingredients = Object.values(this.autoGroceryList || {});
         
+        if (ingredients.length === 0) {
+            groceryContainer.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-secondary);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🛒</div>
+                    <div style="font-weight: 600; margin-bottom: 0.5rem;">No ingredients needed</div>
+                    <div style="font-size: 0.9rem;">Add recipes to generate your shopping list</div>
+                </div>
+            `;
+            return;
+        }
+
         groceryContainer.innerHTML = ingredients.map(ingredient => {
             const ingredientKey = ingredient.name.toLowerCase().trim();
-            
-            // Create recipe tags
-            const recipeTags = ingredient.recipes.map(recipe => {
-                const isOverlapping = ingredient.recipes.length > 1;
-                return `
-                    <span class="recipe-tag ${isOverlapping ? 'overlapping' : ''}" 
-                        title="${recipe.recipeName}: ${recipe.amount}">
-                        ${recipe.recipeName}${isOverlapping ? ` (${recipe.amount})` : ''}
-                    </span>
-                `;
-            }).join('');
-            
-            // Calculate total amount display
             const totalAmountDisplay = ingredient.recipes.length > 1 ? 
                 `Multiple recipes (${ingredient.recipes.length})` : 
                 ingredient.recipes[0].amount;
-            
+
+            const recipeTags = ingredient.recipes.map(recipe => {
+                const isOverlapping = ingredient.recipes.length > 1;
+                return `<span class="recipe-tag ${isOverlapping ? '' : 'active'}">${recipe.recipeName}</span>`;
+            }).join('');
+
             return `
-                <div class="auto-grocery-item ${ingredient.checked ? 'checked' : ''}" data-ingredient="${ingredientKey}">
+                <div class="shopping-item ${ingredient.checked ? 'checked' : ''}">
                     <input type="checkbox" 
-                        id="auto-grocery-${ingredientKey.replace(/\s+/g, '-')}"
+                        id="grocery-${ingredientKey.replace(/\s+/g, '-')}"
                         ${ingredient.checked ? 'checked' : ''}
                         onchange="window.dashboard.toggleAutoGroceryItem('${ingredientKey}')">
-                    <div class="ingredient-info">
-                        <div class="ingredient-header">
-                            <div class="ingredient-name">${ingredient.name}</div>
-                            <div class="ingredient-amount">${totalAmountDisplay}</div>
-                        </div>
-                        <div class="recipe-tags">
-                            ${recipeTags}
-                        </div>
-                    </div>
+                    <label for="grocery-${ingredientKey.replace(/\s+/g, '-')}" ${ingredient.checked ? 'class="checked"' : ''}>
+                        <strong>${ingredient.name}</strong>
+                        <span class="item-detail">${totalAmountDisplay}</span>
+                        <div class="recipe-tags">${recipeTags}</div>
+                    </label>
                 </div>
             `;
         }).join('');
-        
-        // Check if any recipes should be hidden
-        this.checkRecipeCompletion();
     }
 
     // Toggle grocery item checked status

@@ -760,6 +760,14 @@ class Calendar {
         return total;
     }
 
+    navigateWeek(direction) {
+        const firstDay = this.currentWeek[0];
+        firstDay.setDate(firstDay.getDate() + (direction * 7));
+        this.currentDate = new Date(firstDay);
+        this.currentWeek = this.getCurrentWeek();
+        this.renderCalendar();
+    }
+
     // Method to sync with dashboard meals
     syncWithDashboard() {
         if (!window.dashboard) return;

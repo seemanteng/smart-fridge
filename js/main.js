@@ -65,15 +65,19 @@ function showSection(sectionId) {
         targetSection.classList.add('active');
     }
     
-    // Update active tab
-    const tabs = document.querySelectorAll('.nav-tab');
-    tabs.forEach(tab => tab.classList.remove('active'));
+    // Update active tab in sidebar (for smart fridge layout)
+    const sidebarTabs = document.querySelectorAll('.nav-item');
+    sidebarTabs.forEach(tab => tab.classList.remove('active'));
     
-    // Find the clicked tab
-    const clickedTab = event?.target || document.querySelector(`[onclick*="${sectionId}"]`);
-    if (clickedTab) {
-        clickedTab.classList.add('active');
+    // Find and activate the correct sidebar tab
+    const activeTab = document.querySelector(`.nav-item a[onclick*="${sectionId}"]`)?.parentElement;
+    if (activeTab) {
+        activeTab.classList.add('active');
     }
+    
+    // Update old nav tabs if they exist (for other sections)
+    const oldTabs = document.querySelectorAll('.nav-tab');
+    oldTabs.forEach(tab => tab.classList.remove('active'));
 }
 
 // Recipe filtering function (global)

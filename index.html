@@ -1,1321 +1,1164 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Fridge - Smart Meal Planning</title>
-    
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- CSS Files -->
-    <link rel="stylesheet" href="css/variables.css">
-    <link rel="stylesheet" href="css/main.css">
-    <link rel="stylesheet" href="css/components.css">
-    <link rel="stylesheet" href="css/responsive.css">
-    
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Smart Fridge - Smart Meal Planning</title>
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link
+href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<!-- CSS Files -->
+<link rel="stylesheet" href="css/variables.css">
+<link rel="stylesheet" href="css/main.css">
+<link rel="stylesheet" href="css/components.css">
+<link rel="stylesheet" href="css/responsive.css">
+<!-- Favicon -->
+<link rel="icon" type="image/x-icon" href="assets/favicon.ico">
+<style>
+/* Calendar Split Layout Styles */
+.calendar-split-container {
+display: flex;
+height: calc(100vh - 120px);
+gap: var(--space-6);
+padding: var(--space-4);
+box-sizing: border-box;
+}
 
-    <style>
-        /* Enhanced styles for dashboard and calendar */
-        .calendar-day {
-            cursor: pointer;
-            transition: all 0.3s ease;
-            min-height: 140px;
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-lg);
-            padding: var(--space-3);
-            background: var(--bg-primary);
-        }
+/* Left Panel - Meal Details */
+.meal-details-panel {
+flex: 1;
+display: flex;
+flex-direction: column;
+gap: var(--space-6);
+min-width: 0; /* Prevent flex overflow */
+}
 
-        .calendar-day:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
-            border-color: var(--primary-color);
-        }
+.meal-details-header {
+background: var(--bg-primary);
+border-radius: var(--radius-2xl);
+padding: var(--space-6);
+box-shadow: var(--shadow-lg);
+border: 1px solid var(--border-light);
+}
 
-        .calendar-day.today {
-            border-color: var(--primary-color);
-            background: linear-gradient(135deg, var(--bg-primary) 0%, rgba(102, 126, 234, 0.05) 100%);
-        }
+.meal-details-header h2 {
+margin: 0 0 var(--space-3) 0;
+color: var(--text-primary);
+font-size: var(--text-2xl);
+font-weight: var(--font-semibold);
+}
 
-        .day-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--space-3);
-            padding-bottom: var(--space-2);
-            border-bottom: 1px solid var(--border-light);
-        }
+.total-calories {
+color: var(--text-secondary);
+font-size: var(--text-lg);
+font-weight: var(--font-medium);
+}
 
-        .day-number {
-            font-weight: 600;
-            color: var(--text-primary);
-            font-size: 1rem;
-        }
+.total-calories span:last-child {
+color: var(--primary-color);
+font-weight: var(--font-bold);
+}
 
-        .day-date {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            background: var(--bg-secondary);
-            padding: var(--space-1) var(--space-2);
-            border-radius: var(--radius-sm);
-        }
+.meal-details-content {
+flex: 1;
+display: flex;
+flex-direction: column;
+gap: var(--space-4);
+overflow-y: auto;
+min-height: 200px;
+}
 
-        .day-calories {
-            margin-top: var(--space-3);
-            padding: var(--space-2) var(--space-3);
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            color: white;
-            border-radius: var(--radius-md);
-            font-size: 0.75rem;
-            text-align: center;
-            font-weight: 600;
-        }
+.no-meals-selected {
+display: flex;
+flex-direction: column;
+align-items: center;
+justify-content: center;
+padding: var(--space-12);
+color: var(--text-secondary);
+text-align: center;
+background: var(--bg-primary);
+border-radius: var(--radius-2xl);
+border: 1px solid var(--border-light);
+}
 
-        .meal-item {
-            padding: var(--space-2);
-            margin-bottom: var(--space-2);
-            background: var(--bg-tertiary);
-            border-radius: var(--radius-sm);
-            font-size: 0.8rem;
-            transition: all 0.2s ease;
-            border-left: 3px solid var(--primary-color);
-        }
+.empty-meal-icon {
+font-size: 4rem;
+margin-bottom: var(--space-4);
+opacity: 0.5;
+}
 
-        .meal-item:hover {
-            background: var(--bg-secondary);
-            transform: translateX(2px);
-        }
+.meal-card {
+background: var(--bg-primary);
+border-radius: var(--radius-2xl);
+padding: var(--space-6);
+box-shadow: var(--shadow-lg);
+border: 1px solid var(--border-light);
+display: flex;
+gap: var(--space-4);
+transition: var(--transition-all);
+}
 
-        .add-meal-prompt {
-            color: var(--text-light);
-            font-style: italic;
-            text-align: center;
-            padding: var(--space-4);
-            border: 2px dashed var(--border-color);
-            border-radius: var(--radius-md);
-            transition: all 0.3s ease;
-        }
+.meal-card:hover {
+transform: translateY(-2px);
+box-shadow: var(--shadow-xl);
+}
 
-        .add-meal-prompt:hover {
-            border-color: var(--primary-color);
-            color: var(--primary-color);
-        }
+.meal-image {
+width: 80px;
+height: 80px;
+border-radius: var(--radius-xl);
+background: var(--bg-secondary);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 2rem;
+flex-shrink: 0;
+overflow: hidden;
+}
 
-        /* Enhanced suggested recipes styling */
-        .recipe-suggestion {
-            border-left: 3px solid var(--primary-color);
-            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-            transition: all 0.3s ease;
-            border-radius: var(--radius-lg);
-            padding: var(--space-4);
-            margin-bottom: var(--space-3);
-        }
+.meal-image img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
 
-        .recipe-suggestion:hover {
-            transform: translateX(3px);
-            box-shadow: var(--shadow-md);
-            border-left-color: var(--success-color);
-        }
+.meal-info {
+flex: 1;
+display: flex;
+flex-direction: column;
+justify-content: center;
+min-width: 0;
+}
 
-        .recipe-actions {
-            display: flex;
-            gap: var(--space-2);
-            align-items: center;
-        }
+.meal-name {
+font-size: var(--text-xl);
+font-weight: var(--font-semibold);
+color: var(--text-primary);
+margin-bottom: var(--space-2);
+word-wrap: break-word;
+}
 
-        .cook-btn {
-            background: var(--success-color);
-            color: white;
-            border: none;
-            padding: var(--space-2) var(--space-4);
-            border-radius: var(--radius-md);
-            font-size: 0.875rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
+.meal-nutrition {
+display: flex;
+flex-direction: column;
+gap: var(--space-1);
+}
 
-        .cook-btn:hover {
-            background: #059669;
-            transform: translateY(-1px);
-            box-shadow: 0 4px 8px rgba(16, 185, 129, 0.3);
-        }
+.nutrition-item {
+color: var(--text-secondary);
+font-size: var(--text-sm);
+}
 
-        .delete-btn {
-            background: var(--danger-color) !important;
-            color: white !important;
-            border: none;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0;
-            border-radius: var(--radius-md);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 1.2rem;
-            font-weight: bold;
-        }
+/* Top Meals Section */
+.top-meals-section {
+background: var(--bg-primary);
+border-radius: var(--radius-2xl);
+padding: var(--space-6);
+box-shadow: var(--shadow-lg);
+border: 1px solid var(--border-light);
+}
 
-        .delete-btn:hover {
-            background: #dc2626 !important;
-            transform: scale(1.1);
-        }
+.top-meals-section h3 {
+margin: 0 0 var(--space-4) 0;
+color: var(--text-primary);
+font-size: var(--text-xl);
+font-weight: var(--font-semibold);
+}
 
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr;
-            gap: var(--space-6);
-            margin-bottom: var(--space-8);
-        }
+.top-meals-grid {
+display: flex;
+gap: var(--space-4);
+overflow-x: auto;
+padding-bottom: var(--space-2);
+}
 
-        @media (max-width: 1024px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr 1fr;
-            }
-            
-            #auto-grocery-list {
-                grid-column: 1 / -1;
-            }
-        }
+.top-meal-item {
+flex-shrink: 0;
+display: flex;
+flex-direction: column;
+align-items: center;
+padding: var(--space-3);
+background: var(--bg-secondary);
+border-radius: var(--radius-lg);
+min-width: 120px;
+transition: var(--transition-all);
+position: relative;
+}
 
-        @media (max-width: 768px) {
-            .dashboard-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+.top-meal-item:hover {
+background: var(--bg-tertiary);
+transform: translateY(-2px);
+}
 
-        /* Video-specific styles */
-        .recipe-image {
-            position: relative;
-            height: 200px;
-            background: var(--bg-secondary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 4rem;
-            overflow: hidden;
-            border-radius: var(--radius-lg);
-            margin-bottom: var(--space-4);
-        }
+.top-meal-image {
+width: 60px;
+height: 60px;
+border-radius: var(--radius-lg);
+background: var(--bg-tertiary);
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: 1.5rem;
+margin-bottom: var(--space-2);
+position: relative;
+overflow: hidden;
+}
 
-        .recipe-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.3s ease;
-        }
+.top-meal-image img {
+width: 100%;
+height: 100%;
+object-fit: cover;
+}
 
-        .recipe-card:hover .recipe-image img {
-            transform: scale(1.05);
-        }
+.meal-rank {
+position: absolute;
+top: -8px;
+right: -8px;
+background: var(--primary-color);
+color: white;
+border-radius: 50%;
+width: 24px;
+height: 24px;
+display: flex;
+align-items: center;
+justify-content: center;
+font-size: var(--text-xs);
+font-weight: var(--font-bold);
+border: 2px solid white;
+}
 
-        .video-play-button {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 60px;
-            height: 60px;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 24px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            z-index: 2;
-            border: 3px solid white;
-        }
+.top-meal-name {
+font-size: var(--text-sm);
+font-weight: var(--font-medium);
+color: var(--text-primary);
+text-align: center;
+margin-bottom: var(--space-1);
+word-wrap: break-word;
+}
 
-        .video-play-button:hover {
-            background: rgba(0, 0, 0, 0.9);
-            transform: translate(-50%, -50%) scale(1.1);
-        }
+.meal-count {
+font-size: var(--text-xs);
+color: var(--text-secondary);
+}
 
-        .video-play-button::before {
-            content: '▶';
-            margin-left: 3px;
-        }
+/* Right Panel - Calendar */
+.calendar-panel {
+flex: 1;
+background: var(--primary-color);
+border-radius: var(--radius-2xl);
+padding: var(--space-6);
+color: white;
+min-width: 0;
+}
 
-        .empty-state {
-            text-align: center;
-            padding: var(--space-8);
-            color: var(--text-secondary);
-        }
+.calendar-header-new {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: var(--space-6);
+}
 
-        .empty-state-icon {
-            font-size: 3rem;
-            margin-bottom: var(--space-4);
-        }
+.calendar-header-new h2 {
+margin: 0;
+color: white;
+font-size: var(--text-2xl);
+font-weight: var(--font-semibold);
+}
 
-        .empty-state-title {
-            font-weight: 600;
-            margin-bottom: var(--space-2);
-            color: var(--text-primary);
-        }
+.calendar-nav-btn {
+background: rgba(255, 255, 255, 0.2);
+border: none;
+border-radius: var(--radius-lg);
+width: 40px;
+height: 40px;
+display: flex;
+align-items: center;
+justify-content: center;
+color: white;
+font-size: var(--text-lg);
+cursor: pointer;
+transition: var(--transition-all);
+}
 
-        /* Modal improvements */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
+.calendar-nav-btn:hover {
+background: rgba(255, 255, 255, 0.3);
+transform: scale(1.1);
+}
 
-        .modal.active {
-            opacity: 1;
-        }
+.calendar-weekdays {
+display: grid;
+grid-template-columns: repeat(7, 1fr);
+gap: var(--space-2);
+margin-bottom: var(--space-4);
+}
 
-        .modal-content {
-            background: var(--bg-primary);
-            border-radius: var(--radius-xl);
-            padding: var(--space-6);
-            max-width: 600px;
-            width: 90%;
-            max-height: 80vh;
-            overflow-y: auto;
-            transform: scale(0.9);
-            transition: transform 0.3s ease;
-            box-shadow: var(--shadow-lg);
-        }
+.weekday {
+text-align: center;
+color: rgba(255, 255, 255, 0.8);
+font-size: var(--text-sm);
+font-weight: var(--font-medium);
+padding: var(--space-2);
+}
 
-        .modal.active .modal-content {
-            transform: scale(1);
-        }
+.calendar-dates-grid {
+display: grid;
+grid-template-columns: repeat(7, 1fr);
+gap: var(--space-2);
+}
 
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: var(--space-5);
-            padding-bottom: var(--space-3);
-            border-bottom: 1px solid var(--border-color);
-        }
+.calendar-date {
+aspect-ratio: 1;
+display: flex;
+align-items: center;
+justify-content: center;
+border-radius: var(--radius-lg);
+font-weight: var(--font-medium);
+cursor: pointer;
+transition: var(--transition-all);
+position: relative;
+min-height: 50px;
+}
 
-        .modal-title {
-            color: var(--text-primary);
-            font-size: 1.25rem;
-            font-weight: 600;
-        }
+.calendar-date:hover {
+background: rgba(255, 255, 255, 0.1);
+}
 
-        .modal-close {
-            background: none;
-            border: none;
-            font-size: 1.5rem;
-            cursor: pointer;
-            color: var(--text-secondary);
-            padding: var(--space-2);
-            border-radius: var(--radius-md);
-            transition: all 0.3s ease;
-            width: 40px;
-            height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
+.calendar-date.other-month {
+color: rgba(255, 255, 255, 0.3);
+}
 
-        .modal-close:hover {
-            background: var(--bg-secondary);
-            color: var(--text-primary);
-        }
+.calendar-date.selected {
+background: white;
+color: var(--primary-color);
+font-weight: var(--font-bold);
+}
 
-        .form-group {
-            margin-bottom: var(--space-4);
-        }
+.calendar-date.today {
+background: rgba(255, 255, 255, 0.2);
+border: 2px solid white;
+}
 
-        .form-group label {
-            display: block;
-            margin-bottom: var(--space-2);
-            font-weight: 500;
-            color: var(--text-primary);
-        }
+.calendar-date.has-meals::after {
+content: '';
+position: absolute;
+bottom: 4px;
+left: 50%;
+transform: translateX(-50%);
+width: 6px;
+height: 6px;
+background: rgba(255, 255, 255, 0.8);
+border-radius: 50%;
+}
 
-        .form-group input,
-        .form-group select {
-            width: 100%;
-            padding: var(--space-3);
-            border: 1px solid var(--border-color);
-            border-radius: var(--radius-md);
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
-            background: var(--bg-primary);
-        }
+.calendar-date.selected.has-meals::after {
+background: var(--primary-color);
+}
 
-        .form-group input:focus,
-        .form-group select:focus {
-            outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
-        }
+/* Mobile Responsiveness */
+@media (max-width: 968px) {
+.calendar-split-container {
+flex-direction: column;
+height: auto;
+min-height: calc(100vh - 120px);
+}
 
-        .meal-type-section {
-            margin-bottom: var(--space-5);
-            padding: var(--space-4);
-            background: var(--bg-secondary);
-            border-radius: var(--radius-lg);
-            border: 1px solid var(--border-light);
-        }
+.meal-details-panel {
+order: 2;
+}
 
-        .meal-type-section h4 {
-            margin-bottom: var(--space-3);
-            color: var(--primary-color);
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
+.calendar-panel {
+order: 1;
+min-height: 400px;
+}
 
-        .meal-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: var(--space-3);
-            padding-top: var(--space-2);
-            border-top: 1px solid var(--border-light);
-        }
+.top-meals-grid {
+justify-content: center;
+}
+}
 
-        .meal-calories {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            background: var(--bg-tertiary);
-            padding: var(--space-1) var(--space-2);
-            border-radius: var(--radius-sm);
-        }
+@media (max-width: 640px) {
+.calendar-split-container {
+padding: var(--space-2);
+gap: var(--space-4);
+}
 
-        .modal-actions {
-            display: flex;
-            gap: var(--space-3);
-            margin-top: var(--space-6);
-            padding-top: var(--space-4);
-            border-top: 1px solid var(--border-light);
-        }
+.meal-details-header,
+.top-meals-section,
+.calendar-panel {
+padding: var(--space-4);
+}
 
-        /* Grocery list improvements */
-        .grocery-item {
-            display: flex;
-            align-items: center;
-            padding: var(--space-3);
-            margin-bottom: var(--space-2);
-            background: var(--bg-secondary);
-            border-radius: var(--radius-md);
-            transition: all 0.3s ease;
-            border: 1px solid var(--border-light);
-        }
+.calendar-dates-grid {
+gap: var(--space-1);
+}
 
-        .grocery-item:hover {
-            background: var(--bg-tertiary);
-            border-color: var(--primary-color);
-        }
+.calendar-date {
+min-height: 40px;
+font-size: var(--text-sm);
+}
 
-        .grocery-item.checked {
-            opacity: 0.6;
-            text-decoration: line-through;
-            background: var(--bg-tertiary);
-        }
+.meal-card {
+flex-direction: column;
+text-align: center;
+}
 
-        .grocery-item input[type="checkbox"] {
-            margin-right: var(--space-3);
-            transform: scale(1.2);
-            accent-color: var(--primary-color);
-        }
+.meal-image {
+align-self: center;
+}
 
-        .grocery-section {
-            font-size: 0.75rem;
-            color: var(--text-light);
-            background: var(--bg-tertiary);
-            padding: var(--space-1) var(--space-2);
-            border-radius: var(--radius-sm);
-            margin-left: var(--space-2);
-        }
+.meal-nutrition {
+align-items: center;
+}
+}
 
-        /* Enhanced calendar grid */
-        .calendar-grid {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: var(--space-3);
-            margin-bottom: var(--space-4);
-        }
+/* Modal styles */
+.modal {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.5);
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 1000;
+opacity: 0;
+transition: opacity 0.3s ease;
+}
 
-        @media (max-width: 768px) {
-            .calendar-grid {
-                grid-template-columns: repeat(3, 1fr);
-            }
-            
-            .calendar-day {
-                min-height: 120px;
-            }
-        }
+.modal.active {
+opacity: 1;
+}
 
-        @media (max-width: 480px) {
-            .calendar-grid {
-                grid-template-columns: 1fr;
-            }
-        }
+.modal-content {
+background: var(--bg-primary);
+border-radius: var(--radius-xl);
+padding: var(--space-6);
+max-width: 600px;
+width: 90%;
+max-height: 80vh;
+overflow-y: auto;
+transform: scale(0.9);
+transition: transform 0.3s ease;
+box-shadow: var(--shadow-lg);
+}
 
-        /* Toast notifications */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            background: var(--success-color);
-            color: white;
-            padding: var(--space-4) var(--space-5);
-            border-radius: var(--radius-lg);
-            box-shadow: var(--shadow-lg);
-            transform: translateX(100%);
-            transition: transform 0.3s ease;
-            z-index: 1100;
-            max-width: 300px;
-        }
+.modal.active .modal-content {
+transform: scale(1);
+}
 
-        .toast.show {
-            transform: translateX(0);
-        }
+.modal-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: var(--space-5);
+padding-bottom: var(--space-3);
+border-bottom: 1px solid var(--border-light);
+}
 
-        .toast.error {
-            background: var(--danger-color);
-        }
+.modal-title {
+color: var(--text-primary);
+font-size: var(--text-xl);
+font-weight: var(--font-semibold);
+}
 
-        .toast.warning {
-            background: var(--warning-color);
-        }
+.modal-close {
+background: none;
+border: none;
+font-size: 1.5rem;
+cursor: pointer;
+color: var(--text-secondary);
+padding: var(--space-2);
+border-radius: var(--radius-md);
+transition: all 0.3s ease;
+width: 40px;
+height: 40px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
 
-        /* Recipe card button improvements */
-        .recipe-content > div:last-child {
-            display: flex;
-            gap: var(--space-2);
-            margin-top: var(--space-3);
-        }
+.modal-close:hover {
+background: var(--bg-secondary);
+color: var(--text-primary);
+}
 
-        .recipe-content .btn {
-            flex: 1;
-            text-align: center;
-        }
-    </style>
+/* Toast notifications */
+.toast {
+position: fixed;
+top: 20px;
+right: 20px;
+background: var(--success-color);
+color: white;
+padding: var(--space-4) var(--space-5);
+border-radius: var(--radius-lg);
+box-shadow: var(--shadow-lg);
+transform: translateX(100%);
+transition: transform 0.3s ease;
+z-index: 1100;
+max-width: 300px;
+}
+
+.toast.show {
+transform: translateX(0);
+}
+
+.toast.error {
+background: var(--error-color);
+}
+
+.toast.warning {
+background: var(--warning-color);
+}
+
+@media (max-width: 480px) {
+.toast {
+left: 20px;
+right: 20px;
+top: 20px;
+transform: translateY(-100%);
+max-width: none;
+}
+
+.toast.show {
+transform: translateY(0);
+}
+}
+
+/* Ensure proper responsive layout */
+@media (max-width: 1200px) {
+.dashboard-grid {
+grid-template-columns: 1fr 1fr;
+}
+}
+
+@media (max-width: 768px) {
+.dashboard-grid {
+grid-template-columns: 1fr;
+}
+}
+</style>
 </head>
+
 <body>
-    <div class="container">
-        <!-- Header -->
-        <div class="header">
-            <h1>Smart Fridge</h1>
-            <p>Smart meal planning with your ingredients</p>
-        </div>
+<div class="container">
+<!-- Header -->
+<div class="header">
+<h1>Smart Fridge</h1>
+<p>Smart meal planning with your ingredients</p>
+</div>
 
-        <!-- Navigation -->
-        <div class="nav-tabs">
-            <button class="nav-tab active" onclick="showSection('dashboard')">Dashboard</button>
-            <button class="nav-tab" onclick="showSection('inventory')">Inventory</button>
-            <button class="nav-tab" onclick="showSection('recipes')">Recipes</button>
-            <button class="nav-tab" onclick="showSection('calendar')">Calendar</button>
-            <button class="nav-tab" onclick="showSection('goals')">Goals</button>
-        </div>
+<!-- Smart Fridge Layout with Persistent Navigation -->
+<div class="smart-fridge-layout">
+<!-- Sidebar Navigation -->
+<nav class="sidebar">
+<div class="logo">
+<img src="assets/images/Smart Fridge.png" alt="Smart Fridge Logo" class="logo-image">
+</div>
+<ul class="nav-menu">
+<li class="nav-item active">
+<a href="#" onclick="showSection('dashboard')">
+<span class="nav-icon">
+<img src="assets/images/Dashboard.png" alt="Dashboard" class="nav-icon-image">
+</span>
+<span class="nav-text">Dashboard</span>
+</a>
+</li>
+<li class="nav-item">
+<a href="#" onclick="showSection('inventory')">
+<span class="nav-icon">
+<img src="assets/images/Inventory.png" alt="Inventory" class="nav-icon-image">
+</span>
+<span class="nav-text">Inventory</span>
+</a>
+</li>
+<li class="nav-item">
+<a href="#" onclick="showSection('recipes')">
+<span class="nav-icon">
+<img src="assets/images/Recipe.png" alt="Recipes" class="nav-icon-image">
+</span>
+<span class="nav-text">Recipes</span>
+</a>
+</li>
+<li class="nav-item">
+<a href="#" onclick="showSection('calendar')">
+<span class="nav-icon">
+<img src="assets/images/Calendar.png" alt="Calendar" class="nav-icon-image">
+</span>
+<span class="nav-text">Calendar</span>
+</a>
+</li>
+<li class="nav-item">
+<a href="#" onclick="showSection('goals')">
+<span class="nav-icon">
+<img src="assets/images/Goals.png" alt="Goals" class="nav-icon-image">
+</span>
+<span class="nav-text">Goals</span>
+</a>
+</li>
+</ul>
+</nav>
 
-        <!-- Dashboard Section -->
-        <div id="dashboard" class="content-section active">
-            <div class="dashboard-grid">
-                <!-- Main Progress Card -->
-                <div class="card">
-                    <h3>Today's Progress</h3>
-                    <div class="calorie-circle">
-                        <svg width="140" height="140">
-                            <defs>
-                                <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                                    <stop offset="0%" style="stop-color:#667eea"/>
-                                    <stop offset="100%" style="stop-color:#764ba2"/>
-                                </linearGradient>
-                            </defs>
-                            <circle cx="70" cy="70" r="60" class="circle-bg"/>
-                            <circle cx="70" cy="70" r="60" class="circle-progress" 
-                                    stroke-dasharray="0 377" stroke-dashoffset="0"/>
-                        </svg>
-                        <div class="circle-text">
-                            <div class="number">0</div>
-                            <div class="label">of 2,000 cal</div>
-                        </div>
-                    </div>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-number">0g</div>
-                            <div class="stat-label">Protein</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">0g</div>
-                            <div class="stat-label">Carbs</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">0g</div>
-                            <div class="stat-label">Fat</div>
-                        </div>
-                    </div>
-                </div>
+<!-- Main Content Area for all sections -->
+<main class="main-content">
+<!-- Dashboard Section -->
+<div id="dashboard" class="content-section active">
+<!-- Top Row -->
+<div class="dashboard-top-row">
+<!-- Today's Progress Card -->
+<div class="progress-card">
+<h2>Today's Progress</h2>
+<div class="progress-content">
+<div class="calorie-display">
+<div class="calorie-circle">
+<svg width="120" height="120" viewBox="0 0 120 120">
+<defs>
+<linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+<stop offset="0%" style="stop-color:#4ECDC4"/>
+<stop offset="100%" style="stop-color:#44A08D"/>
+</linearGradient>
+</defs>
+<circle cx="60" cy="60" r="50" fill="none" stroke="#e0e0e0" stroke-width="8"/>
+<circle class="circle-progress" cx="60" cy="60" r="50" fill="none"
+stroke="url(#gradient)" stroke-width="8" stroke-linecap="round"/>
+</svg>
+<div class="circle-text">
+<span class="number">0</span>
+<span class="label">of 2000 cal</span>
+</div>
+</div>
+<div class="consumed-label">Consumed</div>
+</div>
+<div class="macros-display">
+<!-- Macros will be populated by JavaScript -->
+</div>
+</div>
+<!-- Meals List -->
+<div class="meals-list" id="meals-breakdown">
+<!-- Meals will be populated by JavaScript -->
+</div>
+</div>
+<!-- Things to Make Card -->
+<div class="suggestions-card">
+<h2>Things to Make</h2>
+<div class="recipe-suggestions" id="recipe-suggestions">
+<!-- Recipes will be populated by JavaScript -->
+</div>
+</div>
+</div>
+<!-- Shopping List Card -->
+<div class="shopping-list-card">
+<h2>Shopping List</h2>
+<div class="shopping-grid" id="auto-grocery-grid">
+<!-- Shopping items will be populated by JavaScript -->
+</div>
+</div>
+</div>
 
-                <!-- Suggested Recipes Card -->
-                <div class="card" id="suggested-recipes">
-                    <h3>🍽️ Things to Make</h3>
-                    <div class="ingredient-list">
-                        <!-- This will be populated by the Dashboard component -->
-                        <div class="empty-state">
-                            <div class="empty-state-icon">🍽️</div>
-                            <div class="empty-state-title">No recipes added yet</div>
-                            <div class="empty-state-description">Add recipes from the Recipes tab to see cooking instructions here</div>
-                        </div>
-                    </div>
-                </div>
+<!-- Inventory Section -->
+<div id="inventory" class="content-section">
+<div class="dashboard-grid">
+<div class="card">
+<h3>Add Ingredient</h3>
+<form id="ingredientForm">
+<div class="form-group">
+<label for="ingredientName">Ingredient Name</label>
+<input type="text" id="ingredientName" placeholder="e.g., Chicken Breast" required>
+</div>
+<div class="form-group">
+<label for="ingredientQuantity">Quantity</label>
+<input type="number" id="ingredientQuantity" placeholder="e.g., 2" step="0.1" min="0" required>
+</div>
+<div class="form-group">
+<label for="ingredientUnit">Unit</label>
+<select id="ingredientUnit" required>
+<option value="">Select unit...</option>
+<option value="grams">Grams</option>
+<option value="kg">Kilograms</option>
+<option value="pieces">Pieces</option>
+<option value="cups">Cups</option>
+<option value="tablespoons">Tablespoons</option>
+<option value="teaspoons">Teaspoons</option>
+<option value="ounces">Ounces</option>
+<option value="pounds">Pounds</option>
+<option value="milliliters">Milliliters</option>
+<option value="liters">Liters</option>
+</select>
+</div>
+<button type="submit" class="btn btn-primary">Add to Inventory</button>
+</form>
+</div>
+<div class="card">
+<h3>Current Inventory</h3>
+<div class="ingredient-list" id="inventoryList">
+<!-- This will be populated by the Inventory component -->
+</div>
+</div>
+</div>
+</div>
 
-                <!-- Auto-Generated Grocery List Card -->
-                <div class="card" id="auto-grocery-list">
-                    <h3>🛒 Shopping List</h3>
-                    <div class="grocery-list-container">
-                        <!-- This will be populated by the Dashboard component -->
-                        <div class="empty-state">
-                            <div class="empty-state-icon">🛒</div>
-                            <div class="empty-state-title">No ingredients needed</div>
-                            <div class="empty-state-description">Add recipes to generate your shopping list</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- Recipes Section -->
+<div id="recipes" class="content-section">
+<div class="card" style="margin-bottom: var(--space-8);">
+<h3>Recipe Filters</h3>
+<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4);">
+<div class="form-group">
+<label>Max Calories</label>
+<input type="number" placeholder="e.g., 500" id="maxCalories">
+</div>
+<div class="form-group">
+<label>Min Protein (g)</label>
+<input type="number" placeholder="e.g., 20" id="minProtein">
+</div>
+<div class="form-group">
+<label>Cuisine Type</label>
+<select id="cuisineType">
+<option value="">All Cuisines</option>
+<option value="asian">Asian</option>
+<option value="italian">Italian</option>
+<option value="mexican">Mexican</option>
+<option value="american">American</option>
+<option value="mediterranean">Mediterranean</option>
+</select>
+</div>
+<div class="form-group">
+<button class="btn btn-primary" onclick="filterRecipes()" style="margin-top: 24px;">Find Recipes</button>
+</div>
+</div>
+</div>
+<div class="recipe-grid">
+<!-- Recipes will be populated by JavaScript -->
+</div>
+</div>
 
-        <!-- Inventory Section -->
-        <div id="inventory" class="content-section">
-            <div class="dashboard-grid">
-                <div class="card">
-                    <h3>Add Ingredient</h3>
-                    <form id="ingredientForm">
-                        <div class="form-group">
-                            <label for="ingredientName">Ingredient Name</label>
-                            <input type="text" id="ingredientName" placeholder="e.g., Chicken Breast" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="ingredientQuantity">Quantity</label>
-                            <input type="number" id="ingredientQuantity" placeholder="e.g., 2" step="0.1" min="0" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="ingredientUnit">Unit</label>
-                            <select id="ingredientUnit" required>
-                                <option value="">Select unit...</option>
-                                <option value="grams">Grams</option>
-                                <option value="kg">Kilograms</option>
-                                <option value="pieces">Pieces</option>
-                                <option value="cups">Cups</option>
-                                <option value="tablespoons">Tablespoons</option>
-                                <option value="teaspoons">Teaspoons</option>
-                                <option value="ounces">Ounces</option>
-                                <option value="pounds">Pounds</option>
-                                <option value="milliliters">Milliliters</option>
-                                <option value="liters">Liters</option>
-                            </select>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Add to Inventory</button>
-                    </form>
-                </div>
+<!-- Calendar Section -->
+<div id="calendar" class="content-section">
+<div class="calendar-split-container">
+<!-- Left Side: Meal Details -->
+<div class="meal-details-panel">
+<div class="meal-details-header">
+<h2 id="selected-date-title">Meals on this day</h2>
+<div class="total-calories">
+<span>Total Calories: </span>
+<span id="daily-total-calories">0</span>
+</div>
+</div>
 
-                <div class="card">
-                    <h3>Current Inventory</h3>
-                    <div class="ingredient-list" id="inventoryList">
-                        <!-- This will be populated by the Inventory component -->
-                    </div>
-                </div>
-            </div>
-        </div>
+<div class="meal-details-content" id="meal-details-content">
+<!-- Meals will be populated by JavaScript -->
+<div class="no-meals-selected">
+<div class="empty-meal-icon">🍽️</div>
+<p>Select a date to view meals</p>
+</div>
+</div>
 
-        <!-- Recipes Section -->
-        <div id="recipes" class="content-section">
-            <div class="card" style="margin-bottom: var(--space-8);">
-                <h3>Recipe Filters</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: var(--space-4);">
-                    <div class="form-group">
-                        <label>Max Calories</label>
-                        <input type="number" placeholder="e.g., 500" id="maxCalories">
-                    </div>
-                    <div class="form-group">
-                        <label>Min Protein (g)</label>
-                        <input type="number" placeholder="e.g., 20" id="minProtein">
-                    </div>
-                    <div class="form-group">
-                        <label>Cuisine Type</label>
-                        <select id="cuisineType">
-                            <option value="">All Cuisines</option>
-                            <option value="asian">Asian</option>
-                            <option value="italian">Italian</option>
-                            <option value="mexican">Mexican</option>
-                            <option value="american">American</option>
-                            <option value="mediterranean">Mediterranean</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <button class="btn btn-primary" onclick="filterRecipes()" style="margin-top: 24px;">Find Recipes</button>
-                    </div>
-                </div>
-            </div>
+<!-- Top Meals Section -->
+<div class="top-meals-section">
+<h3>Top Meals This Month</h3>
+<div class="top-meals-grid" id="top-meals-grid">
+<!-- Top meals will be populated by JavaScript -->
+</div>
+</div>
+</div>
 
-            <div class="recipe-grid">
-                <div class="recipe-card">
-                    <div class="recipe-image">🍗</div>
-                    <div class="recipe-content">
-                        <div class="recipe-title">Teriyaki Chicken Bowl</div>
-                        <div class="recipe-meta">
-                            <span>450 cal</span>
-                            <span>35g protein</span>
-                            <span>25 min</span>
-                        </div>
-                        <div class="recipe-ingredients">Chicken, Rice, Broccoli, Teriyaki Sauce</div>
-                        <div class="recipe-availability">3/4 ingredients available</div>
-                        <div style="display: flex; gap: var(--space-2); margin-top: var(--space-3);">
-                            <button class="btn btn-primary" onclick="showRecipeModal(1)" style="flex: 0.7; max-width: 80px;">
-                                View
-                            </button>
-                            <button class="btn btn-success" onclick="addRecipeToDashboardFromCard(1)" style="flex: 2.3; background: var(--success-color);">
-                                Add to Dashboard
-                            </button>
-                        </div>
-                    </div>
-                </div>
+<!-- Right Side: Calendar Grid -->
+<div class="calendar-panel">
+<div class="calendar-header-new">
+<button class="calendar-nav-btn" id="prev-month" onclick="navigateMonth(-1)">
+<span>‹</span>
+</button>
+<h2 id="calendar-month-display">Loading...</h2>
+<button class="calendar-nav-btn" id="next-month" onclick="navigateMonth(1)">
+<span>›</span>
+</button>
+</div>
 
-                <div class="recipe-card">
-                    <div class="recipe-image">🥗</div>
-                    <div class="recipe-content">
-                        <div class="recipe-title">Quinoa Power Salad</div>
-                        <div class="recipe-meta">
-                            <span>380 cal</span>
-                            <span>18g protein</span>
-                            <span>15 min</span>
-                        </div>
-                        <div class="recipe-ingredients">Quinoa, Chickpeas, Vegetables, Dressing</div>
-                        <div class="recipe-availability">2/4 ingredients available</div>
-                        <div style="display: flex; gap: var(--space-2); margin-top: var(--space-3);">
-                        <button class="btn btn-primary" onclick="showRecipeModal(3)" style="flex: 1; max-width: 80px;">
-                            View
-                        </button>
-                        <button class="btn btn-success" onclick="addRecipeToDashboardFromCard(3)" style="flex: 2; background: var(--success-color);">
-                            Add to Dashboard
-                        </button>
-                    </div>
-                    </div>
-                </div>
+<div class="calendar-weekdays">
+<div class="weekday">Mon</div>
+<div class="weekday">Tue</div>
+<div class="weekday">Wed</div>
+<div class="weekday">Thu</div>
+<div class="weekday">Fri</div>
+<div class="weekday">Sat</div>
+<div class="weekday">Sun</div>
+</div>
 
-                <div class="recipe-card">
-                    <div class="recipe-image">🍝</div>
-                    <div class="recipe-content">
-                        <div class="recipe-title">Veggie Pasta Primavera</div>
-                        <div class="recipe-meta">
-                            <span>420 cal</span>
-                            <span>15g protein</span>
-                            <span>20 min</span>
-                        </div>
-                        <div class="recipe-ingredients">Pasta, Mixed Vegetables, Olive Oil, Herbs</div>
-                        <div class="recipe-availability">1/4 ingredients available</div>
-                        <div style="display: flex; gap: var(--space-2); margin-top: var(--space-3);">
-                            <button class="btn btn-primary" onclick="showRecipeModal(5)" style="flex: 1; max-width: 80px;">
-                                View
-                            </button>
-                            <button class="btn btn-success" onclick="addRecipeToDashboardFromCard(5)" style="flex: 2; background: var(--success-color);">
-                                Add to Dashboard
-                            </button>
-                        </div>
-                    </div>
-                </div>
+<div class="calendar-dates-grid" id="calendar-dates-grid">
+<!-- Calendar dates will be populated by JavaScript -->
+</div>
+</div>
+</div>
+</div>
 
-                <div class="recipe-card">
-                    <div class="recipe-image">🐟</div>
-                    <div class="recipe-content">
-                        <div class="recipe-title">Baked Salmon</div>
-                        <div class="recipe-meta">
-                            <span>380 cal</span>
-                            <span>42g protein</span>
-                            <span>30 min</span>
-                        </div>
-                        <div class="recipe-ingredients">Salmon, Lemon, Herbs, Asparagus</div>
-                        <div class="recipe-availability">0/4 ingredients available</div>
-                        <div style="display: flex; gap: var(--space-2); margin-top: var(--space-3);">
-                            <button class="btn btn-primary" onclick="showRecipeModal(6)" style="flex: 1; max-width: 80px;">
-                                View
-                            </button>
-                            <button class="btn btn-success" onclick="addRecipeToDashboardFromCard(6)" style="flex: 2; background: var(--success-color);">
-                                Add to Dashboard
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- Goals Section -->
+<div id="goals" class="content-section">
+<div class="dashboard-grid">
+<div class="card">
+<h3>Daily Nutrition Goals</h3>
+<form>
+<div class="form-group">
+<label>Daily Calorie Target</label>
+<input type="number" placeholder="e.g., 2000">
+</div>
+<div class="form-group">
+<label>Protein Goal (g)</label>
+<input type="number" placeholder="e.g., 150">
+</div>
+<div class="form-group">
+<label>Carbs Goal (g)</label>
+<input type="number" placeholder="e.g., 250">
+</div>
+<div class="form-group">
+<label>Fat Goal (g)</label>
+<input type="number" placeholder="e.g., 65">
+</div>
+<button type="submit" class="btn btn-primary">Update Goals</button>
+</form>
+</div>
+<div class="card">
+<h3>Weekly Progress</h3>
+<div class="stats-grid">
+<!-- Stats will be populated by JavaScript -->
+</div>
+</div>
+</div>
+</div>
+</main>
+</div>
+</div>
 
-        <!-- Calendar Section -->
-        <div id="calendar" class="content-section">
-            <div class="card">
-                <h3>Meal Tracker</h3>
-                <div class="calendar-grid">
-                    <!-- This will be populated by the Calendar component -->
-                    <div class="calendar-day">
-                        <div class="day-header">
-                            <div class="day-number">Mon</div>
-                            <div class="day-date">16</div>
-                        </div>
-                        <div class="day-meals">
-                            <div class="meal-item">🍳 Scrambled Eggs</div>
-                            <div class="meal-item">🥗 Caesar Salad</div>
-                            <div class="meal-item">🍗 Grilled Chicken</div>
-                        </div>
-                        <div class="day-calories">1050 cal</div>
-                    </div>
-                    
-                    <div class="calendar-day">
-                        <div class="day-header">
-                            <div class="day-number">Tue</div>
-                            <div class="day-date">17</div>
-                        </div>
-                        <div class="day-meals">
-                            <div class="meal-item">🥞 Pancakes</div>
-                            <div class="meal-item">🍕 Pizza</div>
-                        </div>
-                        <div class="day-calories">920 cal</div>
-                    </div>
-                    
-                    <div class="calendar-day today">
-                        <div class="day-header">
-                            <div class="day-number">Wed</div>
-                            <div class="day-date">18</div>
-                        </div>
-                        <div class="day-meals">
-                            <div class="meal-item">🍳 Eggs Benedict</div>
-                            <div class="meal-item">🥪 Club Sandwich</div>
-                        </div>
-                        <div class="day-calories">800 cal</div>
-                    </div>
-                    
-                    <div class="calendar-day">
-                        <div class="day-header">
-                            <div class="day-number">Thu</div>
-                            <div class="day-date">19</div>
-                        </div>
-                        <div class="day-meals">
-                            <div class="add-meal-prompt">Add meals...</div>
-                        </div>
-                    </div>
-                    
-                    <div class="calendar-day">
-                        <div class="day-header">
-                            <div class="day-number">Fri</div>
-                            <div class="day-date">20</div>
-                        </div>
-                        <div class="day-meals">
-                            <div class="add-meal-prompt">Add meals...</div>
-                        </div>
-                    </div>
-                    
-                    <div class="calendar-day">
-                        <div class="day-header">
-                            <div class="day-number">Sat</div>
-                            <div class="day-date">21</div>
-                        </div>
-                        <div class="day-meals">
-                            <div class="add-meal-prompt">Add meals...</div>
-                        </div>
-                    </div>
-                    
-                    <div class="calendar-day">
-                        <div class="day-header">
-                            <div class="day-number">Sun</div>
-                            <div class="day-date">22</div>
-                        </div>
-                        <div class="day-meals">
-                            <div class="add-meal-prompt">Add meals...</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
+<!-- JavaScript Files - Load in correct order -->
+<!-- Data files first -->
+<script src="js/data/recipes.js"></script>
+<script src="js/data/nutrition.js"></script>
+<script src="js/data/ingredients.js"></script>
+<!-- Utility files -->
+<script src="js/utils/helpers.js"></script>
+<script src="js/utils/storage.js"></script>
+<script src="js/utils/nutrition.js"></script>
+<!-- Component files -->
+<script src="js/components/inventory.js"></script>
+<script src="js/components/dashboard.js"></script>
+<script src="js/components/recipes.js"></script>
+<script src="js/components/calendar.js"></script>
+<script src="js/components/goals.js"></script>
+<!-- Main application file last -->
+<script src="js/main.js"></script>
 
-        <!-- Goals Section -->
-        <div id="goals" class="content-section">
-            <div class="dashboard-grid">
-                <div class="card">
-                    <h3>Daily Nutrition Goals</h3>
-                    <form>
-                        <div class="form-group">
-                            <label>Daily Calorie Target</label>
-                            <input type="number" value="2000" placeholder="e.g., 2000">
-                        </div>
-                        <div class="form-group">
-                            <label>Protein Goal (g)</label>
-                            <input type="number" value="150" placeholder="e.g., 150">
-                        </div>
-                        <div class="form-group">
-                            <label>Carbs Goal (g)</label>
-                            <input type="number" value="250" placeholder="e.g., 250">
-                        </div>
-                        <div class="form-group">
-                            <label>Fat Goal (g)</label>
-                            <input type="number" value="65" placeholder="e.g., 65">
-                        </div>
-                        <button type="submit" class="btn btn-primary">Update Goals</button>
-                    </form>
-                </div>
+<script>
+// Calendar functionality for the new design
+let currentCalendarDate = new Date();
+let selectedDate = null;
 
-                <div class="card">
-                    <h3>Weekly Progress</h3>
-                    <div class="stats-grid">
-                        <div class="stat-card">
-                            <div class="stat-number">6/7</div>
-                            <div class="stat-label">Days on Track</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">1,950</div>
-                            <div class="stat-label">Avg Calories</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">145g</div>
-                            <div class="stat-label">Avg Protein</div>
-                        </div>
-                        <div class="stat-card">
-                            <div class="stat-number">15</div>
-                            <div class="stat-label">Recipes Tried</div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
+// Month navigation
+function navigateMonth(direction) {
+currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
+renderCalendarGrid();
+updateCalendarHeader();
+}
 
-    <!-- Toast Notification Template -->
-    <div id="toast" class="toast">
-        <div id="toast-message"></div>
-    </div>
+// Update calendar header
+function updateCalendarHeader() {
+const monthNames = ["January", "February", "March", "April", "May", "June",
+"July", "August", "September", "October", "November", "December"];
+const monthDisplay = document.getElementById('calendar-month-display');
+if (monthDisplay) {
+monthDisplay.textContent = `${monthNames[currentCalendarDate.getMonth()]} ${currentCalendarDate.getFullYear()}`;
+}
+}
 
-    <!-- JavaScript Files - Load in correct order -->
-    <!-- Data files first -->
-    <script src="js/data/recipes.js"></script>
-    <script src="js/data/nutrition.js"></script>
-    <script src="js/data/ingredients.js"></script>
-    
-    <!-- Utility files -->
-    <script src="js/utils/helpers.js"></script>
-    <script src="js/utils/storage.js"></script>
-    <script src="js/utils/nutrition.js"></script>
-    
-    <!-- Component files -->
-    <script src="js/components/inventory.js"></script>
-    <script src="js/components/dashboard.js"></script>
-    <script src="js/components/recipes.js"></script>
-    <script src="js/components/calendar.js"></script>
-    <script src="js/components/goals.js"></script>
-    
-    <!-- Main application file last -->
-    <script src="js/main.js"></script>
+// Render calendar grid
+function renderCalendarGrid() {
+const grid = document.getElementById('calendar-dates-grid');
+if (!grid) return;
 
-    <!-- Inline JavaScript for Custom Functionality -->
-    <script>
-        // Global variables to track daily nutrition (separate from dashboard component)
-        let dailyCalories = 0;
-        let dailyProtein = 0;
-        let dailyCarbs = 0;
-        let dailyFat = 0;
-        const dailyCalorieGoal = 2000;
+const year = currentCalendarDate.getFullYear();
+const month = currentCalendarDate.getMonth();
+const today = new Date();
+const firstDay = new Date(year, month, 1);
+const lastDay = new Date(year, month + 1, 0);
+const startDate = new Date(firstDay);
+startDate.setDate(startDate.getDate() - (firstDay.getDay() || 7) + 1); // Start from Monday
 
-        // Recipe data for modals and functionality
-        const recipeData = {
-            1: {
-                name: "Teriyaki Chicken Bowl",
-                emoji: "🍗",
-                calories: 450,
-                protein: 35,
-                carbs: 45,
-                fat: 12,
-                cookTime: 25,
-                ingredients: [
-                    { name: "chicken breast", amount: 8, unit: "oz" },
-                    { name: "rice", amount: 1, unit: "cup" },
-                    { name: "broccoli", amount: 1, unit: "cup" },
-                    { name: "teriyaki sauce", amount: 3, unit: "tbsp" }
-                ],
-                instructions: [
-                    "Cook rice according to package directions",
-                    "Season and cook chicken breast until done",
-                    "Steam broccoli until tender-crisp",
-                    "Slice chicken and combine with teriyaki sauce",
-                    "Serve over rice with broccoli"
-                ]
-            },
-            3: {
-                name: "Quinoa Power Salad",
-                emoji: "🥗",
-                calories: 380,
-                protein: 18,
-                carbs: 42,
-                fat: 14,
-                cookTime: 15,
-                ingredients: [
-                    { name: "quinoa", amount: 1, unit: "cup" },
-                    { name: "chickpeas", amount: 0.5, unit: "cup" },
-                    { name: "vegetables", amount: 2, unit: "cups" },
-                    { name: "olive oil", amount: 2, unit: "tbsp" }
-                ],
-                instructions: [
-                    "Cook quinoa and let cool completely",
-                    "Dice vegetables into bite-sized pieces",
-                    "Combine quinoa, chickpeas, and vegetables",
-                    "Dress with olive oil and lemon juice",
-                    "Season with salt and pepper"
-                ]
-            },
-            5: {
-                name: "Veggie Pasta Primavera",
-                emoji: "🍝",
-                calories: 420,
-                protein: 15,
-                carbs: 65,
-                fat: 12,
-                cookTime: 20,
-                ingredients: [
-                    { name: "pasta", amount: 8, unit: "oz" },
-                    { name: "mixed vegetables", amount: 2, unit: "cups" },
-                    { name: "olive oil", amount: 2, unit: "tbsp" },
-                    { name: "herbs", amount: 1, unit: "tsp" }
-                ],
-                instructions: [
-                    "Cook pasta according to package directions",
-                    "Sauté mixed vegetables in olive oil until tender",
-                    "Combine pasta with vegetables and herbs",
-                    "Serve hot with grated cheese if desired"
-                ]
-            },
-            6: {
-                name: "Baked Salmon",
-                emoji: "🐟",
-                calories: 380,
-                protein: 42,
-                carbs: 8,
-                fat: 18,
-                cookTime: 30,
-                ingredients: [
-                    { name: "salmon fillets", amount: 2, unit: "pieces" },
-                    { name: "lemon", amount: 1, unit: "piece" },
-                    { name: "herbs", amount: 1, unit: "tsp" },
-                    { name: "asparagus", amount: 1, unit: "bunch" }
-                ],
-                instructions: [
-                    "Preheat oven to 400°F (200°C)",
-                    "Season salmon with herbs and lemon juice",
-                    "Place salmon and asparagus on a baking sheet",
-                    "Bake for 15-20 minutes until salmon is cooked through",
-                    "Serve with lemon wedges"
-                ]
-            }
-        };
+grid.innerHTML = '';
 
-        // Global toast function (only if not available from main.js)
-        if (typeof showToast === 'undefined') {
-            function showToast(message, type = 'success') {
-                const toast = document.getElementById('toast');
-                const toastMessage = document.getElementById('toast-message');
-                
-                toastMessage.textContent = message;
-                toast.className = `toast ${type} show`;
-                
-                setTimeout(() => {
-                    toast.classList.remove('show');
-                }, 3000);
-            }
-        }
+// Generate 42 days (6 weeks)
+for (let i = 0; i < 42; i++) {
+const date = new Date(startDate);
+date.setDate(startDate.getDate() + i);
 
-        // Navigation function (only if not available from main.js)
-        if (typeof showSection === 'undefined') {
-            function showSection(sectionId) {
-                // Hide all sections
-                const sections = document.querySelectorAll('.content-section');
-                sections.forEach(section => section.classList.remove('active'));
-                
-                // Show selected section
-                document.getElementById(sectionId).classList.add('active');
-                
-                // Update active tab
-                const tabs = document.querySelectorAll('.nav-tab');
-                tabs.forEach(tab => tab.classList.remove('active'));
-                event.target.classList.add('active');
-            }
-        }
+const dateElement = document.createElement('div');
+dateElement.className = 'calendar-date';
+dateElement.textContent = date.getDate();
+dateElement.dataset.date = date.toISOString().split('T')[0];
 
-        // Recipe filtering (only if not available from main.js)
-        if (typeof filterRecipes === 'undefined') {
-            function filterRecipes() {
-                const maxCalories = document.getElementById('maxCalories').value;
-                const minProtein = document.getElementById('minProtein').value;
-                const cuisineType = document.getElementById('cuisineType').value;
-                
-                console.log('Filtering recipes:', { maxCalories, minProtein, cuisineType });
-                
-                // Apply filters through recipes component if available
-                if (window.recipes && typeof window.recipes.applyFilters === 'function') {
-                    window.recipes.applyFilters();
-                } else {
-                    showToast('Recipe filters applied!', 'success');
-                }
-            }
-        }
+// Add classes
+if (date.getMonth() !== month) {
+dateElement.classList.add('other-month');
+}
+if (date.toDateString() === today.toDateString()) {
+dateElement.classList.add('today');
+}
+if (selectedDate && date.toDateString() === selectedDate.toDateString()) {
+dateElement.classList.add('selected');
+}
 
-        // Update calorie progress function
-        function updateCalorieProgress(current, target) {
-            const percentage = Math.min((current / target) * 100, 100);
-            const radius = 60; // Should match SVG radius
-            const circumference = 2 * Math.PI * radius;
-            const strokeDasharray = (percentage / 100) * circumference;
-            
-            const progressCircle = document.querySelector('.circle-progress');
-            if (progressCircle) {
-                progressCircle.style.strokeDasharray = `${strokeDasharray} ${circumference}`;
-                progressCircle.style.strokeDashoffset = '0';
-                progressCircle.style.transition = 'stroke-dasharray 1s ease-in-out';
-            }
-        }
+// Check if date has meals
+if (hasMealsOnDate(date)) {
+dateElement.classList.add('has-meals');
+}
 
-        // Update nutrition display
-        function updateNutritionDisplay() {
-            // Update calorie circle number
-            const numberEl = document.querySelector('.circle-text .number');
-            if (numberEl) {
-                numberEl.textContent = dailyCalories;
-            }
-            
-            // Update progress circle
-            updateCalorieProgress(dailyCalories, dailyCalorieGoal);
-            
-            // Update nutrition stats
-            const statNumbers = document.querySelectorAll('.stat-number');
-            if (statNumbers.length >= 3) {
-                statNumbers[0].textContent = `${dailyProtein}g`; // Protein
-                statNumbers[1].textContent = `${dailyCarbs}g`;   // Carbs  
-                statNumbers[2].textContent = `${dailyFat}g`;     // Fat
-            }
-        }
+// Add click event
+dateElement.addEventListener('click', () => selectDate(date));
 
-        // Log meal function
-        function logMeal(name, calories, protein, carbs = 0, fat = 0) {
-            // Add the meal's nutrition to daily totals
-            dailyCalories += calories;
-            dailyProtein += protein;
-            dailyCarbs += carbs || Math.round(calories * 0.4 / 4); // Estimate if not provided
-            dailyFat += fat || Math.round(calories * 0.3 / 9);     // Estimate if not provided
-            
-            // Update the display
-            updateNutritionDisplay();
-            
-            // Also update dashboard component if available
-            if (window.dashboard && typeof window.dashboard.addMeal === 'function') {
-                window.dashboard.addMeal(name, calories, protein, carbs, fat);
-            }
-            
-            showToast(`${name} logged successfully! +${calories} calories, +${protein}g protein`, 'success');
-        }
+grid.appendChild(dateElement);
+}
+}
 
-        // Enhanced recipe modal function with View Recipe functionality
-        function showRecipeModal(recipeId) {
-            const recipe = recipeData[recipeId];
-            if (!recipe) return;
-            
-            const modal = document.createElement('div');
-            modal.className = 'modal active';
-            modal.innerHTML = `
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h3 class="modal-title">${recipe.emoji} ${recipe.name}</h3>
-                        <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
-                    </div>
-                    <div class="modal-body">
-                        <div class="recipe-details">
-                            <div class="recipe-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); padding: var(--space-3); background: var(--bg-secondary); border-radius: var(--radius-lg);">
-                                <div><strong>Calories:</strong> ${recipe.calories}</div>
-                                <div><strong>Protein:</strong> ${recipe.protein}g</div>
-                                <div><strong>Carbs:</strong> ${recipe.carbs}g</div>
-                                <div><strong>Fat:</strong> ${recipe.fat}g</div>
-                                <div><strong>Cook Time:</strong> ${recipe.cookTime} min</div>
-                            </div>
-                            
-                            <div class="recipe-section" style="margin-bottom: var(--space-4);">
-                                <h4 style="color: var(--primary-color); margin-bottom: var(--space-3);">Ingredients:</h4>
-                                <ul style="list-style: none; padding: 0;">
-                                    ${recipe.ingredients.map(ingredient => {
-                                        if (typeof ingredient === 'string') {
-                                            return `<li style="padding: var(--space-2); margin-bottom: var(--space-1); background: var(--bg-secondary); border-radius: var(--radius-md);">${ingredient}</li>`;
-                                        } else {
-                                            return `<li style="padding: var(--space-2); margin-bottom: var(--space-1); background: var(--bg-secondary); border-radius: var(--radius-md);"><strong>${ingredient.amount} ${ingredient.unit}</strong> ${ingredient.name}</li>`;
-                                        }
-                                    }).join('')}
-                                </ul>
-                            </div>
+// Select a date
+function selectDate(date) {
+selectedDate = new Date(date);
+renderCalendarGrid();
+displayMealsForDate(date);
+updateSelectedDateTitle(date);
+}
 
-                            <div class="recipe-section">
-                                <h4 style="color: var(--primary-color); margin-bottom: var(--space-3);">Instructions:</h4>
-                                <ol style="padding-left: var(--space-4);">
-                                    ${recipe.instructions.map((step, index) => `
-                                        <li style="margin-bottom: var(--space-3); line-height: 1.6;">
-                                            <strong>Step ${index + 1}:</strong> ${step}
-                                        </li>
-                                    `).join('')}
-                                </ol>
-                            </div>
-                        </div>
-                        
-                        <div class="modal-actions" style="margin-top: var(--space-6); display: flex; gap:
-                        var(--space-3); justify-content: center;">
-                        <button class="btn btn-secondary"
-                        onclick="this.closest('.modal').remove()">Close</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            document.body.appendChild(modal);
-        }
+// Check if date has meals
+function hasMealsOnDate(date) {
+const dateKey = date.toISOString().split('T')[0];
+if (window.calendar && window.calendar.meals) {
+return window.calendar.meals[dateKey] && window.calendar.meals[dateKey].length > 0;
+}
+return false;
+}
 
-        // Add recipe to dashboard from modal
-        function addRecipeToDashboardFromModal(recipeId) {
-            if (window.dashboard && typeof window.dashboard.addRecipeToDashboard === 'function') {
-                window.dashboard.addRecipeToDashboard(recipeId);
-            } else {
-                // Fallback functionality
-                const recipe = recipeData[recipeId];
-                if (recipe) {
-                    logMeal(recipe.name, recipe.calories, recipe.protein, recipe.carbs, recipe.fat);
-                    showToast(`${recipe.name} added to dashboard!`, 'success');
-                }
-            }
-        }
+// Display meals for selected date
+function displayMealsForDate(date) {
+const dateKey = date.toISOString().split('T')[0];
+const content = document.getElementById('meal-details-content');
+const totalCaloriesSpan = document.getElementById('daily-total-calories');
 
-        // Add recipe to dashboard from recipe card
-        // Add recipe to dashboard from recipe card
-        function addRecipeToDashboardFromCard(recipeId) {
-            // Wait for dashboard to be available
-            if (window.dashboard && typeof window.dashboard.addRecipeToDashboard === 'function') {
-                window.dashboard.addRecipeToDashboard(recipeId);
-            } else {
-                // Retry after a short delay
-                setTimeout(() => {
-                    if (window.dashboard && typeof window.dashboard.addRecipeToDashboard === 'function') {
-                        window.dashboard.addRecipeToDashboard(recipeId);
-                    } else {
-                        // Fallback functionality
-                        const recipe = recipeData[recipeId];
-                        if (recipe) {
-                            logMeal(recipe.name, recipe.calories, recipe.protein, recipe.carbs, recipe.fat);
-                            showToast(`${recipe.name} added to dashboard!`, 'success');
-                        }
-                    }
-                }, 1000);
-            }
-        }
+if (!content) return;
 
-        // Determine meal type based on current time
-        function determineMealType() {
-            const currentHour = new Date().getHours();
-            if (currentHour < 11) return 'breakfast';
-            if (currentHour < 16) return 'lunch';
-            if (currentHour < 21) return 'dinner';
-            return 'snack';
-        }
+let meals = [];
+let totalCalories = 0;
 
-        // Calendar interaction
-        // Handle component integration and initialization
-        document.addEventListener('DOMContentLoaded', function() {
-            // Clear any saved stats to start fresh each day
-            const today = new Date().toISOString().split('T')[0];
-            
-            // Initialize with zero values
-            updateCalorieProgress(0, 2000);
+// Get meals from calendar component
+if (window.calendar && window.calendar.meals && window.calendar.meals[dateKey]) {
+meals = window.calendar.meals[dateKey];
+totalCalories = meals.reduce((sum, meal) => sum + (meal.calories || 0), 0);
+}
 
-            // Wait for all components to load properly
-            setTimeout(() => {
-                // Check if dashboard is properly loaded
-                if (window.dashboard && typeof window.dashboard.renderSuggestedRecipes === 'function') {
-                    window.dashboard.renderSuggestedRecipes();
-                    console.log('Dashboard component loaded successfully');
-                } else {
-                    console.warn('Dashboard component not loaded yet, retrying...');
-                    // Retry after another delay
-                    setTimeout(() => {
-                        if (window.dashboard && typeof window.dashboard.renderSuggestedRecipes === 'function') {
-                            window.dashboard.renderSuggestedRecipes();
-                        }
-                    }, 1000);
-        }
+// Update total calories
+if (totalCaloriesSpan) {
+totalCaloriesSpan.textContent = totalCalories;
+}
 
-        // Calendar day interaction (if calendar component not handling it)
-            if (!window.calendar) {
-                document.querySelectorAll('.calendar-day').forEach(day => {
-                    day.addEventListener('click', function() {
-                        const dayName = this.querySelector('.day-number').textContent;
-                        showToast(`Plan meals for ${dayName}`, 'success');
-                    });
-                });
-            }
-        }, 2000);
+// Render meals
+if (meals.length === 0) {
+content.innerHTML = `
+<div class="no-meals-selected">
+<div class="empty-meal-icon">🍽️</div>
+<p>No meals logged for this day</p>
+<button class="btn btn-primary" onclick="addMealForDate('${dateKey}')">Add Meal</button>
+</div>
+`;
+} else {
+content.innerHTML = meals.map(meal => `
+<div class="meal-card">
+<div class="meal-image">
+${meal.emoji || '🍽️'}
+</div>
+<div class="meal-info">
+<div class="meal-name">${meal.name}</div>
+<div class="meal-nutrition">
+<div class="nutrition-item">${meal.calories || 0} cal</div>
+<div class="nutrition-item">${meal.protein || 0}g Protein</div>
+<div class="nutrition-item">${meal.carbs || 0}g Carbs</div>
+<div class="nutrition-item">${meal.fat || 0}g Fat</div>
+</div>
+</div>
+</div>
+`).join('');
+}
+}
 
-            // Grocery list checkbox handling
-            document.querySelectorAll('.grocery-item input[type="checkbox"]').forEach(checkbox => {
-                checkbox.addEventListener('change', function() {
-                    const item = this.closest('.grocery-item');
-                    if (this.checked) {
-                        item.classList.add('checked');
-                    } else {
-                        item.classList.remove('checked');
-                    }
-                });
-            });
-        });
+// Update selected date title
+function updateSelectedDateTitle(date) {
+const title = document.getElementById('selected-date-title');
+if (title) {
+const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+const isToday = date.toDateString() === new Date().toDateString();
+title.textContent = isToday ? 'Meals for Today' : `Meals on ${date.toLocaleDateString('en-US', options)}`;
+}
+}
 
-        // Handle component integration after everything loads
-        window.addEventListener('load', function() {
-            // Ensure all components are properly integrated
-            setTimeout(() => {
-                // Check dashboard availability before calling methods
-                if (window.dashboard) {
-                    if (typeof window.dashboard.refreshDashboard === 'function') {
-                        window.dashboard.refreshDashboard();
-                    }
-                    if (typeof window.dashboard.renderSuggestedRecipes === 'function') {
-                        window.dashboard.renderSuggestedRecipes();
-                    }
-                }
-                
-                // Check calendar availability
-                if (window.calendar && typeof window.calendar.renderCalendar === 'function') {
-                    window.calendar.renderCalendar();
-                }
-            }, 500);
-        });
+// Add meal for specific date
+function addMealForDate(dateKey) {
+if (window.calendar && typeof window.calendar.showMealPlanningModal === 'function') {
+window.calendar.showMealPlanningModal(dateKey);
+} else {
+showToast('Calendar component not available', 'warning');
+}
+}
 
-        // Handle component integration
-        window.addEventListener('load', function() {
-            // Ensure all components are properly integrated
-            setTimeout(() => {
-                // Trigger dashboard refresh if available
-                if (window.dashboard && typeof window.dashboard.refreshDashboard === 'function') {
-                    window.dashboard.refreshDashboard();
-                }
-                
-                // Trigger calendar refresh if available  
-                if (window.calendar && typeof window.calendar.renderCalendar === 'function') {
-                    window.calendar.renderCalendar();
-                }
-            }, 500);
-        });
-    </script>
+// Render top meals
+function renderTopMeals() {
+const grid = document.getElementById('top-meals-grid');
+if (!grid) return;
+
+const mealFrequency = {};
+if (window.calendar && window.calendar.meals) {
+Object.values(window.calendar.meals).forEach(dayMeals => {
+dayMeals.forEach(meal => {
+const key = meal.name.toLowerCase();
+if (!mealFrequency[key]) {
+mealFrequency[key] = { 
+name: meal.name, 
+count: 0, 
+emoji: meal.emoji || '🍽️' 
+};
+}
+mealFrequency[key].count++;
+});
+});
+}
+
+// Sort and get top 3
+const topMeals = Object.values(mealFrequency)
+.sort((a, b) => b.count - a.count)
+.slice(0, 3);
+
+if (topMeals.length === 0) {
+grid.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No meals logged this month</p>';
+return;
+}
+
+grid.innerHTML = topMeals.map((meal, index) => `
+<div class="top-meal-item">
+<div class="top-meal-image">
+${meal.emoji}
+<div class="meal-rank">${index + 1}</div>
+</div>
+<div class="top-meal-name">${meal.name}</div>
+<div class="meal-count">${meal.count} times</div>
+</div>
+`).join('');
+}
+
+// Initialize calendar
+document.addEventListener('DOMContentLoaded', function() {
+setTimeout(() => {
+updateCalendarHeader();
+renderCalendarGrid();
+renderTopMeals();
+
+// Select today by default
+selectDate(new Date());
+
+// Listen for calendar updates
+window.addEventListener('calendar-updated', () => {
+renderCalendarGrid();
+renderTopMeals();
+if (selectedDate) {
+displayMealsForDate(selectedDate);
+}
+});
+}, 1000);
+});
+
+// Global toast function (fallback if not available from main.js)
+if (typeof showToast === 'undefined') {
+function showToast(message, type = 'success') {
+// Remove existing toast
+const existingToast = document.querySelector('.toast.show');
+if (existingToast) {
+existingToast.remove();
+}
+
+// Create new toast
+const toast = document.createElement('div');
+toast.className = `toast ${type}`;
+toast.innerHTML = `
+<div class="toast-content">
+<span class="toast-message">${message}</span>
+<button class="toast-close" onclick="this.closest('.toast').remove()">&times;</button>
+</div>
+`;
+
+// Add to page
+document.body.appendChild(toast);
+
+// Show toast
+setTimeout(() => toast.classList.add('show'), 10);
+
+// Auto-hide after 3 seconds
+setTimeout(() => {
+if (toast.parentNode) {
+toast.classList.remove('show');
+setTimeout(() => toast.remove(), 300);
+}
+}, 3000);
+}
+}
+
+// Navigation function (fallback if not available from main.js)
+if (typeof showSection === 'undefined') {
+function showSection(sectionId) {
+// Hide all sections
+const sections = document.querySelectorAll('.content-section');
+sections.forEach(section => section.classList.remove('active'));
+
+// Show selected section
+const targetSection = document.getElementById(sectionId);
+if (targetSection) {
+targetSection.classList.add('active');
+}
+
+// Update active tab in sidebar
+const sidebarTabs = document.querySelectorAll('.nav-item');
+sidebarTabs.forEach(tab => tab.classList.remove('active'));
+
+// Find and activate the correct sidebar tab
+const activeTab = document.querySelector(`.nav-item a[onclick*="${sectionId}"]`)?.parentElement;
+if (activeTab) {
+activeTab.classList.add('active');
+}
+}
+}
+
+// Recipe filtering function (fallback if not available from main.js)
+if (typeof filterRecipes === 'undefined') {
+function filterRecipes() {
+if (window.recipes && typeof window.recipes.applyFilters === 'function') {
+window.recipes.applyFilters();
+} else {
+console.log('Recipe filters applied');
+showToast('Recipe filters applied!', 'success');
+}
+}
+}
+
+// Close modals when clicking outside
+document.addEventListener('click', function(e) {
+if (e.target.classList.contains('modal')) {
+e.target.remove();
+}
+});
+
+// Close modals with Escape key
+document.addEventListener('keydown', function(e) {
+if (e.key === 'Escape') {
+const modal = document.querySelector('.modal.active');
+if (modal) {
+modal.remove();
+}
+}
+});
+</script>
 </body>
 </html>
