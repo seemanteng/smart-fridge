@@ -8,8 +8,7 @@ const RECIPE_DATABASE = {
     'teriyaki-chicken-bowl': {
         id: 1,
         name: 'Teriyaki Chicken Bowl',
-        emoji: '🍗',
-        videoUrl: 'https://youtu.be/8oVfFmTNEzw?si=prKuaL747ZbPp-f7', // Replace with actual recipe video
+        videoUrl: 'https://youtu.be/jbRr01FqINo?si=ze_5zOJu_64pMXCC', 
         cuisine: 'asian',
         difficulty: 'easy',
         cookTime: 25,
@@ -36,8 +35,7 @@ const RECIPE_DATABASE = {
     'vegetable-stir-fry': {
         id: 2,
         name: 'Vegetable Stir Fry',
-        emoji: '🥬',
-        videoUrl: 'https://www.youtube.com/watch?v=example2', // Replace with actual recipe video
+        videoUrl: 'https://youtu.be/A7ed4rW2nGI?si=SorkIGI1fopUkfrU', 
         cuisine: 'asian',
         difficulty: 'easy',
         cookTime: 15,
@@ -65,8 +63,7 @@ const RECIPE_DATABASE = {
     'quinoa-power-salad': {
         id: 3,
         name: 'Quinoa Power Salad',
-        emoji: '🥗',
-        videoUrl: 'https://www.youtube.com/watch?v=example3', // Replace with actual recipe video
+        videoUrl: 'https://youtu.be/OQ9mU_zAtEs?si=5ux9GQEsvEK5B4lh', 
         cuisine: 'mediterranean',
         difficulty: 'easy',
         cookTime: 20,
@@ -94,8 +91,7 @@ const RECIPE_DATABASE = {
     'greek-yogurt-parfait': {
         id: 4,
         name: 'Greek Yogurt Parfait',
-        emoji: '🥛',
-        videoUrl: 'https://www.youtube.com/watch?v=example4', // Replace with actual recipe video
+        videoUrl: 'https://youtu.be/3ab-e37VSbI?si=ry7qPjQev0D8IDmi', 
         cuisine: 'mediterranean',
         difficulty: 'easy',
         cookTime: 5,
@@ -122,8 +118,7 @@ const RECIPE_DATABASE = {
     'veggie-pasta-primavera': {
         id: 5,
         name: 'Veggie Pasta Primavera',
-        emoji: '🍝',
-        videoUrl: 'https://www.youtube.com/watch?v=example5', // Replace with actual recipe video
+        videoUrl: 'https://youtu.be/grs8jmovGaM?si=k7dCqntCj-lg35Km', 
         cuisine: 'italian',
         difficulty: 'easy',
         cookTime: 20,
@@ -153,8 +148,7 @@ const RECIPE_DATABASE = {
     'baked-salmon': {
         id: 6,
         name: 'Baked Salmon with Asparagus',
-        emoji: '🐟',
-        videoUrl: 'https://www.youtube.com/watch?v=example6', // Replace with actual recipe video
+        videoUrl: 'https://youtu.be/FQQpIUaSqY0?si=EzB2GrGm0DR7ixa2', 
         cuisine: 'american',
         difficulty: 'easy',
         cookTime: 25,

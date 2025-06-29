@@ -118,44 +118,52 @@ class Recipes {
         return filtered;
     }
 
-    renderRecipeCard(recipe) {
+     renderRecipeCard(recipe) {
         const availability = this.checkIngredientAvailability(recipe.ingredients);
-        const canCook = availability.available >= availability.total * 0.75; // 75% ingredients available
+        const canCook = availability.available >= availability.total * 0.75;
+
+        // Get video thumbnail
+        const videoId = VideoUtils.extractVideoId(recipe.videoUrl);
+        const thumbnailUrl = VideoUtils.getThumbnailUrl(videoId, 'hqdefault');
 
         return `
-            <div class="recipe-card ${canCook ? 'can-cook' : 'missing-ingredients'}" data-recipe-id="${recipe.id}">
-                <div class="recipe-image">
-                    ${recipe.thumbnailUrl ? `<img src="${recipe.thumbnailUrl}" alt="${recipe.name} video">` : recipe.emoji}
-                    ${recipe.videoId ? `<div class="video-play-button" onclick="window.open('https://www.youtube.com/watch?v=${recipe.videoId}', '_blank')"></div>` : ''}
-                </div>
-                <div class="recipe-content">
-                    <div class="recipe-title">${recipe.name}</div>
-                    <div class="recipe-meta">
-                        <span>${recipe.calories} cal</span>
-                        <span>${recipe.nutrition ? recipe.nutrition.protein : recipe.protein || 0}g protein</span>
-                        <span>${recipe.cookTime} min</span>
-                    </div>
-                    <div class="recipe-ingredients">
-                        ${recipe.ingredients
-                            .slice(0, 3)
-                            .map(ing => typeof ing === 'string' ? ing : ing.name)
-                            .join(', ')}${recipe.ingredients.length > 3 ? '...' : ''}
-                    </div>
-                    <div class="recipe-availability">
-                        ${availability.available}/${availability.total} ingredients available
-                    </div>
-                    <div style="display: flex; gap: var(--space-2); margin-top: var(--space-3);">
-                        <button class="btn btn-primary" onclick="recipes.showRecipeModal(${recipe.id})" style="flex: 0.7;">
-                            View 
-                        </button>
-                        <button class="btn btn-success" onclick="recipes.addRecipeToDashboard(${recipe.id})" style="flex: 2.3; background: var(--success-color);">
-                            Add to Dashboard
-                        </button>
-                    </div>
-                </div>
-            </div>
+        <div class="recipe-card ${canCook ? 'can-cook' : 'missing-ingredients'}" data-recipe-id="${recipe.id}">
+        <div class="recipe-image">
+        ${thumbnailUrl ? 
+        `<img src="${thumbnailUrl}" alt="${recipe.name} video" style="width: 100%; height: 100%; object-fit: cover;">
+        ${recipe.videoUrl ? `<div class="video-play-button" onclick="window.open('${recipe.videoUrl}', '_blank')"></div>` : ''}` 
+        : 
+        `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 4rem; background: var(--bg-secondary);">${recipe.emoji}</div>`
+        }
+        </div>
+        <div class="recipe-content">
+        <div class="recipe-title">${recipe.name}</div>
+        <div class="recipe-meta">
+        <span>${recipe.calories} cal</span>
+        <span>${recipe.nutrition ? recipe.nutrition.protein : recipe.protein || 0}g protein</span>
+        <span>${recipe.cookTime} min</span>
+        </div>
+        <div class="recipe-ingredients">
+        ${recipe.ingredients
+        .slice(0, 3)
+        .map(ing => typeof ing === 'string' ? ing : ing.name)
+        .join(', ')}${recipe.ingredients.length > 3 ? '...' : ''}
+        </div>
+        <div class="recipe-availability">
+        ${availability.available}/${availability.total} ingredients available
+        </div>
+        <div style="display: flex; gap: var(--space-2); margin-top: var(--space-3);">
+        <button class="btn btn-primary" onclick="recipes.showRecipeModal(${recipe.id})" style="flex: 0.7;">
+        View
+        </button>
+        <button class="btn btn-success" onclick="recipes.addRecipeToDashboard(${recipe.id})" style="flex: 2.3; background: var(--success-color);">
+        Add to Dashboard
+        </button>
+        </div>
+        </div>
+        </div>
         `;
-    }
+        }
 
     addRecipeToDashboard(recipeId) {
         if (window.dashboard && typeof window.dashboard.addRecipeToDashboard === 'function') {
@@ -269,62 +277,76 @@ class Recipes {
     }
 
     showRecipeModal(recipeId) {
-        const recipe = this.recipes.find(r => r.id === recipeId);
-        if (!recipe) return;
+const recipe = this.recipes.find(r => r.id === recipeId);
+if (!recipe) return;
 
-        const modal = document.createElement('div');
-        modal.className = 'modal';
-        modal.innerHTML = `
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h3 class="modal-title">${recipe.emoji} ${recipe.name}</h3>
-                    <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
-                </div>
-                <div class="modal-body">
-                    <div class="recipe-details">
-                        <div class="recipe-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); padding: var(--space-3); background: var(--bg-secondary); border-radius: var(--radius-lg);">
-                            <div><strong>Calories:</strong> ${recipe.calories}</div>
-                            <div><strong>Protein:</strong> ${recipe.nutrition ? recipe.nutrition.protein : recipe.protein || 0}g</div>
-                            <div><strong>Cook Time:</strong> ${recipe.cookTime} min</div>
-                            <div><strong>Serves:</strong> ${recipe.servings || 1}</div>
-                        </div>
-                        
-                        <div class="recipe-section" style="margin-bottom: var(--space-4);">
-                            <h4 style="color: var(--primary-color); margin-bottom: var(--space-3);">Ingredients:</h4>
-                            <ul style="list-style: none; padding: 0;">
-                                ${recipe.ingredients.map(ingredient => {
-                                    if (typeof ingredient === 'string') {
-                                        return `<li style="padding: var(--space-2); margin-bottom: var(--space-1); background: var(--bg-secondary); border-radius: var(--radius-md);">${ingredient}</li>`;
-                                    } else {
-                                        return `<li style="padding: var(--space-2); margin-bottom: var(--space-1); background: var(--bg-secondary); border-radius: var(--radius-md);"><strong>${ingredient.amount} ${ingredient.unit}</strong> ${ingredient.name}</li>`;
-                                    }
-                                }).join('')}
-                            </ul>
-                        </div>
+// Get video thumbnail URL
+const videoId = VideoUtils.extractVideoId(recipe.videoUrl);
+const thumbnailUrl = VideoUtils.getThumbnailUrl(videoId, 'hqdefault');
 
-                        <div class="recipe-section">
-                            <h4 style="color: var(--primary-color); margin-bottom: var(--space-3);">Instructions:</h4>
-                            <ol style="padding-left: var(--space-4);">
-                                ${recipe.instructions.map((step, index) => `
-                                    <li style="margin-bottom: var(--space-3); line-height: 1.6;">
-                                        <strong>Step ${index + 1}:</strong> ${step}
-                                    </li>
-                                `).join('')}
-                            </ol>
-                        </div>
-                    </div>
-                    
-                   <div class="modal-actions" style="margin-top: var(--space-6); display: flex; gap:
-                    var(--space-3); justify-content: center;">
-                    <button class="btn btn-secondary"
-                    onclick="this.closest('.modal').remove()">Close</button>
-                    </div> 
-                </div>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-        setTimeout(() => modal.classList.add('active'), 10);
+const modal = document.createElement('div');
+modal.className = 'modal';
+modal.innerHTML = `
+<div class="modal-content">
+<div class="modal-header">
+<h3 class="modal-title">${recipe.emoji} ${recipe.name}</h3>
+<button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+</div>
+<div class="modal-body">
+<div class="recipe-details">
+<div class="recipe-stats" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: var(--space-3); margin-bottom: var(--space-4); padding: var(--space-3); background: var(--bg-secondary); border-radius: var(--radius-lg);">
+<div><strong>Cook Time:</strong> ${recipe.cookTime} min</div>
+<div><strong>Calories:</strong> ${recipe.calories}</div>
+<div><strong>Protein:</strong> ${recipe.nutrition ? recipe.nutrition.protein : recipe.protein || 0}g</div>
+<div><strong>Serves:</strong> ${recipe.servings || 1}</div>
+</div>
+<div class="recipe-section" style="margin-bottom: var(--space-4);">
+<h4 style="color: var(--primary-color); margin-bottom: var(--space-3);">Ingredients:</h4>
+<ul style="list-style: none; padding: 0;">
+${recipe.ingredients.map(ingredient => {
+if (typeof ingredient === 'string') {
+return `<li style="padding: var(--space-2); margin-bottom: var(--space-1); background: var(--bg-secondary); border-radius: var(--radius-md);">${ingredient}</li>`;
+} else {
+return `<li style="padding: var(--space-2); margin-bottom: var(--space-1); background: var(--bg-secondary); border-radius: var(--radius-md);"><strong>${ingredient.amount} ${ingredient.unit}</strong> ${ingredient.name}</li>`;
+}
+}).join('')}
+</ul>
+</div>
+<div class="recipe-section" style="margin-bottom: var(--space-4);">
+<h4 style="color: var(--primary-color); margin-bottom: var(--space-3);">Instructions:</h4>
+<ol style="padding-left: var(--space-4);">
+${recipe.instructions.map((step, index) => `
+<li style="margin-bottom: var(--space-3); line-height: 1.6;">
+<strong>Step ${index + 1}:</strong> ${step}
+</li>
+`).join('')}
+</ol>
+</div>
+${recipe.videoUrl ? `
+<div class="recipe-section">
+<h4 style="color: var(--primary-color); margin-bottom: var(--space-3);">Video Instructions:</h4>
+<div class="video-container" style="position: relative; width: 100%; height: 0; padding-bottom: 56.25%; margin-bottom: var(--space-4);">
+${thumbnailUrl ? `
+<div class="video-thumbnail" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-image: url('${thumbnailUrl}'); background-size: cover; background-position: center; border-radius: var(--radius-lg); cursor: pointer; display: flex; align-items: center; justify-content: center;" onclick="window.open('${recipe.videoUrl}', '_blank')">
+<div class="play-button" style="width: 80px; height: 80px; background: rgba(255, 0, 0, 0.8); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; font-size: 2rem; transition: transform 0.3s ease;">▶</div>
+</div>
+` : `
+<a href="${recipe.videoUrl}" target="_blank" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: var(--bg-secondary); border-radius: var(--radius-lg); display: flex; align-items: center; justify-content: center; text-decoration: none; color: var(--primary-color); font-weight: bold;">
+Watch Video Instructions
+</a>
+`}
+</div>
+</div>
+` : ''}
+</div>
+<div class="modal-actions" style="margin-top: var(--space-6); display: flex; gap: var(--space-3); justify-content: center;">
+<button class="btn btn-secondary" onclick="this.closest('.modal').remove()">Close</button>
+</div>
+</div>
+</div>
+`;
+document.body.appendChild(modal);
+setTimeout(() => modal.classList.add('active'), 10);
     }
 
     showMissingIngredientsModal(recipe, availability) {
