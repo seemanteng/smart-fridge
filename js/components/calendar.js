@@ -23,6 +23,23 @@ class Calendar {
         });
     }
 
+    getAllRecipes() {
+        // First try to get recipes from the recipes component if available
+        if (window.recipes && typeof window.recipes.getAllRecipes === 'function') {
+            return window.recipes.getAllRecipes();
+        }
+        // If recipes component not available, try to get directly from RECIPE_DATABASE
+        if (typeof RECIPE_DATABASE !== 'undefined') {
+            return Object.values(RECIPE_DATABASE);
+        }
+        // If RecipeUtils is available, use that
+        if (typeof RecipeUtils !== 'undefined' && typeof RecipeUtils.getAllRecipes === 'function') {
+            return RecipeUtils.getAllRecipes();
+        }
+        // Final fallback - empty array
+        return [];
+    }
+
     getCurrentWeek() {
         const today = new Date();
         const dayOfWeek = today.getDay();
@@ -755,62 +772,62 @@ class Calendar {
     getWeeklyCalories() {
         let total = 0;
         this.currentWeek.forEach(date => {
-            total += this.getTotalCaloriesForDate(date);
-        });
-        return total;
-    }
+        total += this.getTotalCaloriesForDate(date);
+       });
+       return total;
+   }
 
-    navigateWeek(direction) {
-        const firstDay = this.currentWeek[0];
-        firstDay.setDate(firstDay.getDate() + (direction * 7));
-        this.currentDate = new Date(firstDay);
-        this.currentWeek = this.getCurrentWeek();
-        this.renderCalendar();
-    }
+   navigateWeek(direction) {
+       const firstDay = this.currentWeek[0];
+       firstDay.setDate(firstDay.getDate() + (direction * 7));
+       this.currentDate = new Date(firstDay);
+       this.currentWeek = this.getCurrentWeek();
+       this.renderCalendar();
+   }
 
-    // Method to sync with dashboard meals
-    syncWithDashboard() {
-        if (!window.dashboard) return;
-        
-        const today = new Date().toISOString().split('T')[0];
-        const todayStats = window.dashboard.getTodayStats();
-        
-        if (todayStats.meals && todayStats.meals.length > 0) {
-            const todayMeals = this.meals[today] || [];
-            
-            todayStats.meals.forEach(dashboardMeal => {
-                const exists = todayMeals.some(meal => 
-                    meal.name === dashboardMeal.name && 
-                    Math.abs(new Date(meal.timestamp || 0) - new Date(dashboardMeal.timestamp)) < 60000
-                );
-                
-                if (!exists) {
-                    this.addMeal(
-                        today, 
-                        this.determineMealTypeFromTime(dashboardMeal.timestamp),
-                        dashboardMeal.name,
-                        dashboardMeal.calories,
-                        this.getEmojiForMeal(dashboardMeal.name)
-                    );
-                }
-            });
-        }
-    }
+   // Method to sync with dashboard meals
+   syncWithDashboard() {
+       if (!window.dashboard) return;
+       
+       const today = new Date().toISOString().split('T')[0];
+       const todayStats = window.dashboard.getTodayStats();
+       
+       if (todayStats.meals && todayStats.meals.length > 0) {
+           const todayMeals = this.meals[today] || [];
+           
+           todayStats.meals.forEach(dashboardMeal => {
+               const exists = todayMeals.some(meal => 
+                   meal.name === dashboardMeal.name && 
+                   Math.abs(new Date(meal.timestamp || 0) - new Date(dashboardMeal.timestamp)) < 60000
+               );
+               
+               if (!exists) {
+                   this.addMeal(
+                       today, 
+                       this.determineMealTypeFromTime(dashboardMeal.timestamp),
+                       dashboardMeal.name,
+                       dashboardMeal.calories,
+                       this.getEmojiForMeal(dashboardMeal.name)
+                   );
+               }
+           });
+       }
+   }
 }
 
 // Initialize calendar when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-    window.calendar = new Calendar();
-    
-    // Sync with dashboard after a short delay
-    setTimeout(() => {
-        if (window.calendar && typeof window.calendar.syncWithDashboard === 'function') {
-            window.calendar.syncWithDashboard();
-        }
-    }, 1000);
+   window.calendar = new Calendar();
+   
+   // Sync with dashboard after a short delay
+   setTimeout(() => {
+       if (window.calendar && typeof window.calendar.syncWithDashboard === 'function') {
+           window.calendar.syncWithDashboard();
+       }
+   }, 1000);
 });
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Calendar;
+   module.exports = Calendar;
 }

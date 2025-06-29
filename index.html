@@ -18,6 +18,519 @@ href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&fa
 <!-- Favicon -->
 <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 <style>
+
+/* New Inventory Layout */
+.inventory-container {
+padding: var(--space-6);
+max-width: 1400px;
+margin: 0 auto;
+}
+
+.add-ingredient-card {
+background: var(--bg-primary);
+border-radius: var(--radius-2xl);
+padding: var(--space-6);
+margin-bottom: var(--space-6);
+box-shadow: var(--shadow-lg);
+border: 1px solid var(--border-light);
+}
+
+.add-ingredient-card h3 {
+margin: 0 0 var(--space-4) 0;
+color: var(--text-primary);
+font-size: var(--text-2xl);
+font-weight: var(--font-semibold);
+}
+
+.ingredient-form-grid {
+display: grid;
+gap: var(--space-4);
+}
+
+.form-row {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: var(--space-4);
+}
+
+.form-group {
+display: flex;
+flex-direction: column;
+}
+
+.form-group label {
+margin-bottom: var(--space-2);
+font-weight: var(--font-semibold);
+color: var(--text-primary);
+font-size: var(--text-sm);
+}
+
+.form-group input,
+.form-group select {
+padding: var(--space-3) var(--space-4);
+border: none;
+border-radius: var(--radius-xl);
+background: var(--bg-secondary);
+color: var(--text-primary);
+font-size: var(--text-base);
+transition: var(--transition-all);
+}
+
+.form-group input:focus,
+.form-group select:focus {
+outline: none;
+background: var(--bg-tertiary);
+transform: translateY(-1px);
+box-shadow: var(--shadow-md);
+}
+
+.form-buttons {
+display: flex;
+gap: var(--space-3);
+justify-content: flex-start;
+margin-top: var(--space-2);
+}
+
+.form-buttons .btn {
+padding: var(--space-3) var(--space-8);
+border-radius: var(--radius-xl);
+font-weight: var(--font-semibold);
+border: none;
+cursor: pointer;
+transition: var(--transition-all);
+}
+
+.btn-primary {
+background: var(--success-color);
+color: white;
+}
+
+.btn-primary:hover {
+background: #059669;
+transform: translateY(-2px);
+}
+
+.btn-secondary {
+background: #ef4444;
+color: white;
+}
+
+.btn-secondary:hover {
+background: #dc2626;
+transform: translateY(-2px);
+}
+
+/* Search Container */
+.search-container {
+margin-bottom: var(--space-6);
+}
+
+.search-input {
+width: 100%;
+padding: var(--space-4) var(--space-6);
+border: none;
+border-radius: var(--radius-2xl);
+background: var(--bg-primary);
+box-shadow: var(--shadow-lg);
+font-size: var(--text-lg);
+transition: var(--transition-all);
+}
+
+.search-input:focus {
+outline: none;
+transform: translateY(-2px);
+box-shadow: var(--shadow-xl);
+}
+
+/* Category Filters */
+.category-filters {
+display: flex;
+gap: var(--space-3);
+margin-bottom: var(--space-6);
+flex-wrap: wrap;
+justify-content: center;
+}
+
+.filter-btn {
+padding: var(--space-3) var(--space-6);
+border: none;
+border-radius: var(--radius-2xl);
+background: rgba(255, 255, 255, 0.2);
+color: white;
+font-weight: var(--font-semibold);
+cursor: pointer;
+transition: var(--transition-all);
+backdrop-filter: blur(10px);
+}
+
+.filter-btn:hover {
+background: rgba(255, 255, 255, 0.3);
+transform: translateY(-2px);
+}
+
+.filter-btn.active {
+background: white;
+color: var(--primary-color);
+}
+
+/* Inventory Grid */
+.inventory-grid {
+display: grid;
+grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+gap: var(--space-6);
+}
+
+.ingredient-card {
+background: var(--bg-primary);
+border-radius: var(--radius-2xl);
+padding: 0;
+box-shadow: var(--shadow-lg);
+border: 1px solid var(--border-light);
+transition: var(--transition-all);
+overflow: hidden;
+position: relative;
+min-height: 220px; /* Increased height to fit buttons */
+display: flex;
+flex-direction: column;
+}
+
+.ingredient-card:hover {
+transform: translateY(-4px);
+box-shadow: var(--shadow-xl);
+}
+
+.ingredient-card h4 {
+margin: 0 0 var(--space-2) 0;
+color: var(--text-primary);
+font-size: var(--text-xl);
+font-weight: var(--font-semibold);
+}
+
+.ingredient-quantity {
+color: var(--text-secondary);
+font-size: var(--text-lg);
+margin-bottom: var(--space-4);
+}
+
+.ingredient-actions {
+display: flex;
+gap: var(--space-3);
+}
+
+.ingredient-actions .btn {
+flex: 1;
+padding: var(--space-2) var(--space-4);
+border-radius: var(--radius-lg);
+border: none;
+font-weight: var(--font-semibold);
+cursor: pointer;
+transition: var(--transition-all);
+}
+
+.btn-edit {
+background: var(--primary-color);
+color: white;
+}
+
+.btn-edit:hover {
+background: var(--secondary-color);
+transform: translateY(-1px);
+box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.btn-delete {
+background: #ef4444;
+color: white;
+}
+
+.btn-delete:hover {
+background: #dc2626;
+transform: translateY(-1px);
+box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+.ingredient-actions::before {
+content: '';
+position: absolute;
+bottom: 0;
+left: 0;
+right: 0;
+height: 60px;
+background: linear-gradient(to top, rgba(255,255,255,0.95), transparent);
+z-index: -1;
+border-radius: 0 0 var(--radius-2xl) var(--radius-2xl);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+.form-row {
+grid-template-columns: 1fr;
+}
+
+.category-filters {
+gap: var(--space-2);
+}
+
+.filter-btn {
+padding: var(--space-2) var(--space-4);
+font-size: var(--text-sm);
+}
+
+.inventory-grid {
+grid-template-columns: 1fr;
+gap: var(--space-4);
+}
+}
+
+/* Fixed Ingredient Card Styles */
+.ingredient-card {
+    background: var(--bg-primary);
+    border-radius: var(--radius-2xl);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-light);
+    transition: var(--transition-all);
+    overflow: hidden;
+    position: relative;
+    min-height: 200px;
+    display: flex;
+    flex-direction: column;
+}
+
+.ingredient-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+.card-background {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-size: cover;
+    background-position: center;
+    z-index: 1;
+}
+
+.card-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.8) 100%);
+    z-index: 2;
+}
+
+.card-content {
+    position: relative;
+    z-index: 3;
+    padding: var(--space-4);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.ingredient-info {
+    flex: 1;
+    margin-bottom: var(--space-4);
+}
+
+.ingredient-card h4 {
+    margin: 0 0 var(--space-2) 0;
+    color: var(--text-primary);
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+}
+
+.ingredient-quantity {
+    color: var(--text-secondary);
+    font-size: var(--text-lg);
+    font-weight: var(--font-medium);
+    text-shadow: 0 1px 2px rgba(255,255,255,0.8);
+}
+
+.ingredient-actions {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: auto;
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: var(--radius-lg);
+    padding: var(--space-3);
+    backdrop-filter: blur(5px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.ingredient-actions .btn {
+    flex: 1;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    border: none;
+    font-weight: var(--font-semibold);
+    cursor: pointer;
+    transition: var(--transition-all);
+    font-size: var(--text-sm);
+    text-align: center;
+    min-height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-edit {
+    background: var(--primary-color);
+    color: white;
+}
+
+.btn-edit:hover {
+    background: var(--secondary-color);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(102, 126, 234, 0.3);
+}
+
+.btn-delete {
+    background: #ef4444;
+    color: white;
+}
+
+.btn-delete:hover {
+    background: #dc2626;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
+}
+
+/* Modal improvements */
+.modal {
+position: fixed;
+top: 0;
+left: 0;
+width: 100%;
+height: 100%;
+background: rgba(0, 0, 0, 0.5);
+display: flex;
+align-items: center;
+justify-content: center;
+z-index: 1000;
+opacity: 0;
+transition: opacity 0.3s ease;
+}
+
+.modal.active {
+opacity: 1;
+}
+
+.modal-content {
+background: var(--bg-primary);
+border-radius: var(--radius-2xl);
+padding: var(--space-6);
+max-width: 500px;
+width: 90%;
+max-height: 80vh;
+overflow-y: auto;
+transform: scale(0.9);
+transition: transform 0.3s ease;
+box-shadow: var(--shadow-2xl);
+}
+
+.modal.active .modal-content {
+transform: scale(1);
+}
+
+.modal-header {
+display: flex;
+justify-content: space-between;
+align-items: center;
+margin-bottom: var(--space-5);
+padding-bottom: var(--space-3);
+border-bottom: 1px solid var(--border-light);
+}
+
+.modal-title {
+color: var(--text-primary);
+font-size: var(--text-xl);
+font-weight: var(--font-semibold);
+margin: 0;
+}
+
+.modal-close {
+background: none;
+border: none;
+font-size: 1.5rem;
+cursor: pointer;
+color: var(--text-secondary);
+padding: var(--space-2);
+border-radius: var(--radius-md);
+transition: all 0.3s ease;
+width: 40px;
+height: 40px;
+display: flex;
+align-items: center;
+justify-content: center;
+}
+
+.modal-close:hover {
+background: var(--bg-secondary);
+color: var(--text-primary);
+}
+
+.modal-actions {
+display: flex;
+gap: var(--space-3);
+margin-top: var(--space-6);
+justify-content: flex-end;
+}
+
+.modal-actions .btn {
+padding: var(--space-3) var(--space-6);
+border-radius: var(--radius-lg);
+border: none;
+font-weight: var(--font-semibold);
+cursor: pointer;
+transition: var(--transition-all);
+}
+
+/* Delete confirmation modal styling */
+.modal-body p {
+margin-bottom: var(--space-6);
+color: var(--text-secondary);
+line-height: 1.6;
+text-align: center;
+}
+
+/* Responsive adjustments */
+@media (max-width: 640px) {
+.ingredient-card {
+min-height: 180px;
+}
+
+.card-content {
+padding: var(--space-4);
+}
+
+.ingredient-card h4 {
+font-size: var(--text-lg);
+}
+
+.ingredient-quantity {
+font-size: var(--text-base);
+}
+
+.ingredient-actions .btn {
+padding: var(--space-2) var(--space-3);
+font-size: var(--text-xs);
+}
+
+.modal-content {
+width: 95%;
+padding: var(--space-4);
+}
+
+.modal-actions {
+flex-direction: column;
+}
+}
 /* Calendar Split Layout Styles */
 .calendar-split-container {
 display: flex;
@@ -355,6 +868,115 @@ border-radius: 50%;
 
 .calendar-date.selected.has-meals::after {
 background: var(--primary-color);
+}
+
+/* Category styling */
+.category-section {
+margin-bottom: var(--space-6);
+}
+
+.category-header {
+display: flex;
+align-items: center;
+gap: var(--space-2);
+margin-bottom: var(--space-4);
+padding: var(--space-3) var(--space-4);
+background: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0.05));
+border-radius: var(--radius-lg);
+backdrop-filter: blur(10px);
+border: 1px solid rgba(255,255,255,0.1);
+}
+
+.category-icon {
+font-size: 1.5rem;
+}
+
+.category-title {
+margin: 0;
+color: var(--text-primary);
+font-size: var(--text-lg);
+font-weight: var(--font-semibold);
+flex: 1;
+}
+
+.category-count {
+color: var(--text-secondary);
+font-size: var(--text-sm);
+background: rgba(255,255,255,0.1);
+padding: var(--space-1) var(--space-2);
+border-radius: var(--radius-md);
+}
+
+.category-items {
+display: grid;
+gap: var(--space-3);
+}
+
+/* Enhanced ingredient item styling */
+.ingredient-item {
+display: flex;
+justify-content: space-between;
+align-items: center;
+padding: var(--space-4);
+margin-bottom: 0;
+background: var(--bg-primary);
+border-radius: var(--radius-lg);
+transition: var(--transition-all);
+border: 1px solid var(--border-light);
+box-shadow: var(--shadow-sm);
+}
+
+.ingredient-item:hover {
+background: var(--bg-secondary);
+transform: translateY(-2px);
+box-shadow: var(--shadow-md);
+border-color: var(--primary-color);
+}
+
+.ingredient-info {
+flex: 1;
+}
+
+.ingredient-name {
+font-weight: var(--font-semibold);
+color: var(--text-primary);
+margin-bottom: var(--space-1);
+font-size: var(--text-base);
+}
+
+.ingredient-quantity {
+font-size: var(--text-sm);
+color: var(--text-secondary);
+}
+
+.ingredient-actions {
+display: flex;
+gap: var(--space-2);
+opacity: 0;
+transition: var(--transition-normal);
+}
+
+.ingredient-item:hover .ingredient-actions {
+opacity: 1;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+.category-items {
+gap: var(--space-2);
+}
+
+.ingredient-actions {
+opacity: 1;
+}
+
+.category-header {
+padding: var(--space-2) var(--space-3);
+}
+
+.category-title {
+font-size: var(--text-base);
+}
 }
 
 /* Mobile Responsiveness */
@@ -696,22 +1318,21 @@ stroke="url(#gradient)" stroke-width="8" stroke-linecap="round"/>
 </div>
 </div>
 
+
 <!-- Inventory Section -->
 <div id="inventory" class="content-section">
-<div class="dashboard-grid">
-<div class="card">
+<div class="inventory-container">
+<!-- Add Ingredient Form -->
+<div class="add-ingredient-card">
 <h3>Add Ingredient</h3>
-<form id="ingredientForm">
+<form id="ingredientForm" class="ingredient-form-grid">
+<div class="form-row">
 <div class="form-group">
-<label for="ingredientName">Ingredient Name</label>
-<input type="text" id="ingredientName" placeholder="e.g., Chicken Breast" required>
+<label for="ingredientName">Name:</label>
+<input type="text" id="ingredientName" placeholder="Enter ingredient name" required>
 </div>
 <div class="form-group">
-<label for="ingredientQuantity">Quantity</label>
-<input type="number" id="ingredientQuantity" placeholder="e.g., 2" step="0.1" min="0" required>
-</div>
-<div class="form-group">
-<label for="ingredientUnit">Unit</label>
+<label for="ingredientUnit">Unit:</label>
 <select id="ingredientUnit" required>
 <option value="">Select unit...</option>
 <option value="grams">Grams</option>
@@ -726,17 +1347,55 @@ stroke="url(#gradient)" stroke-width="8" stroke-linecap="round"/>
 <option value="liters">Liters</option>
 </select>
 </div>
-<button type="submit" class="btn btn-primary">Add to Inventory</button>
+</div>
+<div class="form-row">
+<div class="form-group">
+<label for="ingredientQuantity">Quantity:</label>
+<input type="number" id="ingredientQuantity" placeholder="Enter quantity" step="0.1" min="0" required>
+</div>
+<div class="form-group">
+<label for="ingredientCategory">Category:</label>
+<select id="ingredientCategory">
+<option value="">Auto-detect</option>
+<option value="Fruits">Fruits</option>
+<option value="Vegetables">Vegetables</option>
+<option value="Grains">Grains</option>
+<option value="Proteins">Proteins</option>
+<option value="Dairy">Dairy</option>
+<option value="Other">Other</option>
+</select>
+</div>
+</div>
+<div class="form-buttons">
+<button type="submit" class="btn btn-primary">Add</button>
+<button type="button" class="btn btn-secondary" onclick="this.closest('form').reset()">Clear</button>
+</div>
 </form>
 </div>
-<div class="card">
-<h3>Current Inventory</h3>
-<div class="ingredient-list" id="inventoryList">
+
+<!-- Search Bar -->
+<div class="search-container">
+<input type="text" id="ingredientSearch" placeholder="🔍 Search ingredients..." class="search-input">
+</div>
+
+<!-- Category Filter Buttons -->
+<div class="category-filters">
+<button class="filter-btn active" onclick="inventory.filterByCategory('all')" data-category="all">All</button>
+<button class="filter-btn" onclick="inventory.filterByCategory('Proteins')" data-category="Proteins">Protein</button>
+<button class="filter-btn" onclick="inventory.filterByCategory('Vegetables')" data-category="Vegetables">Vege</button>
+<button class="filter-btn" onclick="inventory.filterByCategory('Grains')" data-category="Grains">Grains</button>
+<button class="filter-btn" onclick="inventory.filterByCategory('Fruits')" data-category="Fruits">Fruits</button>
+<button class="filter-btn" onclick="inventory.filterByCategory('Dairy')" data-category="Dairy">Dairy</button>
+<button class="filter-btn" onclick="inventory.filterByCategory('Other')" data-category="Other">Others</button>
+</div>
+
+<!-- Inventory Grid -->
+<div class="inventory-grid" id="inventoryList">
 <!-- This will be populated by the Inventory component -->
 </div>
 </div>
 </div>
-</div>
+
 
 <!-- Recipes Section -->
 <div id="recipes" class="content-section">
@@ -975,53 +1634,131 @@ return false;
 
 // Display meals for selected date
 function displayMealsForDate(date) {
-const dateKey = date.toISOString().split('T')[0];
-const content = document.getElementById('meal-details-content');
-const totalCaloriesSpan = document.getElementById('daily-total-calories');
+    const dateKey = date.toISOString().split('T')[0];
+    const content = document.getElementById('meal-details-content');
+    const totalCaloriesSpan = document.getElementById('daily-total-calories');
+    if (!content) return;
 
-if (!content) return;
+    let meals = [];
+    let totalCalories = 0;
 
-let meals = [];
-let totalCalories = 0;
+    // Get meals from calendar component
+    if (window.calendar && window.calendar.meals && window.calendar.meals[dateKey]) {
+        meals = window.calendar.meals[dateKey];
+        totalCalories = meals.reduce((sum, meal) => sum + (meal.calories || 0), 0);
+    }
 
-// Get meals from calendar component
-if (window.calendar && window.calendar.meals && window.calendar.meals[dateKey]) {
-meals = window.calendar.meals[dateKey];
-totalCalories = meals.reduce((sum, meal) => sum + (meal.calories || 0), 0);
+    // Update total calories
+    if (totalCaloriesSpan) {
+        totalCaloriesSpan.textContent = totalCalories;
+    }
+
+    // Render meals
+    if (meals.length === 0) {
+        content.innerHTML = `
+            <div class="no-meals-selected">
+                <div class="empty-meal-icon">🍽</div>
+                <p>No meals logged for this day</p>
+                <button class="btn btn-primary" onclick="addMealForDate('${dateKey}')">Add Meal</button>
+            </div>
+        `;
+    } else {
+        content.innerHTML = meals.map(meal => {
+            // Try to find the recipe to get thumbnail
+            const allRecipes = window.calendar.getAllRecipes();
+            const recipe = allRecipes.find(r => r.name === meal.name);
+            let thumbnailUrl = null;
+            
+            if (recipe && recipe.videoUrl) {
+                const videoId = VideoUtils.extractVideoId(recipe.videoUrl);
+                thumbnailUrl = VideoUtils.getThumbnailUrl(videoId, 'hqdefault');
+            }
+
+            return `
+                <div class="meal-card">
+                    <div class="meal-image">
+                        ${thumbnailUrl ? 
+                            `<img src="${thumbnailUrl}" alt="${meal.name}" style="width: 100%; height: 100%; object-fit: cover;">` 
+                            : (meal.emoji || '🍽')
+                        }
+                    </div>
+                    <div class="meal-info">
+                        <div class="meal-name">${meal.name}</div>
+                        <div class="meal-nutrition">
+                            <div class="nutrition-item">${meal.calories || 0} cal</div>
+                            <div class="nutrition-item">${meal.protein || 0}g Protein</div>
+                            <div class="nutrition-item">${meal.carbs || 0}g Carbs</div>
+                            <div class="nutrition-item">${meal.fat || 0}g Fat</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
 }
 
-// Update total calories
-if (totalCaloriesSpan) {
-totalCaloriesSpan.textContent = totalCalories;
-}
+// Render top meals
+function renderTopMeals() {
+    const grid = document.getElementById('top-meals-grid');
+    if (!grid) return;
 
-// Render meals
-if (meals.length === 0) {
-content.innerHTML = `
-<div class="no-meals-selected">
-<div class="empty-meal-icon">🍽️</div>
-<p>No meals logged for this day</p>
-<button class="btn btn-primary" onclick="addMealForDate('${dateKey}')">Add Meal</button>
-</div>
-`;
-} else {
-content.innerHTML = meals.map(meal => `
-<div class="meal-card">
-<div class="meal-image">
-${meal.emoji || '🍽️'}
-</div>
-<div class="meal-info">
-<div class="meal-name">${meal.name}</div>
-<div class="meal-nutrition">
-<div class="nutrition-item">${meal.calories || 0} cal</div>
-<div class="nutrition-item">${meal.protein || 0}g Protein</div>
-<div class="nutrition-item">${meal.carbs || 0}g Carbs</div>
-<div class="nutrition-item">${meal.fat || 0}g Fat</div>
-</div>
-</div>
-</div>
-`).join('');
-}
+    const mealFrequency = {};
+    if (window.calendar && window.calendar.meals) {
+        Object.values(window.calendar.meals).forEach(dayMeals => {
+            dayMeals.forEach(meal => {
+                const key = meal.name.toLowerCase();
+                if (!mealFrequency[key]) {
+                    mealFrequency[key] = {
+                        name: meal.name,
+                        count: 0,
+                        emoji: meal.emoji || '🍽'
+                    };
+                }
+                mealFrequency[key].count++;
+            });
+        });
+    }
+
+    // Sort and get top 3
+    const topMeals = Object.values(mealFrequency)
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 3);
+
+    if (topMeals.length === 0) {
+        grid.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No meals logged this month</p>';
+        return;
+    }
+
+    // Get all recipes to find thumbnails
+    let allRecipes = [];
+    if (window.calendar && typeof window.calendar.getAllRecipes === 'function') {
+        allRecipes = window.calendar.getAllRecipes();
+    }
+
+    grid.innerHTML = topMeals.map((meal, index) => {
+        // Try to find the recipe to get thumbnail
+        const recipe = allRecipes.find(r => r.name === meal.name);
+        let thumbnailUrl = null;
+        
+        if (recipe && recipe.videoUrl) {
+            const videoId = VideoUtils.extractVideoId(recipe.videoUrl);
+            thumbnailUrl = VideoUtils.getThumbnailUrl(videoId, 'hqdefault');
+        }
+
+        return `
+            <div class="top-meal-item">
+                <div class="top-meal-image">
+                    ${thumbnailUrl ? 
+                        `<img src="${thumbnailUrl}" alt="${meal.name}" style="width: 100%; height: 100%; object-fit: cover;">` 
+                        : meal.emoji
+                    }
+                    <div class="meal-rank">${index + 1}</div>
+                </div>
+                <div class="top-meal-name">${meal.name}</div>
+                <div class="meal-count">${meal.count} times</div>
+            </div>
+        `;
+    }).join('');
 }
 
 // Update selected date title
@@ -1043,49 +1780,6 @@ showToast('Calendar component not available', 'warning');
 }
 }
 
-// Render top meals
-function renderTopMeals() {
-const grid = document.getElementById('top-meals-grid');
-if (!grid) return;
-
-const mealFrequency = {};
-if (window.calendar && window.calendar.meals) {
-Object.values(window.calendar.meals).forEach(dayMeals => {
-dayMeals.forEach(meal => {
-const key = meal.name.toLowerCase();
-if (!mealFrequency[key]) {
-mealFrequency[key] = { 
-name: meal.name, 
-count: 0, 
-emoji: meal.emoji || '🍽️' 
-};
-}
-mealFrequency[key].count++;
-});
-});
-}
-
-// Sort and get top 3
-const topMeals = Object.values(mealFrequency)
-.sort((a, b) => b.count - a.count)
-.slice(0, 3);
-
-if (topMeals.length === 0) {
-grid.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No meals logged this month</p>';
-return;
-}
-
-grid.innerHTML = topMeals.map((meal, index) => `
-<div class="top-meal-item">
-<div class="top-meal-image">
-${meal.emoji}
-<div class="meal-rank">${index + 1}</div>
-</div>
-<div class="top-meal-name">${meal.name}</div>
-<div class="meal-count">${meal.count} times</div>
-</div>
-`).join('');
-}
 
 // Initialize calendar
 document.addEventListener('DOMContentLoaded', function() {

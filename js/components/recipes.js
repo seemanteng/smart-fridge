@@ -31,7 +31,6 @@ class Recipes {
             {
                 id: 1,
                 name: 'Teriyaki Chicken Bowl',
-                emoji: '🍗',
                 calories: 450,
                 nutrition: { protein: 35, carbs: 45, fat: 12, fiber: 3 },
                 cookTime: 25,
@@ -53,7 +52,6 @@ class Recipes {
             {
                 id: 2,
                 name: 'Quinoa Power Salad',
-                emoji: '🥗',
                 calories: 380,
                 nutrition: { protein: 18, carbs: 42, fat: 14, fiber: 8 },
                 cookTime: 15,
@@ -133,7 +131,7 @@ class Recipes {
         `<img src="${thumbnailUrl}" alt="${recipe.name} video" style="width: 100%; height: 100%; object-fit: cover;">
         ${recipe.videoUrl ? `<div class="video-play-button" onclick="window.open('${recipe.videoUrl}', '_blank')"></div>` : ''}` 
         : 
-        `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 4rem; background: var(--bg-secondary);">${recipe.emoji}</div>`
+        `<div style="width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 4rem; background: var(--bg-secondary);"> Image Unavailable </div>`
         }
         </div>
         <div class="recipe-content">
@@ -289,7 +287,7 @@ modal.className = 'modal';
 modal.innerHTML = `
 <div class="modal-content">
 <div class="modal-header">
-<h3 class="modal-title">${recipe.emoji} ${recipe.name}</h3>
+<h3 class="modal-title">${recipe.name}</h3>
 <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
 </div>
 <div class="modal-body">

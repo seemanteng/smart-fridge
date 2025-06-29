@@ -256,13 +256,16 @@ class Dashboard {
             const today = new Date();
             const mealType = this.determineMealType();
             window.calendar.addMeal(
-                today, 
-                mealType, 
-                recipe.name, 
-                recipe.calories, 
+                today,
+                mealType,
+                recipe.name,
+                recipe.calories,
                 recipe.emoji || '🍽'
             );
         }
+
+        // Remove the recipe from "Things to Make" after logging
+        this.removeRecipeFromDashboard(recipeId);
 
         if (window.showToast) {
             showToast(`${recipe.name} logged as cooked! +${recipe.calories} calories`, 'success');
@@ -383,16 +386,34 @@ class Dashboard {
             return;
         }
 
-        mealsList.innerHTML = this.todayStats.meals.map((meal, index) => `
-            <div class="meal-item">
-                <div class="meal-info">
-                    <span class="meal-name">${meal.name}</span>
-                    <span class="meal-stats">${meal.calories} cal • ${meal.protein}g protein • ${meal.carbs || 0}g carbs • ${meal.fat || 0}g fat</span>
+        mealsList.innerHTML = this.todayStats.meals.map((meal, index) => {
+            // Try to find the recipe to get thumbnail
+            const allRecipes = this.getAllRecipes();
+            const recipe = allRecipes.find(r => r.name === meal.name);
+            let thumbnailUrl = null;
+            
+            if (recipe && recipe.videoUrl) {
+                const videoId = VideoUtils.extractVideoId(recipe.videoUrl);
+                thumbnailUrl = VideoUtils.getThumbnailUrl(videoId, 'hqdefault');
+            }
+
+            return `
+                <div class="meal-item">
+                    <div class="meal-image-small">
+                        ${thumbnailUrl ? 
+                            `<img src="${thumbnailUrl}" alt="${meal.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-md);">` 
+                            : '🍽'
+                        }
+                    </div>
+                    <div class="meal-info">
+                        <span class="meal-name">${meal.name}</span>
+                        <span class="meal-stats">${meal.calories} cal • ${meal.protein}g protein • ${meal.carbs || 0}g carbs • ${meal.fat || 0}g fat</span>
+                    </div>
+                    <button class="remove-btn" onclick="window.dashboard.removeMeal(${index})">REMOVE</button>
                 </div>
-                <button class="remove-btn" onclick="window.dashboard.removeMeal(${index})">REMOVE</button>
-            </div>
-        `).join('');
-    }
+            `;
+        }).join('');
+    } 
 
     // Update renderSuggestedRecipes method
     renderSuggestedRecipes() {
@@ -411,9 +432,20 @@ class Dashboard {
             return;
         }
 
-        suggestedContainer.innerHTML = addedRecipes.slice(0, 2).map(recipe => `
-            <div class="recipe-card-small">
-                <div class="recipe-image">${recipe.emoji || '🍽'}</div>
+        suggestedContainer.innerHTML = addedRecipes.slice(0, 2).map(recipe => {
+        const videoId = VideoUtils.extractVideoId(recipe.videoUrl);
+        const thumbnailUrl = VideoUtils.getThumbnailUrl(videoId, 'hqdefault');
+        
+        return `
+            <div class="recipe-card-small" style="position: relative;">
+                <button class="recipe-remove-btn" onclick="window.dashboard.removeRecipeFromDashboard(${recipe.id})" 
+                        title="Remove from Things to Make">&times;</button>
+                <div class="recipe-image">
+                    ${thumbnailUrl ? 
+                        `<img src="${thumbnailUrl}" alt="${recipe.name}" style="width: 100%; height: 100%; object-fit: cover; border-radius: var(--radius-xl);">` 
+                        : (recipe.emoji || '🍽')
+                    }
+                </div>
                 <div class="recipe-info">
                     <h3>${recipe.name}</h3>
                     <div class="recipe-actions">
@@ -422,7 +454,8 @@ class Dashboard {
                     </div>
                 </div>
             </div>
-        `).join('');
+        `;
+        }).join('');
 
         this.generateAutoGroceryList();
     }
