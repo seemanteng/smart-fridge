@@ -1,21 +1,27 @@
 /**
- * Goals Component 
- * Handles user goals setting and progress tracking
+ * Goals Component - Complete Updated Version
+ * Handles user goals setting, progress tracking, and insights with fixed fats stats
  */
-
 class Goals {
     constructor() {
         this.goals = this.loadGoals();
-        this.progress = this.loadProgress();
+        this.userProfile = this.loadUserProfile();
         this.weeklyStats = this.loadWeeklyStats();
+        this.chart = null;
         this.init();
     }
 
     init() {
-        this.renderGoalsForm();
-        this.renderWeeklyProgress();
-        this.bindEvents();
-        this.calculateRecommendations();
+        // Delay initialization to ensure DOM is ready
+        setTimeout(() => {
+            this.renderGoalsForm();
+            this.renderWeeklyChart();
+            this.renderMacroStats();
+            this.renderSummaryStats();
+            this.renderExerciseSuggestions();
+            this.renderRecipeSuggestions();
+            this.bindEvents();
+        }, 500);
     }
 
     loadGoals() {
@@ -23,100 +29,63 @@ class Goals {
         if (savedGoals) {
             return JSON.parse(savedGoals);
         }
-
-        // Default goals based on general recommendations
         return {
             dailyCalories: 2000,
             dailyProtein: 150,
-            dailyCarbs: 250,
-            dailyFat: 65,
-            dailyFiber: 25,
-            dailyWater: 8,
-            activityLevel: 'lightly-active',
-            goal: 'maintain', // maintain, lose, gain
-            weightGoal: null,
-            height: null,
-            weight: null,
-            age: null,
-            gender: null,
-            preferences: {
-                vegetarian: false,
-                vegan: false,
-                glutenFree: false,
-                dairyFree: false,
-                lowCarb: false,
-                highProtein: false
-            }
+            dailyCarbs: 87,
+            dailyFat: 97
         };
     }
 
-    loadProgress() {
-        const today = new Date().toISOString().split('T')[0];
-        const savedProgress = localStorage.getItem(`mtable_progress_${today}`);
-        
-        if (savedProgress) {
-            return JSON.parse(savedProgress);
+    loadUserProfile() {
+        const savedProfile = localStorage.getItem('mtable_user_profile');
+        if (savedProfile) {
+            return JSON.parse(savedProfile);
         }
-
         return {
-            date: today,
-            calories: 1850,
-            protein: 145,
-            carbs: 180,
-            fat: 75,
-            fiber: 18,
-            water: 6,
-            exercise: 0,
-            steps: 0
+            age: null,
+            gender: null,
+            weight: null,
+            height: null,
+            activityLevel: 'moderate'
         };
     }
 
     loadWeeklyStats() {
-        const savedStats = localStorage.getItem('mtable_weekly_progress');
-        if (savedStats) {
-            return JSON.parse(savedStats);
+        // Get actual data from the last 7 days
+        const weeklyData = [];
+        const today = new Date();
+        
+        for (let i = 6; i >= 0; i--) {
+            const date = new Date(today);
+            date.setDate(today.getDate() - i);
+            const dateKey = date.toISOString().split('T')[0];
+            
+            const dayStats = this.getDayStats(dateKey);
+            weeklyData.push({
+                date: dateKey,
+                day: date.toLocaleDateString('en-US', { weekday: 'short' }),
+                calories: dayStats ? dayStats.calories || 0 : 0,
+                protein: dayStats ? dayStats.protein || 0 : 0,
+                carbs: dayStats ? dayStats.carbs || 0 : 0,
+                fat: dayStats ? dayStats.fat || 0 : 0
+            });
         }
-
-        // Generate sample weekly data
-        return this.generateSampleWeeklyStats();
+        
+        return weeklyData;
     }
 
-    generateSampleWeeklyStats() {
-        const stats = {
-            daysOnTrack: 6,
-            totalDays: 7,
-            averageCalories: 1950,
-            averageProtein: 145,
-            recipesTried: 15,
-            weeklyCalories: [],
-            weeklyProtein: [],
-            streakDays: 12
-        };
-
-        // Generate 7 days of sample data
-        for (let i = 6; i >= 0; i--) {
-            const date = new Date();
-            date.setDate(date.getDate() - i);
-            
-            stats.weeklyCalories.push({
-                date: date.toISOString().split('T')[0],
-                calories: Math.floor(Math.random() * 400) + 1800,
-                target: this.goals.dailyCalories
-            });
-            
-            stats.weeklyProtein.push({
-                date: date.toISOString().split('T')[0],
-                protein: Math.floor(Math.random() * 40) + 130,
-                target: this.goals.dailyProtein
-            });
-        }
-
-        return stats;
+    getDayStats(dateKey) {
+        const savedStats = localStorage.getItem(`mtable_stats_${dateKey}`);
+        return savedStats ? JSON.parse(savedStats) : null;
     }
 
     saveGoals() {
         localStorage.setItem('mtable_goals', JSON.stringify(this.goals));
-        this.calculateRecommendations();
+        this.renderGoalsForm();
+        this.renderWeeklyChart();
+        this.renderMacroStats();
+        this.renderSummaryStats();
         
         // Notify other components
         window.dispatchEvent(new CustomEvent('goals-updated', {
@@ -124,616 +93,583 @@ class Goals {
         }));
     }
 
-    saveProgress() {
-        const today = new Date().toISOString().split('T')[0];
-        localStorage.setItem(`mtable_progress_${today}`, JSON.stringify(this.progress));
+    saveUserProfile() {
+        localStorage.setItem('mtable_user_profile', JSON.stringify(this.userProfile));
+        this.renderExerciseSuggestions();
+        this.renderRecipeSuggestions();
     }
 
     renderGoalsForm() {
-        const goalsForm = document.querySelector('#goals form');
-        if (!goalsForm) return;
-
-        // Update form values
-        const calorieInput = goalsForm.querySelector('input[type="number"]');
-        const proteinInput = goalsForm.querySelectorAll('input[type="number"]')[1];
-        const activitySelect = goalsForm.querySelector('select');
+        // Update the input fields with current values
+        const calorieInput = document.getElementById('dailyCalorieGoal');
+        const proteinInput = document.getElementById('dailyProteinGoal');
+        const carbsInput = document.getElementById('dailyCarbsGoal');
+        const fatsInput = document.getElementById('dailyFatsGoal');
+        const ageInput = document.getElementById('userAge');
+        const genderInput = document.getElementById('userGender');
 
         if (calorieInput) calorieInput.value = this.goals.dailyCalories;
         if (proteinInput) proteinInput.value = this.goals.dailyProtein;
-        if (activitySelect) activitySelect.value = this.goals.activityLevel;
+        if (carbsInput) carbsInput.value = this.goals.dailyCarbs;
+        if (fatsInput) fatsInput.value = this.goals.dailyFat;
+        if (ageInput) ageInput.value = this.userProfile.age || '';
+        if (genderInput) genderInput.value = this.userProfile.gender || '';
 
-        // Add advanced form if it doesn't exist
-        this.addAdvancedGoalsForm(goalsForm);
-    }
-
-    addAdvancedGoalsForm(form) {
-        const existingAdvanced = form.querySelector('.advanced-goals');
-        if (existingAdvanced) return;
-        
-        return;
-    }
-
-    renderWeeklyProgress() {
-        const progressContainer = document.querySelector('#goals .stats-grid');
-        if (!progressContainer) return;
-
-        // Clear existing content
-        progressContainer.innerHTML = '';
-
-        // Calculate real weekly stats
-        const realWeeklyStats = this.calculateRealWeeklyStats();
-
-        const stats = [
-            {
-                number: `${realWeeklyStats.daysOnTrack}/${realWeeklyStats.totalDays}`,
-                label: 'Days on Track',
-                percentage: (realWeeklyStats.daysOnTrack / realWeeklyStats.totalDays) * 100
-            },
-            {
-                number: realWeeklyStats.averageCalories.toLocaleString(),
-                label: 'Avg Calories',
-                percentage: realWeeklyStats.averageCalories > 0 ? (realWeeklyStats.averageCalories / this.goals.dailyCalories) * 100 : 0
-            },
-            {
-                number: `${realWeeklyStats.averageProtein}g`,
-                label: 'Avg Protein',
-                percentage: realWeeklyStats.averageProtein > 0 ? (realWeeklyStats.averageProtein / this.goals.dailyProtein) * 100 : 0
-            },
-            {
-                number: realWeeklyStats.mealsLogged.toString(),
-                label: 'Meals Logged',
-                percentage: Math.min((realWeeklyStats.mealsLogged / 21) * 100, 100) // 3 meals per day * 7 days
-            }
-        ];
-
-        stats.forEach(stat => {
-            const statCard = document.createElement('div');
-            statCard.className = 'stat-card';
-            statCard.innerHTML = `
-                <div class="stat-number">${stat.number}</div>
-                <div class="stat-label">${stat.label}</div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: ${Math.min(stat.percentage, 100)}%"></div>
-                </div>
-            `;
-            progressContainer.appendChild(statCard);
-        });
-
-        // Add streak and trends with real data
-        this.addProgressCharts();
-    }
-
-    calculateRealWeeklyStats() {
-        const today = new Date();
-        const weekStats = {
-            totalDays: 7,
-            daysOnTrack: 0,
-            averageCalories: 0,
-            averageProtein: 0,
-            mealsLogged: 0,
-            totalCalories: 0,
-            totalProtein: 0,
-            daysWithData: 0
-        };
-
-        // Get data for the last 7 days
-        for (let i = 0; i < 7; i++) {
-            const date = new Date(today);
-            date.setDate(today.getDate() - i);
-            const dateKey = date.toISOString().split('T')[0];
-            
-            // Try to get saved stats for this day
-            const dayStats = this.getDayStats(dateKey);
-            
-            if (dayStats && dayStats.calories > 0) {
-                weekStats.daysWithData++;
-                weekStats.totalCalories += dayStats.calories;
-                weekStats.totalProtein += dayStats.protein || 0;
-                weekStats.mealsLogged += dayStats.meals ? dayStats.meals.length : 0;
-                
-                // Check if day was "on track" (within 90-110% of calorie goal)
-                const caloriePercentage = (dayStats.calories / this.goals.dailyCalories) * 100;
-                if (caloriePercentage >= 90 && caloriePercentage <= 110) {
-                    weekStats.daysOnTrack++;
-                }
-            }
-        }
-
-        // Calculate averages
-        if (weekStats.daysWithData > 0) {
-            weekStats.averageCalories = Math.round(weekStats.totalCalories / weekStats.daysWithData);
-            weekStats.averageProtein = Math.round(weekStats.totalProtein / weekStats.daysWithData);
-        }
-
-        return weekStats;
-    }
-
-    getDayStats(dateKey) {
-        // Try to get stats from localStorage
-        const savedStats = localStorage.getItem(`mtable_stats_${dateKey}`);
-        if (savedStats) {
-            return JSON.parse(savedStats);
-        }
-        
-        // If no saved stats, return null
-        return null;
-    }
-
-    addProgressCharts() {
-        const goalsSection = document.querySelector('#goals');
-        if (!goalsSection) return;
-
-        let chartsContainer = goalsSection.querySelector('.progress-charts');
-        if (!chartsContainer) {
-            chartsContainer = document.createElement('div');
-            chartsContainer.className = 'progress-charts';
-            chartsContainer.innerHTML = `
-                <div class="card">
-                    <h3>Weekly Trends</h3>
-                    <div class="charts-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: var(--space-6);">
-                        <div class="chart-container">
-                            <h4>Calorie Trend</h4>
-                            <div class="simple-chart" id="calorieChart"></div>
-                        </div>
-                        <div class="chart-container">
-                            <h4>Protein Trend</h4>
-                            <div class="simple-chart" id="proteinChart"></div>
-                        </div>
-                    </div>
-                    <div class="streak-info" style="text-align: center; margin-top: var(--space-6);">
-                        <div class="streak-card" style="display: inline-block; padding: var(--space-4); background: var(--bg-secondary); border-radius: var(--radius-lg);">
-                            <div class="streak-number" style="font-size: var(--text-3xl); font-weight: var(--font-bold); color: var(--primary-color);">${this.calculateRealStreak()}</div>
-                            <div class="streak-label" style="color: var(--text-secondary);">Day Streak</div>
-                            <div class="streak-emoji" style="font-size: var(--text-2xl); margin-top: var(--space-2);">🔥</div>
-                        </div>
-                    </div>
-                </div>
-            `;
-            
-            // Insert after the existing cards
-            const existingCards = goalsSection.querySelectorAll('.card');
-            if (existingCards.length > 1) {
-                existingCards[1].after(chartsContainer);
-            }
-        }
-
-        this.renderSimpleCharts();
-    }
-
-    calculateRealStreak() {
-        let streak = 0;
-        const today = new Date();
-        
-        // Count consecutive days from today backwards where user was on track
-        for (let i = 0; i < 30; i++) { // Check up to 30 days back
-            const date = new Date(today);
-            date.setDate(today.getDate() - i);
-            const dateKey = date.toISOString().split('T')[0];
-            const dayStats = this.getDayStats(dateKey);
-            
-            if (dayStats && dayStats.calories > 0) {
-                const caloriePercentage = (dayStats.calories / this.goals.dailyCalories) * 100;
-                if (caloriePercentage >= 90 && caloriePercentage <= 110) {
-                    streak++;
-                } else {
-                    break; // Streak broken
-                }
-            } else {
-                break; // No data = streak broken
-            }
-        }
-        
-        return streak;
-    }
-
-    renderSimpleCharts() {
-        this.renderCalorieChart();
-        this.renderProteinChart();
-    }
-
-    renderCalorieChart() {
-        const chartContainer = document.getElementById('calorieChart');
-        if (!chartContainer) return;
-
-        const data = this.getRealWeeklyCalorieData();
-        const maxCalories = Math.max(...data.map(d => d.calories), this.goals.dailyCalories);
-
-        chartContainer.innerHTML = `
-            <div class="chart-bars" style="display: flex; align-items: end; gap: var(--space-2); height: 150px; margin: var(--space-4) 0;">
-                ${data.map((day, index) => {
-                    const height = day.calories > 0 ? (day.calories / maxCalories) * 100 : 10;
-                    const targetHeight = (day.target / maxCalories) * 100;
-                    const dayName = new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' });
-                    const isOnTarget = day.calories >= day.target * 0.9 && day.calories <= day.target * 1.1;
-                    
-                    return `
-                        <div class="chart-bar-container" style="flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; height: 100%;">
-                            <div class="chart-target-line" style="position: absolute; bottom: ${targetHeight}%; width: 100%; height: 2px; background: var(--warning-color); opacity: 0.7;"></div>
-                            <div class="chart-bar ${isOnTarget ? 'on-target' : ''}" style="width: 100%; background: ${isOnTarget ? 'var(--success-color)' : 'var(--primary-color)'}; border-radius: var(--radius-sm) var(--radius-sm) 0 0; height: ${height}%; min-height: 10px; position: relative; margin-top: auto;">
-                                <div class="chart-value" style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: var(--text-xs); font-weight: var(--font-medium);">${day.calories || 0}</div>
-                            </div>
-                            <div class="chart-label" style="margin-top: var(--space-1); font-size: var(--text-xs); color: var(--text-secondary);">${dayName}</div>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-            <div class="chart-legend" style="display: flex; justify-content: center; gap: var(--space-4); margin-top: var(--space-3);">
-                <span class="legend-item" style="display: flex; align-items: center; gap: var(--space-1); font-size: var(--text-xs);">
-                    <span class="legend-color" style="width: 12px; height: 12px; background: var(--primary-color); border-radius: var(--radius-sm);"></span>
-                    Actual
-                </span>
-                <span class="legend-item" style="display: flex; align-items: center; gap: var(--space-1); font-size: var(--text-xs);">
-                    <span class="legend-color" style="width: 12px; height: 2px; background: var(--warning-color);"></span>
-                    Target
-                </span>
-            </div>
-        `;
-    }
-
-    renderProteinChart() {
-        const chartContainer = document.getElementById('proteinChart');
-        if (!chartContainer) return;
-
-        const data = this.getRealWeeklyProteinData();
-        const maxProtein = Math.max(...data.map(d => d.protein), this.goals.dailyProtein);
-
-        chartContainer.innerHTML = `
-            <div class="chart-bars" style="display: flex; align-items: end; gap: var(--space-2); height: 150px; margin: var(--space-4) 0;">
-                ${data.map((day, index) => {
-                    const height = day.protein > 0 ? (day.protein / maxProtein) * 100 : 10;
-                    const targetHeight = (day.target / maxProtein) * 100;
-                    const dayName = new Date(day.date).toLocaleDateString('en-US', { weekday: 'short' });
-                    const isOnTarget = day.protein >= day.target * 0.9;
-                    
-                    return `
-                        <div class="chart-bar-container" style="flex: 1; display: flex; flex-direction: column; align-items: center; position: relative; height: 100%;">
-                            <div class="chart-target-line" style="position: absolute; bottom: ${targetHeight}%; width: 100%; height: 2px; background: var(--warning-color); opacity: 0.7;"></div>
-                            <div class="chart-bar ${isOnTarget ? 'on-target' : ''}" style="width: 100%; background: ${isOnTarget ? 'var(--success-color)' : 'var(--secondary-color)'}; border-radius: var(--radius-sm) var(--radius-sm) 0 0; height: ${height}%; min-height: 10px; position: relative; margin-top: auto;">
-                                <div class="chart-value" style="position: absolute; top: -20px; left: 50%; transform: translateX(-50%); font-size: var(--text-xs); font-weight: var(--font-medium);">${day.protein || 0}g</div>
-                            </div>
-                            <div class="chart-label" style="margin-top: var(--space-1); font-size: var(--text-xs); color: var(--text-secondary);">${dayName}</div>
-                        </div>
-                    `;
-                }).join('')}
-            </div>
-        `;
-    }
-
-    getRealWeeklyCalorieData() {
-        const weekData = [];
-        const today = new Date();
-        
-        for (let i = 6; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(today.getDate() - i);
-            const dateKey = date.toISOString().split('T')[0];
-            const dayStats = this.getDayStats(dateKey);
-            
-            weekData.push({
-                date: dateKey,
-                calories: dayStats ? dayStats.calories || 0 : 0,
-                target: this.goals.dailyCalories
-            });
-        }
-        
-        return weekData;
-    }
-
-    getRealWeeklyProteinData() {
-        const weekData = [];
-        const today = new Date();
-        
-        for (let i = 6; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(today.getDate() - i);
-            const dateKey = date.toISOString().split('T')[0];
-            const dayStats = this.getDayStats(dateKey);
-            
-            weekData.push({
-                date: dateKey,
-                protein: dayStats ? dayStats.protein || 0 : 0,
-                target: this.goals.dailyProtein
-            });
-        }
-        
-        return weekData;
-    }
-
-    bindEvents() {
-        // Goals form submission
-        const goalsForm = document.querySelector('#goals form');
-        if (goalsForm) {
-            goalsForm.addEventListener('submit', (e) => {
-                e.preventDefault();
-                this.updateGoals(goalsForm);
-            });
-        }
-
-        // Real-time input updates
-        document.addEventListener('input', (e) => {
-            if (e.target.closest('#goals')) {
-                this.handleGoalInput(e.target);
-            }
-        });
-
-        // Preference checkboxes
-        document.addEventListener('change', (e) => {
-            if (e.target.type === 'checkbox' && e.target.closest('.preferences-grid')) {
-                this.updatePreference(e.target.id, e.target.checked);
-            }
-        });
-    }
-
-    handleGoalInput(input) {
-        const id = input.id;
-        const value = input.value;
-
-        // Auto-calculate related values
-        if (id === 'weight' || id === 'height' || id === 'age' || id === 'gender') {
-            this.updateBodyInfo();
+        // Update target displays
+        const targetCalories = document.getElementById('targetCalories');
+        if (targetCalories) {
+            targetCalories.textContent = this.goals.dailyCalories;
         }
     }
 
-    updateGoals(form) {
-        // Update basic goals
-        const calorieInput = form.querySelector('input[type="number"]');
-        const proteinInput = form.querySelectorAll('input[type="number"]')[1];
-        const activitySelect = form.querySelector('select');
-
-        if (calorieInput) this.goals.dailyCalories = parseInt(calorieInput.value) || 2000;
-        if (proteinInput) this.goals.dailyProtein = parseInt(proteinInput.value) || 150;
-        if (activitySelect) this.goals.activityLevel = activitySelect.value;
-
-        // Update advanced goals
-        const advancedInputs = {
-            age: form.querySelector('#age'),
-            gender: form.querySelector('#gender'),
-            height: form.querySelector('#height'),
-            weight: form.querySelector('#weight'),
-            primaryGoal: form.querySelector('#primaryGoal'),
-            targetWeight: form.querySelector('#targetWeight'),
-            carbs: form.querySelector('#carbs'),
-            fat: form.querySelector('#fat'),
-            fiber: form.querySelector('#fiber'),
-            water: form.querySelector('#water')
-        };
-
-        Object.keys(advancedInputs).forEach(key => {
-            const input = advancedInputs[key];
-            if (input) {
-                if (key === 'gender' || key === 'primaryGoal') {
-                    this.goals[key === 'primaryGoal' ? 'goal' : key] = input.value;
-                } else if (key === 'targetWeight') {
-                    this.goals.weightGoal = parseFloat(input.value) || null;
-                } else if (['carbs', 'fat', 'fiber', 'water'].includes(key)) {
-                    this.goals[`daily${key.charAt(0).toUpperCase() + key.slice(1)}`] = parseInt(input.value) || 0;
-                } else {
-                    this.goals[key] = parseFloat(input.value) || null;
-                }
-            }
-        });
-
-        this.saveGoals();
-        this.validateGoals();
-        
-        if (window.showToast) {
-            showToast('Goals updated successfully!', 'success');
-        }
-    }
-
-    updatePreference(preference, value) {
-        this.goals.preferences[preference] = value;
-        this.saveGoals();
-        
-        // Handle conflicting preferences
-        this.handlePreferenceConflicts(preference, value);
-    }
-
-    handlePreferenceConflicts(preference, value) {
-        if (value) {
-            // If vegan is selected, also select vegetarian
-            if (preference === 'vegan') {
-                this.goals.preferences.vegetarian = true;
-                const vegInput = document.querySelector('#vegetarian');
-                if (vegInput) vegInput.checked = true;
-            }
-            
-            // If low carb is selected, suggest higher protein
-            if (preference === 'lowCarb') {
-                this.goals.preferences.highProtein = true;
-                const proteinInput = document.querySelector('#highProtein');
-                if (proteinInput) proteinInput.checked = true;
-                this.suggestLowCarbMacros();
-            }
-        } else {
-            // If vegetarian is unselected, also unselect vegan
-            if (preference === 'vegetarian') {
-                this.goals.preferences.vegan = false;
-                const veganInput = document.querySelector('#vegan');
-                if (veganInput) veganInput.checked = false;
-            }
-        }
-    }
-
-    calculateBMR() {
-        if (!this.goals.weight || !this.goals.height || !this.goals.age || !this.goals.gender) {
-            if (window.showToast) {
-                showToast('Please fill in weight, height, age, and gender first', 'warning');
-            }
+    renderWeeklyChart() {
+        const canvas = document.getElementById('caloriesChart');
+        if (!canvas) {
+            console.log('Canvas not found');
             return;
         }
 
-        let bmr;
-        const weight = this.goals.weight;
-        const height = this.goals.height;
-        const age = this.goals.age;
-
-        // Mifflin-St Jeor Equation
-        if (this.goals.gender === 'male') {
-            bmr = (10 * weight) + (6.25 * height) - (5 * age) + 5;
-        } else {
-            bmr = (10 * weight) + (6.25 * height) - (5 * age) - 161;
+        // Ensure canvas is visible and has dimensions
+        const rect = canvas.getBoundingClientRect();
+        if (rect.width === 0 || rect.height === 0) {
+            console.log('Canvas has no dimensions, retrying...');
+            setTimeout(() => this.renderWeeklyChart(), 1000);
+            return;
         }
 
-        bmr = Math.round(bmr);
-
-        return bmr;
-    }
-
-    calculateTDEE() {
-        const bmr = this.calculateBMR();
-        if (!bmr) return;
-
-        const multipliers = {
-            'sedentary': 1.2,
-            'lightly-active': 1.375,
-            'moderately-active': 1.55,
-            'very-active': 1.725,
-            'extremely-active': 1.9
-        };
-
-        const multiplier = multipliers[this.goals.activityLevel] || 1.375;
-        const tdee = Math.round(bmr * multiplier);
-
-        // Auto-update calorie goal
-        this.goals.dailyCalories = tdee;
-        const calorieInput = document.querySelector('#goals input[type="number"]');
-        if (calorieInput) {
-            calorieInput.value = tdee;
-        }
-
-        this.saveGoals();
+        const ctx = canvas.getContext('2d');
+        const data = this.weeklyStats;
         
-        if (window.showToast) {
-            showToast(`TDEE calculated: ${tdee} calories. Goal updated!`, 'success');
-        }
-    }
-
-    suggestMacros() {
-        const calories = this.goals.dailyCalories;
-        let proteinRatio, carbRatio, fatRatio;
-
-        // Adjust ratios based on goals and preferences
-        if (this.goals.preferences.lowCarb) {
-            proteinRatio = 0.30;
-            carbRatio = 0.20;
-            fatRatio = 0.50;
-        } else if (this.goals.preferences.highProtein || this.goals.goal === 'muscle') {
-            proteinRatio = 0.30;
-            carbRatio = 0.40;
-            fatRatio = 0.30;
-        } else if (this.goals.goal === 'lose') {
-            proteinRatio = 0.25;
-            carbRatio = 0.45;
-            fatRatio = 0.30;
-        } else {
-            // Balanced approach
-            proteinRatio = 0.20;
-            carbRatio = 0.50;
-            fatRatio = 0.30;
-        }
-
-        const suggestedProtein = Math.round((calories * proteinRatio) / 4);
-        const suggestedCarbs = Math.round((calories * carbRatio) / 4);
-        const suggestedFat = Math.round((calories * fatRatio) / 9);
-
-        // Update form inputs
-        const proteinInput = document.querySelector('#goals input[type="number"]:nth-of-type(2)');
-        const carbsInput = document.querySelector('#carbs');
-        const fatInput = document.querySelector('#fat');
-
-        if (proteinInput) proteinInput.value = suggestedProtein;
-        if (carbsInput) carbsInput.value = suggestedCarbs;
-        if (fatInput) fatInput.value = suggestedFat;
-
-        // Update goals object
-        this.goals.dailyProtein = suggestedProtein;
-        this.goals.dailyCarbs = suggestedCarbs;
-        this.goals.dailyFat = suggestedFat;
-
-        this.saveGoals();
+        // Set canvas size properly
+        const dpr = window.devicePixelRatio || 1;
+        const displayWidth = canvas.offsetWidth;
+        const displayHeight = canvas.offsetHeight;
         
-        if (window.showToast) {
-            showToast(`Macros suggested: ${suggestedProtein}g protein, ${suggestedCarbs}g carbs, ${suggestedFat}g fat`, 'success');
-        }
-    }
-
-    suggestLowCarbMacros() {
-        const calories = this.goals.dailyCalories;
-        const protein = Math.round((calories * 0.30) / 4);
-        const carbs = Math.round((calories * 0.15) / 4);
-        const fat = Math.round((calories * 0.55) / 9);
-
-        this.goals.dailyProtein = protein;
-        this.goals.dailyCarbs = carbs;
-        this.goals.dailyFat = fat;
-
-        // Update inputs if they exist
-        const proteinInput = document.querySelector('#goals input[type="number"]:nth-of-type(2)');
-        const carbsInput = document.querySelector('#carbs');
-        const fatInput = document.querySelector('#fat');
-
-        if (proteinInput) proteinInput.value = protein;
-        if (carbsInput) carbsInput.value = carbs;
-        if (fatInput) fatInput.value = fat;
-    }
-
-    updateBodyInfo() {
-        // Auto-calculate BMI if height and weight are available
-        if (this.goals.height && this.goals.weight) {
-            const heightM = this.goals.height / 100;
-            const bmi = this.goals.weight / (heightM * heightM);
-            this.goals.bmi = Math.round(bmi * 10) / 10;
-        }
-    }
-
-    validateGoals() {
-        const warnings = [];
+        canvas.width = displayWidth * dpr;
+        canvas.height = displayHeight * dpr;
         
-        // Check for very low calories
-        if (this.goals.dailyCalories < 1200) {
-            warnings.push('Daily calorie goal seems very low. Consider consulting a healthcare provider.');
-        }
+        ctx.scale(dpr, dpr);
         
-        // Check for very high calories
-        if (this.goals.dailyCalories > 4000) {
-            warnings.push('Daily calorie goal seems very high. Make sure this aligns with your activity level.');
-        }
+        // Clear canvas
+        ctx.clearRect(0, 0, displayWidth, displayHeight);
         
-        // Check protein adequacy
-        const proteinPerKg = this.goals.weight ? this.goals.dailyProtein / this.goals.weight : 0;
-        if (proteinPerKg < 0.8) {
-            warnings.push('Protein goal might be too low. Consider at least 0.8g per kg of body weight.');
-        }
+        const padding = 40;
+        const chartWidth = displayWidth - (padding * 2);
+        const chartHeight = displayHeight - (padding * 2);
         
-        // Show warnings
-        if (warnings.length > 0 && window.showToast) {
-            warnings.forEach(warning => {
-                setTimeout(() => showToast(warning, 'warning'), 100);
-            });
-        }
-    }
-
-    calculateRecommendations() {
-        // Calculate ideal ranges based on user input
-        if (this.goals.weight && this.goals.height && this.goals.age && this.goals.gender) {
-            const bmr = this.calculateBMR();
-            const idealProtein = Math.round(this.goals.weight * 1.2); // 1.2g per kg for active individuals
-            const idealWater = Math.round(this.goals.weight * 0.033); // 33ml per kg
+        // Find max value for scaling
+        const maxCalories = Math.max(...data.map(d => d.calories), this.goals.dailyCalories, 100);
+        const scale = chartHeight / maxCalories;
+        
+        // Draw bars
+        const barWidth = chartWidth / 7;
+        data.forEach((day, index) => {
+            const barHeight = Math.max(day.calories * scale, 3);
+            const x = padding + (index * barWidth) + (barWidth * 0.15);
+            const y = displayHeight - padding - barHeight;
+            const actualBarWidth = barWidth * 0.7;
             
-            this.recommendations = {
-                bmr: bmr,
-                idealProtein: idealProtein,
-                idealWater: idealWater,
-                lastCalculated: new Date().toISOString()
-            };
+            // Determine color
+            const percentage = (day.calories / this.goals.dailyCalories) * 100;
+            let color;
+            
+            if (percentage >= 90 && percentage <= 110) {
+                color = '#4CAF50'; // Perfect - green
+            } else if (percentage < 80) {
+                color = '#FFC107'; // Under - yellow
+            } else if (percentage > 120) {
+                color = '#FF5722'; // Over - red
+            } else {
+                color = '#2196F3'; // Close - blue
+            }
+            
+            // Draw bar
+            ctx.fillStyle = color;
+            ctx.fillRect(x, y, actualBarWidth, barHeight);
+            
+            // Draw percentage label
+            if (day.calories > 0) {
+                ctx.fillStyle = '#666';
+                ctx.font = '12px Arial';
+                ctx.textAlign = 'center';
+                const percentText = Math.round(percentage) + '%';
+                ctx.fillText(percentText, x + actualBarWidth/2, y - 5);
+            }
+        });
+        
+        // Draw target line
+        const targetY = displayHeight - padding - (this.goals.dailyCalories * scale);
+        ctx.strokeStyle = '#FF9800';
+        ctx.lineWidth = 2;
+        ctx.setLineDash([5, 5]);
+        ctx.beginPath();
+        ctx.moveTo(padding, targetY);
+        ctx.lineTo(displayWidth - padding, targetY);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        
+        // Update current calories display
+        const today = data[data.length - 1];
+        const currentCalories = document.getElementById('currentCalories');
+        if (currentCalories) {
+            currentCalories.textContent = today.calories;
         }
+        
+        console.log('Chart rendered successfully');
+    }
+
+    renderMacroStats() {
+        const today = this.weeklyStats[this.weeklyStats.length - 1] || { protein: 0, carbs: 0, fat: 0 };
+        
+        console.log('Rendering macro stats:', today); // Debug log
+        
+        // Protein stats
+        this.renderMacroCard('protein', today.protein, this.goals.dailyProtein, '#E91E63');
+        
+        // Carbs stats
+        this.renderMacroCard('carbs', today.carbs, this.goals.dailyCarbs, '#FF9800');
+        
+        // Fats stats - fixed the naming issue
+        this.renderMacroCard('fats', today.fat, this.goals.dailyFat, '#9C27B0');
+    }
+
+    renderMacroCard(macroType, current, target, color) {
+        // Handle the fats vs fat naming inconsistency
+        const elementSuffix = macroType === 'fats' ? 'fats' : macroType;
+        const statsElement = document.getElementById(`${elementSuffix}Stats`);
+        const chartElement = document.getElementById(`${elementSuffix}Chart`);
+        
+        console.log(`Rendering ${macroType}: current=${current}, target=${target}`); // Debug log
+        console.log(`Looking for elements: ${elementSuffix}Stats, ${elementSuffix}Chart`); // Debug log
+        
+        if (!statsElement) {
+            console.error(`Stats element not found: ${elementSuffix}Stats`);
+            return;
+        }
+        
+        const percentage = Math.round((current / target) * 100);
+        
+        // Update stats content
+        statsElement.innerHTML = `
+            <div class="macro-current">${current}g / ${target}g</div>
+            <div class="macro-percentage">${percentage}% of goal</div>
+            <div class="macro-status">${this.getMacroStatus(percentage)}</div>
+        `;
+        
+        // Draw mini chart if canvas exists
+        if (chartElement) {
+            this.drawMacroChart(chartElement, current, target, color);
+        } else {
+            console.warn(`Chart element not found: ${elementSuffix}Chart`);
+        }
+    }
+
+    drawMacroChart(canvas, current, target, color) {
+        const ctx = canvas.getContext('2d');
+        
+        // Set canvas size
+        const dpr = window.devicePixelRatio || 1;
+        const displayWidth = canvas.offsetWidth;
+        const displayHeight = canvas.offsetHeight;
+        
+        canvas.width = displayWidth * dpr;
+        canvas.height = displayHeight * dpr;
+        ctx.scale(dpr, dpr);
+        
+        const centerX = displayWidth / 2;
+        const centerY = displayHeight / 2;
+        const radius = Math.min(displayWidth, displayHeight) / 2 - 5;
+        
+        // Clear canvas
+        ctx.clearRect(0, 0, displayWidth, displayHeight);
+        
+        // Draw background circle
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, 0, 2 * Math.PI);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.lineWidth = 6;
+        ctx.stroke();
+        
+        // Draw progress arc
+        const percentage = Math.min((current / target), 1);
+        const endAngle = (percentage * 2 * Math.PI) - (Math.PI / 2);
+        
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, -Math.PI / 2, endAngle);
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 6;
+        ctx.lineCap = 'round';
+        ctx.stroke();
+        
+        // Draw percentage text
+        ctx.fillStyle = 'white';
+        ctx.font = 'bold 12px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(Math.round(percentage * 100) + '%', centerX, centerY);
+    }
+
+    getMacroStatus(percentage) {
+        if (percentage < 50) return 'Low - Consider increasing intake';
+        if (percentage < 80) return 'Below target - Room for improvement';
+        if (percentage <= 110) return 'On track - Great job!';
+        if (percentage <= 130) return 'Slightly over - Monitor intake';
+        return 'High - Consider reducing intake';
+    }
+
+    renderSummaryStats() {
+        const averageStats = document.getElementById('averageStats');
+        if (!averageStats) return;
+        
+        // Calculate weekly averages
+        const totalDays = this.weeklyStats.length;
+        const avgCalories = Math.round(this.weeklyStats.reduce((sum, day) => sum + day.calories, 0) / totalDays);
+        const avgProtein = Math.round(this.weeklyStats.reduce((sum, day) => sum + day.protein, 0) / totalDays);
+        const avgCarbs = Math.round(this.weeklyStats.reduce((sum, day) => sum + day.carbs, 0) / totalDays);
+        const avgFat = Math.round(this.weeklyStats.reduce((sum, day) => sum + day.fat, 0) / totalDays);
+        
+        // Days on track calculation
+        const daysOnTrack = this.weeklyStats.filter(day => {
+            const percentage = (day.calories / this.goals.dailyCalories) * 100;
+            return percentage >= 90 && percentage <= 110;
+        }).length;
+        
+        averageStats.innerHTML = `
+            <div class="stats-layout">
+                <div class="stat-item">
+                    <div class="stat-label">Average Calories</div>
+                    <div class="stat-value">${avgCalories} kcal</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Average Protein</div>
+                    <div class="stat-value">${avgProtein}g</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Average Carbs</div>
+                    <div class="stat-value">${avgCarbs}g</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Average Fats</div>
+                    <div class="stat-value">${avgFat}g</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Days on Track</div>
+                    <div class="stat-value">${daysOnTrack}/7 days</div>
+                </div>
+                <div class="stat-item">
+                    <div class="stat-label">Weekly Consistency</div>
+                    <div class="stat-value">${Math.round((daysOnTrack/7) * 100)}%</div>
+                </div>
+            </div>
+        `;
+    }
+
+    renderExerciseSuggestions() {
+        const exerciseSuggestions = document.getElementById('exerciseSuggestions');
+        if (!exerciseSuggestions) return;
+        
+        let suggestion = "Complete your profile for personalized exercise recommendations.";
+        
+        if (this.userProfile.age && this.userProfile.gender) {
+            const today = this.weeklyStats[this.weeklyStats.length - 1] || { calories: 0 };
+            const calorieDeficit = this.goals.dailyCalories - today.calories;
+            
+            if (calorieDeficit > 500) {
+                suggestion = "Light cardio (20-30 min walking) to maintain energy while meeting calorie goals.";
+            } else if (calorieDeficit > 0) {
+                suggestion = "Moderate exercise (30 min cardio or strength training) to complement your nutrition.";
+            } else if (calorieDeficit < -200) {
+                suggestion = "High intensity workout (45+ min) to balance excess calorie intake.";
+            } else {
+                suggestion = "Balanced routine: 3-4 days cardio, 2-3 days strength training for optimal health.";
+            }
+        }
+        
+        exerciseSuggestions.innerHTML = `
+            <div class="exercise-recommendation">
+                <p>${suggestion}</p>
+            </div>
+        `;
+    }
+
+    renderRecipeSuggestions() {
+        const recipeSuggestions = document.getElementById('recipeSuggestions');
+        if (!recipeSuggestions) return;
+        
+        // Get suggested recipes based on goals
+        const suggestions = this.getRecipeSuggestions();
+        
+        if (suggestions.length === 0) {
+            recipeSuggestions.innerHTML = `
+                <div class="recipe-suggestion-item">
+                    <div class="recipe-name">Greek Yogurt Parfait</div>
+                    <div class="recipe-match">Good choice: high protein, light meal</div>
+                </div>
+                <div class="recipe-suggestion-item">
+                    <div class="recipe-name">Teriyaki Chicken Bowl</div>
+                    <div class="recipe-match">Good choice: high protein</div>
+                </div>
+                <div class="recipe-suggestion-item">
+                    <div class="recipe-name">Quinoa Power Salad</div>
+                    <div class="recipe-match">Good choice: high protein</div>
+                </div>
+            `;
+            return;
+        }
+        
+        recipeSuggestions.innerHTML = suggestions.map(recipe => `
+            <div class="recipe-suggestion-item">
+                <div class="recipe-name">${recipe.name}</div>
+                <div class="recipe-match">${recipe.reason}</div>
+            </div>
+        `).join('');
+    }
+
+    getRecipeSuggestions() {
+        const today = this.weeklyStats[this.weeklyStats.length - 1] || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        const remaining = {
+            calories: this.goals.dailyCalories - today.calories,
+            protein: this.goals.dailyProtein - today.protein,
+            carbs: this.goals.dailyCarbs - today.carbs,
+            fat: this.goals.dailyFat - today.fat
+        };
+        
+        const suggestions = [];
+        
+        // Get all recipes if available
+        let allRecipes = [];
+        if (window.recipes && typeof window.recipes.getAllRecipes === 'function') {
+            allRecipes = window.recipes.getAllRecipes();
+        } else if (typeof RECIPE_DATABASE !== 'undefined') {
+            allRecipes = Object.values(RECIPE_DATABASE);
+        }
+        
+        // If no recipes available, return empty
+        if (allRecipes.length === 0) {
+            return [];
+        }
+        
+        // Filter recipes based on remaining macros
+        allRecipes.forEach(recipe => {
+            let score = 0;
+            let reasons = [];
+            
+            // Check if recipe fits remaining calories
+            if (recipe.calories <= remaining.calories + 100 && remaining.calories > 100) {
+                score += 2;
+                reasons.push('fits calorie budget');
+            }
+            
+            // Check protein needs
+            if (remaining.protein > 20 && recipe.nutrition && recipe.nutrition.protein > 15) {
+                score += 3;
+                reasons.push('high protein');
+            }
+            
+            // Check if low calorie needed
+            if (remaining.calories < 300 && recipe.calories < 300) {
+                score += 2;
+                reasons.push('light meal');
+            }
+            
+            // Check if balanced meal needed
+            if (remaining.calories > 300 && remaining.protein > 10 && recipe.calories > 300) {
+                score += 1;
+                reasons.push('balanced option');
+            }
+            
+            if (score >= 1) {
+                suggestions.push({
+                    name: recipe.name,
+                    reason: `Good choice: ${reasons.join(', ')}`,
+                    score: score
+                });
+            }
+        });
+        
+        // Sort by score and return top 3
+        return suggestions
+            .sort((a, b) => b.score - a.score)
+            .slice(0, 3);
+    }
+
+    bindEvents() {
+        // Listen for dashboard updates to refresh stats
+        window.addEventListener('dashboard-updated', () => {
+            this.refreshGoalsDisplay();
+        });
+
+        // Listen for calendar updates
+        window.addEventListener('calendar-updated', () => {
+            this.refreshGoalsDisplay();
+        });
+
+        // Re-render charts when window is resized
+        window.addEventListener('resize', () => {
+            setTimeout(() => {
+                this.renderWeeklyChart();
+                this.renderMacroStats();
+            }, 300);
+        });
+    }
+
+    setUserProfile() {
+        const ageInput = document.getElementById('userAge');
+        const genderInput = document.getElementById('userGender');
+        
+        if (!ageInput || !genderInput) {
+            console.error('Profile input elements not found');
+            return;
+        }
+        
+        const age = ageInput.value;
+        const gender = genderInput.value;
+        
+        if (age && gender) {
+            this.userProfile.age = parseInt(age);
+            this.userProfile.gender = gender;
+            this.saveUserProfile();
+            
+            if (window.showToast) {
+                showToast('User profile updated successfully!', 'success');
+            } else {
+                console.log('User profile updated successfully!');
+            }
+        } else {
+            if (window.showToast) {
+                showToast('Please fill in both age and gender', 'warning');
+            } else {
+                console.log('Please fill in both age and gender');
+            }
+        }
+    }
+
+    clearUserProfile() {
+        this.userProfile = {
+            age: null,
+            gender: null,
+            weight: null,
+            height: null,
+            activityLevel: 'moderate'
+        };
+        this.saveUserProfile();
+        
+        // Clear form fields
+        const ageInput = document.getElementById('userAge');
+        const genderInput = document.getElementById('userGender');
+        
+        if (ageInput) ageInput.value = '';
+        if (genderInput) genderInput.value = '';
+        
+        if (window.showToast) {
+            showToast('User profile cleared', 'success');
+        } else {
+            console.log('User profile cleared');
+        }
+    }
+
+    setDailyGoals() {
+        const calorieInput = document.getElementById('dailyCalorieGoal');
+        const proteinInput = document.getElementById('dailyProteinGoal');
+        const carbsInput = document.getElementById('dailyCarbsGoal');
+        const fatsInput = document.getElementById('dailyFatsGoal');
+        
+        if (!calorieInput || !proteinInput || !carbsInput || !fatsInput) {
+            console.error('Goals input elements not found');
+            return;
+        }
+        
+        const calories = calorieInput.value;
+        const protein = proteinInput.value;
+        const carbs = carbsInput.value;
+        const fats = fatsInput.value;
+        
+        if (calories && protein && carbs && fats) {
+            this.goals.dailyCalories = parseInt(calories);
+            this.goals.dailyProtein = parseInt(protein);
+            this.goals.dailyCarbs = parseInt(carbs);
+            this.goals.dailyFat = parseInt(fats);
+            
+            this.saveGoals();
+            
+            if (window.showToast) {
+                showToast('Daily goals updated successfully!', 'success');
+            } else {
+                console.log('Daily goals updated successfully!');
+            }
+        } else {
+            if (window.showToast) {
+                showToast('Please fill in all goal fields', 'warning');
+            } else {
+                console.log('Please fill in all goal fields');
+            }
+        }
+    }
+
+    clearDailyGoals() {
+        this.goals = {
+            dailyCalories: 2000,
+            dailyProtein: 150,
+            dailyCarbs: 250,
+            dailyFat: 65
+        };
+        this.saveGoals();
+        
+        if (window.showToast) {
+            showToast('Daily goals reset to defaults', 'success');
+        } else {
+            console.log('Daily goals reset to defaults');
+        }
+    }
+
+    // Refresh method to update all displays
+    refreshGoalsDisplay() {
+        this.weeklyStats = this.loadWeeklyStats();
+        this.renderWeeklyChart();
+        this.renderMacroStats();
+        this.renderSummaryStats();
+        this.renderExerciseSuggestions();
+        this.renderRecipeSuggestions();
+    }
+
+    // Public API methods for other components
+    getGoals() {
+        return { ...this.goals };
+    }
+
+    getUserProfile() {
+        return { ...this.userProfile };
+    }
+
+    updateGoal(goalType, value) {
+        if (this.goals.hasOwnProperty(goalType)) {
+            this.goals[goalType] = value;
+            this.saveGoals();
+            return true;
+        }
+        return false;
+    }
+
+    // Legacy methods for backward compatibility
+    loadProgress() {
+        const today = new Date().toISOString().split('T')[0];
+        const savedProgress = localStorage.getItem(`mtable_stats_${today}`);
+        if (savedProgress) {
+            return JSON.parse(savedProgress);
+        }
+        return {
+            date: today,
+            calories: 0,
+            protein: 0,
+            carbs: 0,
+            fat: 0,
+            meals: []
+        };
     }
 
     getGoalStatus() {
-        const today = this.progress;
+        const today = this.loadProgress();
         const goals = this.goals;
-        
         return {
             calories: {
                 current: today.calories,
@@ -746,135 +682,21 @@ class Goals {
                 target: goals.dailyProtein,
                 percentage: (today.protein / goals.dailyProtein) * 100,
                 status: this.getStatus(today.protein, goals.dailyProtein)
-            },
-            carbs: {
-                current: today.carbs,
-                target: goals.dailyCarbs,
-                percentage: (today.carbs / goals.dailyCarbs) * 100,
-                status: this.getStatus(today.carbs, goals.dailyCarbs)
-            },
-            fat: {
-                current: today.fat,
-                target: goals.dailyFat,
-                percentage: (today.fat / goals.dailyFat) * 100,
-                status: this.getStatus(today.fat, goals.dailyFat)
             }
         };
     }
 
     getStatus(current, target) {
         const percentage = (current / target) * 100;
-        
         if (percentage < 80) return 'under';
         if (percentage <= 110) return 'on-track';
         return 'over';
     }
 
-    updateProgress(calories, protein, carbs, fat) {
-        this.progress.calories += calories;
-        this.progress.protein += protein;
-        this.progress.carbs += carbs;
-        this.progress.fat += fat;
-        
-        this.saveProgress();
-        this.updateWeeklyStats();
+    getAllGoals() {
+        return { ...this.goals };
     }
 
-    updateWeeklyStats() {
-        // Update today's entry in weekly stats
-        const today = new Date().toISOString().split('T')[0];
-        
-        // Update calorie data
-        const calorieEntry = this.weeklyStats.weeklyCalories.find(entry => entry.date === today);
-        if (calorieEntry) {
-            calorieEntry.calories = this.progress.calories;
-        }
-        
-        // Update protein data
-        const proteinEntry = this.weeklyStats.weeklyProtein.find(entry => entry.date === today);
-        if (proteinEntry) {
-            proteinEntry.protein = this.progress.protein;
-        }
-        
-        // Recalculate averages
-        this.weeklyStats.averageCalories = Math.round(
-            this.weeklyStats.weeklyCalories.reduce((sum, day) => sum + day.calories, 0) / 7
-        );
-        
-        this.weeklyStats.averageProtein = Math.round(
-            this.weeklyStats.weeklyProtein.reduce((sum, day) => sum + day.protein, 0) / 7
-        );
-        
-        // Update days on track
-        this.weeklyStats.daysOnTrack = this.weeklyStats.weeklyCalories.filter(day => {
-            const percentage = (day.calories / day.target) * 100;
-            return percentage >= 90 && percentage <= 110;
-        }).length;
-        
-        localStorage.setItem('mtable_weekly_progress', JSON.stringify(this.weeklyStats));
-    }
-
-    resetProgress() {
-        const today = new Date().toISOString().split('T')[0];
-        this.progress = {
-            date: today,
-            calories: 0,
-            protein: 0,
-            carbs: 0,
-            fat: 0,
-            fiber: 0,
-            water: 0,
-            exercise: 0,
-            steps: 0
-        };
-        this.saveProgress();
-    }
-
-    exportGoals() {
-        const data = {
-            goals: this.goals,
-            weeklyStats: this.weeklyStats,
-            exportDate: new Date().toISOString()
-        };
-        
-        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = `mtable-goals-${new Date().toISOString().split('T')[0]}.json`;
-        a.click();
-        URL.revokeObjectURL(url);
-        
-        if (window.showToast) {
-            showToast('Goals exported successfully!', 'success');
-        }
-    }
-
-    importGoals(file) {
-        const reader = new FileReader();
-        reader.onload = (e) => {
-            try {
-                const data = JSON.parse(e.target.result);
-                if (data.goals) {
-                    this.goals = { ...this.goals, ...data.goals };
-                    this.saveGoals();
-                    this.renderGoalsForm();
-                    this.renderWeeklyProgress();
-                    
-                    if (window.showToast) {
-                        showToast('Goals imported successfully!', 'success');
-                    }
-                }
-            } catch (error) {
-                if (window.showToast) {
-                    showToast('Error importing goals file', 'error');
-                }
-            }
-        };
-        reader.readAsText(file);
-    }
-
-    // Public API methods for other components
     getCalorieGoal() {
         return this.goals.dailyCalories;
     }
@@ -891,294 +713,18 @@ class Goals {
             fat: this.goals.dailyFat
         };
     }
-
-    getAllGoals() {
-        return { ...this.goals };
-    }
-
-    updateGoal(goalType, value) {
-        if (this.goals.hasOwnProperty(goalType)) {
-            this.goals[goalType] = value;
-            this.saveGoals();
-            return true;
-        }
-        return false;
-    }
-
-    getWeeklyProgress() {
-        return { ...this.weeklyStats };
-    }
-
-    getTodayProgress() {
-        return { ...this.progress };
-    }
-
-    isOnTrack() {
-        const status = this.getGoalStatus();
-        return status.calories.status === 'on-track' && status.protein.status === 'on-track';
-    }
-
-    getDailyRemaining() {
-        return {
-            calories: Math.max(0, this.goals.dailyCalories - this.progress.calories),
-            protein: Math.max(0, this.goals.dailyProtein - this.progress.protein),
-            carbs: Math.max(0, this.goals.dailyCarbs - this.progress.carbs),
-            fat: Math.max(0, this.goals.dailyFat - this.progress.fat)
-        };
-    }
-
-    calculateCalorieAdjustment() {
-        // Calculate calorie adjustment based on goal
-        let adjustment = 0;
-        
-        if (this.goals.goal === 'lose') {
-            adjustment = -500; // 500 calorie deficit for 1lb/week loss
-        } else if (this.goals.goal === 'gain') {
-            adjustment = 500; // 500 calorie surplus for 1lb/week gain
-        }
-        
-        return this.goals.dailyCalories + adjustment;
-    }
-
-    getBMICategory() {
-        if (!this.goals.bmi) return 'Unknown';
-        
-        if (this.goals.bmi < 18.5) return 'Underweight';
-        if (this.goals.bmi < 25) return 'Normal weight';
-        if (this.goals.bmi < 30) return 'Overweight';
-        return 'Obese';
-    }
-
-    getProgressSummary() {
-        const status = this.getGoalStatus();
-        const remaining = this.getDailyRemaining();
-        
-        return {
-            todayStatus: status,
-            remaining: remaining,
-            weeklyStats: this.weeklyStats,
-            streak: this.weeklyStats.streakDays,
-            bmi: this.goals.bmi,
-            bmiCategory: this.getBMICategory(),
-            isOnTrack: this.isOnTrack()
-        };
-    }
-
-    // Utility methods
-    formatMacroSplit() {
-        const total = this.goals.dailyCalories;
-        const proteinCals = this.goals.dailyProtein * 4;
-        const carbCals = this.goals.dailyCarbs * 4;
-        const fatCals = this.goals.dailyFat * 9;
-        
-        return {
-            protein: Math.round((proteinCals / total) * 100),
-            carbs: Math.round((carbCals / total) * 100),
-            fat: Math.round((fatCals / total) * 100)
-        };
-    }
-
-    predictWeightChange() {
-        // Simple prediction based on calorie deficit/surplus
-        const dailyBalance = this.progress.calories - this.goals.dailyCalories;
-        const weeklyBalance = dailyBalance * 7;
-        const predictedWeightChange = weeklyBalance / 3500; // 3500 calories = 1 pound
-        
-        return {
-            dailyBalance: dailyBalance,
-            weeklyBalance: weeklyBalance,
-            predictedWeightChangePerWeek: Math.round(predictedWeightChange * 10) / 10
-        };
-    }
-}
-
-// Add CSS for charts and additional styling
-const goalsCSS = `
-<style>
-.form-section {
-    margin-bottom: var(--space-6);
-    padding: var(--space-4);
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-light);
-}
-
-.form-section h4 {
-    margin-bottom: var(--space-4);
-    color: var(--text-primary);
-    font-size: var(--text-lg);
-}
-
-.preferences-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-    gap: var(--space-3);
-}
-
-.preference-checkbox {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    cursor: pointer;
-    padding: var(--space-2);
-    border-radius: var(--radius-md);
-    transition: var(--transition-fast);
-}
-
-.preference-checkbox:hover {
-    background: var(--bg-tertiary);
-}
-
-.calculation-buttons {
-    display: flex;
-    gap: var(--space-3);
-    flex-wrap: wrap;
-}
-
-.charts-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: var(--space-6);
-}
-
-.chart-container h4 {
-    margin-bottom: var(--space-3);
-    color: var(--text-primary);
-    text-align: center;
-}
-
-.simple-chart {
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
-    padding: var(--space-4);
-    border: 1px solid var(--border-light);
-}
-
-.chart-bars {
-    display: flex;
-    align-items: end;
-    gap: var(--space-2);
-    height: 150px;
-    margin: var(--space-4) 0;
-}
-
-.chart-bar-container {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    position: relative;
-    height: 100%;
-}
-
-.chart-bar {
-    width: 100%;
-    border-radius: var(--radius-sm) var(--radius-sm) 0 0;
-    min-height: 10px;
-    position: relative;
-    margin-top: auto;
-    transition: var(--transition-normal);
-}
-
-.chart-bar.on-target {
-    background: var(--success-color) !important;
-}
-
-.chart-value {
-    position: absolute;
-    top: -20px;
-    left: 50%;
-    transform: translateX(-50%);
-    font-size: var(--text-xs);
-    font-weight: var(--font-medium);
-    white-space: nowrap;
-}
-
-.chart-label {
-    margin-top: var(--space-1);
-    font-size: var(--text-xs);
-    color: var(--text-secondary);
-}
-
-.chart-target-line {
-    position: absolute;
-    width: 100%;
-    height: 2px;
-    background: var(--warning-color);
-    opacity: 0.7;
-}
-
-.chart-legend {
-    display: flex;
-    justify-content: center;
-    gap: var(--space-4);
-    margin-top: var(--space-3);
-}
-
-.legend-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-    font-size: var(--text-xs);
-}
-
-.legend-color {
-    width: 12px;
-    height: 12px;
-    border-radius: var(--radius-sm);
-}
-
-.streak-info {
-    text-align: center;
-    margin-top: var(--space-6);
-}
-
-.streak-card {
-    display: inline-block;
-    padding: var(--space-4);
-    background: var(--bg-secondary);
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-light);
-}
-
-.streak-number {
-    font-size: var(--text-3xl);
-    font-weight: var(--font-bold);
-    color: var(--primary-color);
-}
-
-.streak-label {
-    color: var(--text-secondary);
-    margin-top: var(--space-1);
-}
-
-.streak-emoji {
-    font-size: var(--text-2xl);
-    margin-top: var(--space-2);
-}
-
-.progress-charts {
-    margin-top: var(--space-8);
-}
-
-.advanced-goals {
-    margin-top: var(--space-6);
-}
-</style>
-`;
-
-// Inject CSS if not already present
-if (!document.querySelector('#goals-css')) {
-    const styleSheet = document.createElement('style');
-    styleSheet.id = 'goals-css';
-    styleSheet.innerHTML = goalsCSS.replace('<style>', '').replace('</style>', '');
-    document.head.appendChild(styleSheet);
 }
 
 // Initialize goals when DOM is loaded
 let goals;
 document.addEventListener('DOMContentLoaded', function() {
-    goals = new Goals();
+    // Wait a bit more to ensure everything is loaded
+    setTimeout(() => {
+        goals = new Goals();
+        // Make goals globally available
+        window.goals = goals;
+        console.log('Goals component initialized');
+    }, 1000);
 });
 
 // Export for use in other modules

@@ -910,6 +910,684 @@ th {
   gap: var(--space-3);
 }
 
+/* Replace the Goals CSS in your main.css file */
+
+/* Remove the container background and use full gradient */
+.goals-main-container {
+    padding: var(--space-8);
+    max-width: 1400px;
+    margin: 0 auto;
+    color: white;
+    /* No background - use the existing gradient from parent */
+}
+
+/* Replace the Goals CSS layout sections in your main.css */
+
+/* Goals Header - Clean and minimal */
+.goals-header {
+    margin-bottom: var(--space-8);
+}
+
+.goals-header h1 {
+    color: white;
+    font-size: 2.5rem;
+    font-weight: var(--font-bold);
+    margin: 0;
+    text-align: left;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Insights Section (moved to top) */
+.insights-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8);
+    margin-bottom: var(--space-8);
+}
+
+/* Summary Section (middle) */
+.summary-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8);
+    margin-bottom: var(--space-8);
+}
+
+/* Bottom Section - Profile and Goals (moved to bottom) */
+.goals-bottom-section {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: var(--space-8);
+    align-items: start;
+    padding-top: var(--space-6);
+    border-top: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Profile Card - Compact and clean */
+.profile-card {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    min-width: 280px;
+}
+
+.profile-row {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.profile-field {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+}
+
+.profile-field label {
+    color: white;
+    font-weight: var(--font-semibold);
+    min-width: 70px;
+    font-size: var(--text-base);
+}
+
+.profile-field input,
+.profile-field select {
+    flex: 1;
+    padding: var(--space-2) var(--space-3);
+    border: none;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+    min-width: 120px;
+}
+
+/* Profile Buttons - Side by side */
+.profile-buttons {
+    display: flex;
+    gap: var(--space-2);
+    justify-content: flex-start;
+    margin-top: var(--space-2);
+}
+
+/* Small button variant */
+.btn-small {
+    padding: var(--space-2) var(--space-4) !important;
+    font-size: var(--text-xs) !important;
+    min-width: 60px !important;
+    letter-spacing: 0.3px;
+}
+
+/* Update the action buttons to be smaller by default for profile */
+.profile-buttons .btn-action {
+    padding: var(--space-2) var(--space-4);
+    border: none;
+    border-radius: var(--radius-lg);
+    font-weight: var(--font-bold);
+    font-size: var(--text-xs);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+    min-width: 60px;
+}
+
+/* Goals Card - Professional layout */
+.goals-card {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.goals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+    margin-bottom: var(--space-5);
+}
+
+.goal-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.goal-field label {
+    color: white;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.goal-field input {
+    padding: var(--space-3) var(--space-4);
+    border: none;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+}
+
+.goals-actions {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: flex-end;
+}
+
+/* Keep the goals buttons larger */
+.goals-actions .btn-action {
+    padding: var(--space-3) var(--space-6);
+    font-size: var(--text-sm);
+    min-width: 80px;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .goals-bottom-section,
+    .insights-section,
+    .summary-section {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+    }
+    
+    .goals-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+    }
+}
+
+@media (max-width: 768px) {
+    .profile-card {
+        min-width: 240px;
+    }
+    
+    .profile-field {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: var(--space-2);
+    }
+    
+    .profile-field label {
+        min-width: auto;
+    }
+    
+    .profile-field input,
+    .profile-field select {
+        width: 100%;
+        min-width: auto;
+    }
+    
+    .profile-buttons {
+        justify-content: center;
+        gap: var(--space-3);
+    }
+    
+    .goals-actions {
+        justify-content: center;
+    }
+}
+
+/* Goals Card - Professional layout */
+.goals-card {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.goals-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-5);
+    margin-bottom: var(--space-5);
+}
+
+.goal-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.goal-field label {
+    color: white;
+    font-weight: var(--font-semibold);
+    font-size: var(--text-sm);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.goal-field input {
+    padding: var(--space-3) var(--space-4);
+    border: none;
+    border-radius: var(--radius-lg);
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--text-primary);
+    font-size: var(--text-base);
+}
+
+.goals-actions {
+    display: flex;
+    gap: var(--space-3);
+    justify-content: flex-end;
+}
+
+/* Action Buttons - Modern design */
+.btn-action {
+    padding: var(--space-3) var(--space-6);
+    border: none;
+    border-radius: var(--radius-full);
+    font-weight: var(--font-bold);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 80px;
+}
+
+.btn-set {
+    background: linear-gradient(135deg, #4CAF50, #45a049);
+    color: white;
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.4);
+}
+
+.btn-set:hover {
+    background: linear-gradient(135deg, #45a049, #3d8b40);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(76, 175, 80, 0.5);
+}
+
+.btn-clear {
+    background: linear-gradient(135deg, #FF7043, #F4511E);
+    color: white;
+    box-shadow: 0 4px 15px rgba(255, 112, 67, 0.4);
+}
+
+.btn-clear:hover {
+    background: linear-gradient(135deg, #F4511E, #E64A19);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255, 112, 67, 0.5);
+}
+
+/* Insights Section */
+.insights-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8);
+    margin-bottom: var(--space-8);
+}
+
+/* Chart Card - Clean and modern */
+.chart-card {
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    color: var(--text-primary);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.chart-header {
+    margin-bottom: var(--space-5);
+}
+
+.chart-header h3 {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    margin: 0 0 var(--space-3) 0;
+    color: var(--text-primary);
+}
+
+.current-display {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    flex-wrap: wrap;
+}
+
+.current-number {
+    font-size: 3.5rem;
+    font-weight: var(--font-bold);
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+.current-unit {
+    font-size: var(--text-lg);
+    color: var(--text-secondary);
+    font-weight: var(--font-medium);
+}
+
+.target-text {
+    font-size: var(--text-base);
+    color: var(--text-secondary);
+    margin-left: auto;
+    font-weight: var(--font-medium);
+}
+
+.chart-area {
+    height: 220px;
+    margin: var(--space-5) 0;
+    position: relative;
+}
+
+#caloriesChart {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius-lg);
+}
+
+.chart-days {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    font-weight: var(--font-medium);
+    margin-top: var(--space-3);
+    padding: 0 var(--space-2);
+}
+
+/* Macro Cards */
+.macro-cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.macro-card {
+    background: rgba(139, 195, 74, 0.25);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-5);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+}
+
+.macro-card h3 {
+    color: white;
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    margin: 0 0 var(--space-3) 0;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+}
+
+.macro-content {
+    color: rgba(255, 255, 255, 0.95);
+    margin-bottom: var(--space-3);
+}
+
+.macro-chart {
+    height: 60px;
+    width: 100%;
+}
+
+.macro-chart canvas {
+    width: 100%;
+    height: 100%;
+}
+
+/* Summary Section */
+.summary-section {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: var(--space-8);
+}
+
+.summary-card,
+.suggestions-card {
+    background: rgba(255, 255, 255, 0.98);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    color: var(--text-primary);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
+    border: 1px solid rgba(255, 255, 255, 0.5);
+}
+
+.summary-card h3,
+.suggestions-card h3 {
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    margin: 0 0 var(--space-5) 0;
+    color: var(--text-primary);
+}
+
+/* Stats Layout - Beautiful grid */
+.stats-layout {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--space-4);
+}
+
+.stat-item {
+    text-align: center;
+    padding: var(--space-4);
+    background: linear-gradient(135deg, var(--bg-secondary), var(--bg-tertiary));
+    border-radius: var(--radius-xl);
+    border: 1px solid var(--border-light);
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.stat-label {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    margin-bottom: var(--space-2);
+    font-weight: var(--font-medium);
+}
+
+.stat-value {
+    font-size: var(--text-2xl);
+    font-weight: var(--font-bold);
+    color: var(--primary-color);
+    line-height: 1;
+}
+
+/* Exercise and Recipe Sections */
+.exercise-section {
+    margin-bottom: var(--space-6);
+}
+
+.exercise-content {
+    padding: var(--space-4);
+    background: linear-gradient(135deg, #E3F2FD, #F3E5F5);
+    border-radius: var(--radius-xl);
+    border-left: 4px solid var(--primary-color);
+}
+
+.exercise-recommendation p {
+    margin: 0;
+    font-size: var(--text-base);
+    line-height: 1.6;
+    color: var(--text-primary);
+    font-weight: var(--font-medium);
+}
+
+.suggestions-card h4 {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
+    margin: 0 0 var(--space-4) 0;
+    color: var(--text-primary);
+}
+
+.recipes-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.recipe-suggestion-item {
+    padding: var(--space-4);
+    background: linear-gradient(135deg, #F1F8E9, #E8F5E8);
+    border-radius: var(--radius-lg);
+    border-left: 3px solid var(--success-color);
+    transition: all 0.3s ease;
+}
+
+.recipe-suggestion-item:hover {
+    transform: translateX(5px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+
+.recipe-name {
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+    font-size: var(--text-base);
+}
+
+.recipe-match {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    font-style: italic;
+    line-height: 1.4;
+}
+
+/* Macro Status Styles */
+.macro-current {
+    font-size: var(--text-base);
+    font-weight: var(--font-bold);
+    margin-bottom: var(--space-2);
+}
+
+.macro-percentage {
+    font-size: var(--text-sm);
+    margin-bottom: var(--space-2);
+    opacity: 0.9;
+}
+
+.macro-status {
+    font-size: var(--text-xs);
+    padding: var(--space-2);
+    border-radius: var(--radius-md);
+    background: rgba(255, 255, 255, 0.2);
+    font-weight: var(--font-medium);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .goals-top-section,
+    .insights-section,
+    .summary-section {
+        grid-template-columns: 1fr;
+        gap: var(--space-6);
+    }
+    
+    .goals-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-4);
+    }
+    
+    .stats-layout {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .goals-main-container {
+        padding: var(--space-4);
+    }
+    
+    .goals-header h1 {
+        font-size: 2rem;
+        text-align: center;
+    }
+    
+    .profile-row {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-3);
+    }
+    
+    .goals-actions {
+        justify-content: center;
+    }
+    
+    .current-number {
+        font-size: 2.5rem;
+    }
+    
+    .current-display {
+        justify-content: center;
+        text-align: center;
+    }
+    
+    .target-text {
+        margin-left: 0;
+        text-align: center;
+        width: 100%;
+    }
+}
+
+/* Add this CSS to fix canvas issues - add to your main.css */
+
+/* Ensure canvas elements have proper dimensions */
+#caloriesChart {
+    width: 100% !important;
+    height: 220px !important;
+    border-radius: var(--radius-lg);
+    display: block;
+}
+
+.macro-chart canvas {
+    width: 100% !important;
+    height: 60px !important;
+    display: block;
+}
+
+/* Fix chart container sizing */
+.chart-area {
+    height: 220px;
+    margin: var(--space-5) 0;
+    position: relative;
+    width: 100%;
+    min-height: 220px;
+}
+
+.macro-chart {
+    height: 60px;
+    width: 100%;
+    margin-top: var(--space-3);
+}
+
+/* Ensure proper canvas rendering */
+canvas {
+    image-rendering: -webkit-optimize-contrast;
+    image-rendering: optimize-contrast;
+    image-rendering: crisp-edges;
+    image-rendering: pixelated;
+}
+
+/* Fix for high DPI displays */
+@media (-webkit-min-device-pixel-ratio: 2), (min-resolution: 192dpi) {
+    canvas {
+        image-rendering: auto;
+    }
+}
+
+/* Debug styles - remove after testing */
+.chart-card {
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+.chart-area {
+    border: 1px solid rgba(255,0,0,0.2);
+    background: rgba(0,255,0,0.05);
+}
+
+#caloriesChart {
+    border: 1px solid rgba(0,0,255,0.2);
+    background: rgba(255,255,255,0.1);
+}
+
 /* Modal styles */
 .modal {
   position: fixed;

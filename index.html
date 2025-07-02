@@ -1727,41 +1727,144 @@ stroke="url(#gradient)" stroke-width="8" stroke-linecap="round"/>
     </div>
 </div>
 
-<!-- Goals Section -->
+<!-- Goals -->
+<!-- Replace the entire Goals Section in your HTML file -->
 <div id="goals" class="content-section">
-<div class="dashboard-grid">
-<div class="card">
-<h3>Daily Nutrition Goals</h3>
-<form>
-<div class="form-group">
-<label>Daily Calorie Target</label>
-<input type="number" placeholder="e.g., 2000">
-</div>
-<div class="form-group">
-<label>Protein Goal (g)</label>
-<input type="number" placeholder="e.g., 150">
-</div>
-<div class="form-group">
-<label>Carbs Goal (g)</label>
-<input type="number" placeholder="e.g., 250">
-</div>
-<div class="form-group">
-<label>Fat Goal (g)</label>
-<input type="number" placeholder="e.g., 65">
-</div>
-<button type="submit" class="btn btn-primary">Update Goals</button>
-</form>
-</div>
-<div class="card">
-<h3>Weekly Progress</h3>
-<div class="stats-grid">
-<!-- Stats will be populated by JavaScript -->
-</div>
-</div>
-</div>
-</div>
-</main>
-</div>
+    <div class="goals-main-container">
+        <!-- Header -->
+        <div class="goals-header">
+            <h1>Hope you're doing great, here's your insights!</h1>
+        </div>
+        
+        <!-- Top Row: Charts and Stats (moved up from middle) -->
+        <div class="insights-section">
+            <!-- Weekly Calories Chart -->
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h3>Calories</h3>
+                    <div class="current-display">
+                        <span class="current-number" id="currentCalories">0</span>
+                        <span class="current-unit">Kcal</span>
+                        <span class="target-text">Target: <span id="targetCalories">2000</span> Kcal</span>
+                    </div>
+                </div>
+                <div class="chart-area">
+                    <canvas id="caloriesChart"></canvas>
+                </div>
+                <div class="chart-days">
+                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                </div>
+            </div>
+            
+            <!-- Macro Stats Cards -->
+            <div class="macro-cards">
+                <div class="macro-card protein-card">
+                    <h3>Protein stats</h3>
+                    <div class="macro-content" id="proteinStats">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    <div class="macro-chart">
+                        <canvas id="proteinChart"></canvas>
+                    </div>
+                </div>
+                <div class="macro-card carbs-card">
+                    <h3>Carbs stats</h3>
+                    <div class="macro-content" id="carbsStats">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    <div class="macro-chart">
+                        <canvas id="carbsChart"></canvas>
+                    </div>
+                </div>
+                <div class="macro-card fats-card">
+                    <h3>Fats Stats</h3>
+                    <div class="macro-content" id="fatsStats">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    <div class="macro-chart">
+                        <canvas id="fatsChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Middle Row: Summary Cards -->
+        <div class="summary-section">
+            <div class="summary-card">
+                <h3>Average Cal, proteins, carbs and fats stats</h3>
+                <div class="stats-layout" id="averageStats">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+            </div>
+            <div class="suggestions-card">
+                <div class="exercise-section">
+                    <h3>Suggest level of exercise based on user's profile</h3>
+                    <div class="exercise-content" id="exerciseSuggestions">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+                <div class="recipes-section">
+                    <h4>Suggested Recipes Based on user's goals</h4>
+                    <div class="recipes-content" id="recipeSuggestions">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Bottom Row: User Profile and Daily Goals (moved from top) -->
+        <div class="goals-bottom-section">
+            <!-- User Profile Section -->
+            <div class="profile-card">
+                <div class="profile-row">
+                    <div class="profile-field">
+                        <label for="userAge">Age:</label>
+                        <input type="number" id="userAge" placeholder="25">
+                    </div>
+                </div>
+                <div class="profile-row">
+                    <div class="profile-field">
+                        <label for="userGender">Gender:</label>
+                        <select id="userGender">
+                            <option value="">Select</option>
+                            <option value="male">Male</option>
+                            <option value="female">Female</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="profile-buttons">
+                    <button class="btn-action btn-set btn-small" onclick="goals.setUserProfile()">SET</button>
+                    <button class="btn-action btn-clear btn-small" onclick="goals.clearUserProfile()">CLEAR</button>
+                </div>
+            </div>
+            
+            <!-- Daily Goals Section -->
+            <div class="goals-card">
+                <div class="goals-grid">
+                    <div class="goal-field">
+                        <label for="dailyCalorieGoal">Daily Caloric Goal</label>
+                        <input type="number" id="dailyCalorieGoal" placeholder="2000">
+                    </div>
+                    <div class="goal-field">
+                        <label for="dailyProteinGoal">Daily Protein Goal (g)</label>
+                        <input type="number" id="dailyProteinGoal" placeholder="150">
+                    </div>
+                    <div class="goal-field">
+                        <label for="dailyCarbsGoal">Daily Carbs Goal (g)</label>
+                        <input type="number" id="dailyCarbsGoal" placeholder="250">
+                    </div>
+                    <div class="goal-field">
+                        <label for="dailyFatsGoal">Daily Fats Goal (g)</label>
+                        <input type="number" id="dailyFatsGoal" placeholder="65">
+                    </div>
+                </div>
+                <div class="goals-actions">
+                    <button class="btn-action btn-set" onclick="goals.setDailyGoals()">SET</button>
+                    <button class="btn-action btn-clear" onclick="goals.clearDailyGoals()">CLEAR</button>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- JavaScript Files - Load in correct order -->
