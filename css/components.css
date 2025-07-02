@@ -832,6 +832,396 @@ height: 18px;
     color: var(--text-secondary);
 }
 
+/* New Calendar Layout */
+.calendar-new-layout {
+    display: flex;
+    gap: var(--space-6);
+    padding: var(--space-4);
+    min-height: calc(100vh - 120px);
+    max-width: 1400px;
+    margin: 0 auto;
+}
+
+/* Left Panel - Meals Today */
+.meals-today-panel {
+    flex: 1;
+    background: var(--bg-primary);
+    border-radius: var(--radius-3xl);
+    padding: var(--space-8);
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border-light);
+    display: flex;
+    flex-direction: column;
+    max-width: 500px;
+}
+
+.meals-header {
+    margin-bottom: var(--space-6);
+}
+
+.meals-header h2 {
+    margin: 0 0 var(--space-2) 0;
+    color: var(--text-primary);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
+}
+
+.total-calories {
+    color: var(--text-secondary);
+    font-size: var(--text-lg);
+    font-weight: var(--font-medium);
+}
+
+.total-calories span:last-child {
+    color: var(--primary-color);
+    font-weight: var(--font-bold);
+}
+
+.meals-list-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    overflow-y: auto;
+    max-height: 600px;
+    padding-right: var(--space-2);
+}
+
+/* Individual Meal Cards */
+.meal-card {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-5);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-light);
+    display: flex;
+    gap: var(--space-4);
+    transition: var(--transition-all);
+}
+
+.meal-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+.meal-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 3px solid white;
+    box-shadow: var(--shadow-md);
+}
+
+.meal-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.meal-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+
+.meal-name {
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-2);
+}
+
+.meal-nutrition {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.nutrition-item {
+    color: var(--text-secondary);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+}
+
+/* Right Panel */
+.calendar-right-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    max-width: 600px;
+}
+
+/* Calendar Widget */
+.calendar-widget {
+    background: var(--primary-color);
+    border-radius: var(--radius-3xl);
+    padding: var(--space-8);
+    color: white;
+    box-shadow: var(--shadow-xl);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-6);
+}
+
+.calendar-header h2 {
+    margin: 0;
+    color: white;
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
+}
+
+.calendar-nav-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: var(--radius-lg);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: var(--text-lg);
+    cursor: pointer;
+    transition: var(--transition-all);
+}
+
+.calendar-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.weekday {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    padding: var(--space-2);
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--space-2);
+}
+
+.calendar-date {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: var(--transition-all);
+    position: relative;
+    min-height: 45px;
+    font-size: var(--text-base);
+}
+
+.calendar-date:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.calendar-date.other-month {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.calendar-date.selected {
+    background: white;
+    color: var(--primary-color);
+    font-weight: var(--font-bold);
+}
+
+.calendar-date.today {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid white;
+}
+
+.calendar-date.has-meals::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+}
+
+/* Top Picks Section */
+.top-picks-section {
+    background: var(--bg-primary);
+    border-radius: var(--radius-3xl);
+    padding: var(--space-8);
+    box-shadow: var(--shadow-xl);
+    border: 1px solid var(--border-light);
+}
+
+.top-picks-section h3 {
+    margin: 0 0 var(--space-6) 0;
+    color: var(--text-primary);
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
+    text-align: center;
+}
+
+.top-picks-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: var(--space-4);
+}
+
+.top-meal-card {
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+    box-shadow: var(--shadow-lg);
+    transition: var(--transition-all);
+}
+
+.top-meal-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-xl);
+}
+
+.top-meal-card:nth-child(1) {
+    background: linear-gradient(135deg, #ffb3ba, #ffa07a);
+}
+
+.top-meal-card:nth-child(2) {
+    background: linear-gradient(135deg, #87ceeb, #4682b4);
+}
+
+.top-meal-card:nth-child(3) {
+    background: linear-gradient(135deg, #f0e68c, #daa520);
+}
+
+.meal-rank {
+    font-size: var(--text-3xl);
+    font-weight: var(--font-bold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-3);
+}
+
+.top-meal-image {
+    width: 80px;
+    height: 80px;
+    border-radius: 50%;
+    margin: 0 auto var(--space-3);
+    overflow: hidden;
+    border: 3px solid white;
+    box-shadow: var(--shadow-md);
+    background: var(--bg-tertiary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2rem;
+}
+
+.top-meal-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.top-meal-name {
+    font-size: var(--text-base);
+    font-weight: var(--font-semibold);
+    color: var(--text-primary);
+    margin-bottom: var(--space-1);
+}
+
+.meal-count {
+    font-size: var(--text-sm);
+    color: var(--text-secondary);
+    font-weight: var(--font-medium);
+}
+
+/* No meals state */
+.no-meals-selected {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-12);
+    color: var(--text-secondary);
+    text-align: center;
+    background: var(--bg-secondary);
+    border-radius: var(--radius-2xl);
+    border: 1px solid var(--border-light);
+    min-height: 300px;
+}
+
+.empty-meal-icon {
+    font-size: 4rem;
+    margin-bottom: var(--space-4);
+    opacity: 0.5;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .calendar-new-layout {
+        flex-direction: column;
+        gap: var(--space-4);
+    }
+    
+    .meals-today-panel,
+    .calendar-right-panel {
+        max-width: none;
+    }
+    
+    .top-picks-grid {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-3);
+    }
+}
+
+@media (max-width: 768px) {
+    .calendar-new-layout {
+        padding: var(--space-2);
+    }
+    
+    .meals-today-panel,
+    .calendar-widget,
+    .top-picks-section {
+        padding: var(--space-4);
+    }
+    
+    .top-picks-grid {
+        grid-template-columns: 1fr;
+        gap: var(--space-3);
+    }
+    
+    .meal-card {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+}
+
 /* Statistics Cards */
 .stat-card {
   text-align: center;
@@ -859,6 +1249,190 @@ height: 18px;
   color: var(--text-secondary);
   font-size: var(--text-sm);
   font-weight: var(--font-medium);
+}
+
+/* Updated Calendar Layout */
+.calendar-split-container {
+    display: flex;
+    height: calc(100vh - 120px);
+    gap: var(--space-6);
+    padding: var(--space-4);
+    box-sizing: border-box;
+}
+
+/* Left Panel - Meal Details (Fixed Height) */
+.meal-details-panel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    min-width: 0;
+    max-width: 500px;
+}
+
+.meal-details-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+    overflow-y: auto;
+    max-height: calc(100vh - 300px); /* Fixed height, no infinite scrolling */
+    min-height: 300px;
+    padding-right: var(--space-2);
+}
+
+/* Right Panel - Calendar and Top Meals */
+.calendar-and-top-meals {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    min-width: 0;
+}
+
+/* Calendar Panel (Compact) */
+.calendar-panel {
+    background: var(--primary-color);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    color: white;
+    flex-shrink: 0;
+}
+
+/* Top Meals Section (Below Calendar) */
+.top-meals-section {
+    background: var(--bg-primary);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-light);
+    flex-shrink: 0;
+}
+
+.top-meals-section h3 {
+    margin: 0 0 var(--space-4) 0;
+    color: var(--text-primary);
+    font-size: var(--text-xl);
+    font-weight: var(--font-semibold);
+}
+
+.top-meals-grid {
+    display: flex;
+    gap: var(--space-4);
+    overflow-x: auto;
+    padding-bottom: var(--space-2);
+}
+
+/* Meal Cards - Compact Layout */
+.meal-card {
+    background: var(--bg-primary);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-4);
+    box-shadow: var(--shadow-lg);
+    border: 1px solid var(--border-light);
+    display: flex;
+    gap: var(--space-3);
+    transition: var(--transition-all);
+    min-height: auto;
+    margin-bottom: var(--space-3);
+}
+
+.meal-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-xl);
+}
+
+.meal-image {
+    width: 60px;
+    height: 60px;
+    border-radius: var(--radius-xl);
+    background: var(--bg-secondary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.5rem;
+    flex-shrink: 0;
+    overflow: hidden;
+}
+
+/* No scrolling for meal details - compact layout */
+.no-meals-selected {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: var(--space-8);
+    color: var(--text-secondary);
+    text-align: center;
+    background: var(--bg-primary);
+    border-radius: var(--radius-2xl);
+    border: 1px solid var(--border-light);
+    min-height: 200px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 1200px) {
+    .calendar-split-container {
+        flex-direction: column;
+        height: auto;
+        min-height: calc(100vh - 120px);
+    }
+    
+    .meal-details-panel {
+        order: 2;
+        max-width: none;
+    }
+    
+    .calendar-and-top-meals {
+        order: 1;
+    }
+    
+    .meal-details-content {
+        max-height: 400px;
+    }
+}
+
+@media (max-width: 768px) {
+    .calendar-split-container {
+        padding: var(--space-2);
+        gap: var(--space-4);
+    }
+    
+    .meal-details-header,
+    .top-meals-section,
+    .calendar-panel {
+        padding: var(--space-4);
+    }
+    
+    .top-meals-grid {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .meal-card {
+        flex-direction: column;
+        text-align: center;
+        align-items: center;
+    }
+}
+
+/* Ensure proper scrolling behavior */
+.meal-details-content::-webkit-scrollbar {
+    width: 6px;
+}
+
+.meal-details-content::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-full);
+}
+
+.meal-details-content::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: var(--radius-full);
+}
+
+.meal-details-content::-webkit-scrollbar-thumb:hover {
+    background: var(--secondary-color);
 }
 
 /* Progress Bars */

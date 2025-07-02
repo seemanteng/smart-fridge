@@ -19,6 +19,68 @@ href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&fa
 <link rel="icon" type="image/x-icon" href="assets/favicon.ico">
 <style>
 
+/* Fix for scroll displacement - add this to your CSS */
+html, body {
+    overflow-x: hidden;
+    position: relative;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Prevent elastic scrolling on mobile */
+body {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Alternative solution - disable transforms during scroll */
+.smart-fridge-layout {
+    position: relative;
+    overflow-x: hidden;
+    -webkit-overflow-scrolling: touch;
+}
+
+/* Remove transforms that cause displacement */
+.add-ingredient-card:hover,
+.search-input:hover,
+.filter-btn:hover,
+.ingredient-card:hover {
+    transform: none !important;
+}
+
+/* Keep only safe transforms */
+.btn:hover {
+    transform: translateY(-1px) !important;
+}
+
+/* Prevent background displacement */
+.container {
+    position: relative;
+    overflow-x: hidden;
+    min-height: 100vh;
+}
+
+/* Fix for mobile elastic scrolling */
+@media (max-width: 768px) {
+    html, body {
+        position: relative;
+        overflow-x: hidden;
+        -webkit-overflow-scrolling: touch;
+        overscroll-behavior: none;
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+    
+    /* Disable all hover transforms on mobile */
+    *:hover {
+        transform: none !important;
+    }
+}
+
 /* New Inventory Layout */
 .inventory-container {
 padding: var(--space-6);
@@ -531,6 +593,181 @@ padding: var(--space-4);
 flex-direction: column;
 }
 }
+
+/* Calendar Panel Responsive Fixes */
+.calendar-panel {
+    flex: 1;
+    background: var(--primary-color);
+    border-radius: var(--radius-2xl);
+    padding: var(--space-6);
+    color: white;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    height: fit-content;
+}
+
+.calendar-header-new {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-6);
+    flex-shrink: 0;
+}
+
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+    flex-shrink: 0;
+}
+
+.weekday {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    padding: var(--space-2);
+    min-height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.calendar-dates-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--space-2);
+    flex: 1;
+    align-content: start;
+}
+
+.calendar-date {
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-lg);
+    font-weight: var(--font-medium);
+    cursor: pointer;
+    transition: var(--transition-all);
+    position: relative;
+    min-height: 40px;
+    max-height: 60px;
+    font-size: var(--text-sm);
+}
+
+/* Responsive adjustments for different screen sizes */
+@media (min-width: 1200px) {
+    .calendar-dates-grid {
+        gap: var(--space-3);
+    }
+    
+    .calendar-date {
+        min-height: 50px;
+        max-height: 70px;
+        font-size: var(--text-base);
+    }
+    
+    .weekday {
+        font-size: var(--text-base);
+        min-height: 40px;
+    }
+}
+
+@media (min-width: 1440px) {
+    .calendar-dates-grid {
+        gap: var(--space-4);
+    }
+    
+    .calendar-date {
+        min-height: 60px;
+        max-height: 80px;
+    }
+}
+
+@media (max-width: 1199px) {
+    .calendar-dates-grid {
+        gap: var(--space-1);
+    }
+    
+    .calendar-date {
+        min-height: 35px;
+        max-height: 50px;
+        font-size: var(--text-xs);
+    }
+    
+    .weekday {
+        font-size: var(--text-xs);
+        min-height: 28px;
+    }
+}
+
+/* Fix for very large monitors */
+@media (min-width: 1600px) {
+    .calendar-split-container {
+        max-width: 1400px;
+        margin: 0 auto;
+    }
+    
+    .calendar-panel {
+        max-width: 600px;
+    }
+}
+
+/* Ensure proper grid behavior */
+.calendar-dates-grid {
+    width: 100%;
+    height: auto;
+    min-height: 280px;
+    max-height: 420px;
+}
+
+/* Fix calendar date alignment */
+.calendar-date {
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    text-align: center;
+    line-height: 1;
+}
+
+.calendar-date:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.calendar-date.other-month {
+    color: rgba(255, 255, 255, 0.3);
+}
+
+.calendar-date.selected {
+    background: white;
+    color: var(--primary-color);
+    font-weight: var(--font-bold);
+}
+
+.calendar-date.today {
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid white;
+}
+
+.calendar-date.has-meals::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 6px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.8);
+    border-radius: 50%;
+}
+
+.calendar-date.selected.has-meals::after {
+    background: var(--primary-color);
+}
+
 /* Calendar Split Layout Styles */
 .calendar-split-container {
 display: flex;
@@ -1433,61 +1670,61 @@ stroke="url(#gradient)" stroke-width="8" stroke-linecap="round"/>
 
 <!-- Calendar Section -->
 <div id="calendar" class="content-section">
-<div class="calendar-split-container">
-<!-- Left Side: Meal Details -->
-<div class="meal-details-panel">
-<div class="meal-details-header">
-<h2 id="selected-date-title">Meals on this day</h2>
-<div class="total-calories">
-<span>Total Calories: </span>
-<span id="daily-total-calories">0</span>
-</div>
-</div>
-
-<div class="meal-details-content" id="meal-details-content">
-<!-- Meals will be populated by JavaScript -->
-<div class="no-meals-selected">
-<div class="empty-meal-icon">🍽️</div>
-<p>Select a date to view meals</p>
-</div>
-</div>
-
-<!-- Top Meals Section -->
-<div class="top-meals-section">
-<h3>Top Meals This Month</h3>
-<div class="top-meals-grid" id="top-meals-grid">
-<!-- Top meals will be populated by JavaScript -->
-</div>
-</div>
-</div>
-
-<!-- Right Side: Calendar Grid -->
-<div class="calendar-panel">
-<div class="calendar-header-new">
-<button class="calendar-nav-btn" id="prev-month" onclick="navigateMonth(-1)">
-<span>‹</span>
-</button>
-<h2 id="calendar-month-display">Loading...</h2>
-<button class="calendar-nav-btn" id="next-month" onclick="navigateMonth(1)">
-<span>›</span>
-</button>
-</div>
-
-<div class="calendar-weekdays">
-<div class="weekday">Mon</div>
-<div class="weekday">Tue</div>
-<div class="weekday">Wed</div>
-<div class="weekday">Thu</div>
-<div class="weekday">Fri</div>
-<div class="weekday">Sat</div>
-<div class="weekday">Sun</div>
-</div>
-
-<div class="calendar-dates-grid" id="calendar-dates-grid">
-<!-- Calendar dates will be populated by JavaScript -->
-</div>
-</div>
-</div>
+    <div class="calendar-new-layout">
+        <!-- Left Side: Meal Details -->
+        <div class="meals-today-panel">
+            <div class="meals-header">
+                <h2 id="selected-date-title">Meals on this day</h2>
+                <div class="total-calories">
+                    <span>Total Calories: </span>
+                    <span id="daily-total-calories">0</span>
+                </div>
+            </div>
+            <div class="meals-list-container" id="meal-details-content">
+                <!-- Meals will be populated by JavaScript -->
+                <div class="no-meals-selected">
+                    <div class="empty-meal-icon">🍽</div>
+                    <p>Select a date to view meals</p>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Side: Calendar and Top Meals -->
+        <div class="calendar-right-panel">
+            <!-- Calendar -->
+            <div class="calendar-widget">
+                <div class="calendar-header">
+                    <button class="calendar-nav-btn" id="prev-month" onclick="navigateMonth(-1)">
+                        <span>‹</span>
+                    </button>
+                    <h2 id="calendar-month-display">Loading...</h2>
+                    <button class="calendar-nav-btn" id="next-month" onclick="navigateMonth(1)">
+                        <span>›</span>
+                    </button>
+                </div>
+                <div class="calendar-weekdays">
+                    <div class="weekday">Mon</div>
+                    <div class="weekday">Tues</div>
+                    <div class="weekday">Weds</div>
+                    <div class="weekday">Thurs</div>
+                    <div class="weekday">Fri</div>
+                    <div class="weekday">Sat</div>
+                    <div class="weekday">Sun</div>
+                </div>
+                <div class="calendar-grid" id="calendar-dates-grid">
+                    <!-- Calendar dates will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Top Picks Section -->
+            <div class="top-picks-section">
+                <h3>Your Top Picks this Month ⭐</h3>
+                <div class="top-picks-grid" id="top-meals-grid">
+                    <!-- Top meals will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <!-- Goals Section -->
@@ -1633,6 +1870,7 @@ return false;
 }
 
 // Display meals for selected date
+// Display meals for selected date
 function displayMealsForDate(date) {
     const dateKey = date.toISOString().split('T')[0];
     const content = document.getElementById('meal-details-content');
@@ -1678,7 +1916,7 @@ function displayMealsForDate(date) {
                 <div class="meal-card">
                     <div class="meal-image">
                         ${thumbnailUrl ? 
-                            `<img src="${thumbnailUrl}" alt="${meal.name}" style="width: 100%; height: 100%; object-fit: cover;">` 
+                            `<img src="${thumbnailUrl}" alt="${meal.name}">` 
                             : (meal.emoji || '🍽')
                         }
                     </div>
@@ -1698,6 +1936,7 @@ function displayMealsForDate(date) {
 }
 
 // Render top meals
+// Render top meals with new layout (no ranking)
 function renderTopMeals() {
     const grid = document.getElementById('top-meals-grid');
     if (!grid) return;
@@ -1725,7 +1964,12 @@ function renderTopMeals() {
         .slice(0, 3);
 
     if (topMeals.length === 0) {
-        grid.innerHTML = '<p style="color: var(--text-secondary); text-align: center;">No meals logged this month</p>';
+        grid.innerHTML = `
+            <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: rgba(255, 255, 255, 0.8);">
+                <div style="font-size: 3rem; margin-bottom: 1rem;">📊</div>
+                <div>No meals logged this month</div>
+            </div>
+        `;
         return;
     }
 
@@ -1736,7 +1980,6 @@ function renderTopMeals() {
     }
 
     grid.innerHTML = topMeals.map((meal, index) => {
-        // Try to find the recipe to get thumbnail
         const recipe = allRecipes.find(r => r.name === meal.name);
         let thumbnailUrl = null;
         
@@ -1746,13 +1989,12 @@ function renderTopMeals() {
         }
 
         return `
-            <div class="top-meal-item">
+            <div class="top-meal-card">
                 <div class="top-meal-image">
                     ${thumbnailUrl ? 
-                        `<img src="${thumbnailUrl}" alt="${meal.name}" style="width: 100%; height: 100%; object-fit: cover;">` 
+                        `<img src="${thumbnailUrl}" alt="${meal.name}">` 
                         : meal.emoji
                     }
-                    <div class="meal-rank">${index + 1}</div>
                 </div>
                 <div class="top-meal-name">${meal.name}</div>
                 <div class="meal-count">${meal.count} times</div>

@@ -269,6 +269,7 @@ class Dashboard {
 
         if (window.showToast) {
             showToast(`${recipe.name} logged as cooked! +${recipe.calories} calories`, 'success');
+
         }
     }
 
@@ -505,6 +506,26 @@ class Dashboard {
         }).join('');
     }
 
+    // Clear all completed items
+    clearCompletedItems() {
+        let removedCount = 0;
+        Object.keys(this.autoGroceryList || {}).forEach(key => {
+            if (this.autoGroceryList[key].checked) {
+                delete this.autoGroceryList[key];
+                removedCount++;
+            }
+        });
+        
+        if (removedCount > 0) {
+            this.saveGroceryCheckedStates();
+            this.renderAutoGroceryList();
+            
+            if (window.showToast) {
+                showToast(`Successfully Removed ${removedCount} items!`, 'success');
+            }
+        }
+    }
+
     // Toggle grocery item checked status
     toggleAutoGroceryItem(ingredientKey) {
         if (this.autoGroceryList && this.autoGroceryList[ingredientKey]) {
@@ -513,20 +534,37 @@ class Dashboard {
             // Save checked state to localStorage
             this.saveGroceryCheckedStates();
             
-            // Update the visual state
-            const item = document.querySelector(`[data-ingredient="${ingredientKey}"]`);
-            if (item) {
-                if (this.autoGroceryList[ingredientKey].checked) {
-                    item.classList.add('checked');
-                } else {
-                    item.classList.remove('checked');
+            // If item is checked, remove it from the display after a short delay
+            if (this.autoGroceryList[ingredientKey].checked) {
+                const itemElement = document.querySelector(`input[onchange*="${ingredientKey}"]`)?.closest('.shopping-item');
+                if (itemElement) {
+                    // Add fade out animation
+                    itemElement.style.transition = 'all 0.3s ease';
+                    itemElement.style.opacity = '0.5';
+                    itemElement.style.transform = 'scale(0.95)';
+                    
+                    // Remove after animation
+                    setTimeout(() => {
+                        // Remove from data structure
+                        delete this.autoGroceryList[ingredientKey];
+                        
+                        // Re-render the grocery list
+                        this.renderAutoGroceryList();
+                        
+                        // Save updated state
+                        this.saveGroceryCheckedStates();
+                        
+                        if (window.showToast) {
+                            showToast('Successfully Removed!', 'success');
+                        }
+                    }, 300);
                 }
             }
             
             // Check if any recipes should be hidden
             this.checkRecipeCompletion();
         }
-    }
+    } 
 
     // Check if recipes should be hidden based on ingredient completion
     checkRecipeCompletion() {
@@ -608,7 +646,7 @@ class Dashboard {
         this.clearGroceryForRemovedRecipes();
         
         if (window.showToast) {
-            showToast('Recipe removed from dashboard', 'success');
+            showToast('Successfully Removed!', 'success');
         }
     } 
 

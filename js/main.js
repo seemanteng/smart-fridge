@@ -16,24 +16,23 @@ function showToast(message, type = 'success') {
     if (existingToast) {
         existingToast.remove();
     }
-
+    
     // Create new toast
     const toast = document.createElement('div');
     toast.className = `toast ${type}`;
     toast.innerHTML = `
         <div class="toast-content">
-            <span class="toast-icon">${getToastIcon(type)}</span>
             <span class="toast-message">${message}</span>
             <button class="toast-close" onclick="this.closest('.toast').remove()">&times;</button>
         </div>
     `;
-
+    
     // Add to page
     document.body.appendChild(toast);
-
+    
     // Show toast
     setTimeout(() => toast.classList.add('show'), 10);
-
+    
     // Auto-hide after 3 seconds
     setTimeout(() => {
         if (toast.parentNode) {
@@ -41,16 +40,6 @@ function showToast(message, type = 'success') {
             setTimeout(() => toast.remove(), 300);
         }
     }, 3000);
-}
-
-function getToastIcon(type) {
-    const icons = {
-        success: '✅',
-        error: '❌',
-        warning: '⚠️',
-        info: 'ℹ️'
-    };
-    return icons[type] || icons.info;
 }
 
 // Navigation function (global)
