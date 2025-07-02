@@ -1227,48 +1227,51 @@ font-size: var(--text-base);
 @media (max-width: 768px) {
     .mobile-header {
         display: flex !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        z-index: 1001 !important;
     }
     
     .mobile-overlay {
         display: block !important;
+        position: fixed !important;
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        bottom: 0 !important;
+        z-index: 1001 !important;
     }
-    
+
     /* Hide desktop sidebar and create mobile sidebar */
     .sidebar {
-        position: fixed;
-        left: -100%;
-        top: 0;
-        width: 250px;
-        height: 100vh;
-        z-index: 1002;
-        transition: left 0.3s ease;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        position: fixed !important;
+        left: -100% !important;
+        top: 0 !important;
+        width: 280px !important;
+        height: 100vh !important;
+        z-index: 1002 !important;
+        transition: left 0.3s ease !important;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
         backdrop-filter: blur(20px);
         border-right: 1px solid rgba(255, 255, 255, 0.2);
         box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
+        margin-left: 0 !important;
     }
     
     .sidebar.active {
-        left: 0;
+        left: 0 !important;
+        transform: translateX(0) !important;
     }
     
-    /* Ensure sidebar content is visible */
     .sidebar .logo,
     .sidebar .nav-menu,
     .sidebar .nav-item,
     .sidebar .nav-item a {
-        opacity: 1;
-        visibility: visible;
-        color: white;
-    }
-    
-    .sidebar .nav-item a {
-        color: rgba(255, 255, 255, 0.8);
-        padding: 15px 20px;
-        margin-bottom: 5px;
-        border-radius: 12px;
-        margin-left: 10px;
-        margin-right: 10px;
+        opacity: 1 !important;
+        visibility: visible !important;
+        color: white !important;
     }
     
     .sidebar .nav-item.active a,
