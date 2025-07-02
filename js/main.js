@@ -179,6 +179,18 @@ function setupComponentCommunication() {
         console.log('📊 Dashboard updated');
         // Other components can react to dashboard changes here
     });
+
+    // Listen for goals section activation
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('a[onclick*="goals"]')) {
+            setTimeout(() => {
+                if (window.goals && typeof window.goals.refreshGoalsDisplay === 'function') {
+                    console.log('Goals tab clicked, refreshing...');
+                    window.goals.refreshGoalsDisplay();
+                }
+            }, 500);
+        }
+    });
 }
 
 function addToastStyles() {

@@ -1437,6 +1437,403 @@ grid-template-columns: 1fr 1fr;
 grid-template-columns: 1fr;
 }
 }
+/* New Visual Goals Layout */
+.goals-visual-container {
+    padding: 40px;
+    min-height: calc(100vh - 120px);
+    color: white;
+}
+
+.goals-visual-header {
+    text-align: center;
+    margin-bottom: 40px;
+}
+
+.goals-visual-header h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin: 0;
+    color: white !important;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+/* Weekly Charts Grid */
+.weekly-charts-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    margin-bottom: 50px;
+}
+
+/* Enhanced Chart Styling */
+.chart-card-visual {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 24px;
+    padding: 30px;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.chart-card-visual:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.chart-card-visual::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #ff7043, #ffb74d, #fff176, #81c784);
+    opacity: 0.8;
+}
+
+.chart-area-visual {
+    height: 220px;
+    margin: 20px 0;
+    position: relative;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 16px;
+    padding: 15px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.chart-area-visual::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.03), transparent);
+    border-radius: 16px;
+    pointer-events: none;
+}
+
+/* Enhanced chart icons */
+.chart-icon {
+    font-size: 2.5rem;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.3), rgba(255, 255, 255, 0.1));
+    padding: 15px;
+    border-radius: 50%;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border: 2px solid rgba(255, 255, 255, 0.2);
+}
+
+/* Chart days with better styling */
+.chart-days {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 600;
+    margin-top: 15px;
+    padding: 0 15px;
+}
+
+.chart-days span {
+    padding: 5px 8px;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+}
+
+.chart-days span:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.chart-header-visual {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-bottom: 20px;
+}
+
+
+.chart-header-visual h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0;
+    color: white;
+}
+
+
+.chart-area-visual canvas {
+    width: 100% !important;
+    height: 100% !important;
+}
+
+
+/* Average Stats Row */
+.average-stats-row {
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    margin-bottom: 50px;
+    flex-wrap: wrap;
+}
+
+.stat-circle {
+    width: 180px;
+    height: 180px;
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 50%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 3rem;
+    font-weight: 700;
+    color: white;
+    margin-bottom: 10px;
+    line-height: 1;
+}
+
+.stat-label {
+    font-size: 1rem;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: 500;
+    line-height: 1.2;
+}
+
+/* Bottom Row */
+.bottom-row {
+    display: grid;
+    grid-template-columns: 1.2fr 1fr;
+    gap: 40px;
+}
+
+.suggestions-panel {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 24px;
+    padding: 30px;
+    color: #333;
+}
+
+.suggestions-panel h3 {
+    font-size: 1.3rem;
+    font-weight: 600;
+    margin: 0 0 20px 0;
+    color: #333;
+}
+
+.suggestions-panel h4 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 30px 0 15px 0;
+    color: #333;
+}
+
+.exercise-suggestion {
+    background: #f8f9fa;
+    padding: 20px;
+    border-radius: 16px;
+    border-left: 4px solid #667eea;
+    margin-bottom: 20px;
+}
+
+.recipe-suggestions-visual {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.recipe-suggestion-visual {
+    background: #f1f8e9;
+    padding: 15px;
+    border-radius: 12px;
+    border-left: 3px solid #51cf66;
+}
+
+.recipe-name-visual {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 5px;
+}
+
+.recipe-match-visual {
+    font-size: 0.9rem;
+    color: #666;
+    font-style: italic;
+}
+
+/* Goals Setting Panel */
+.goals-setting-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+
+.goals-form-section,
+.profile-form-section {
+    background: rgba(255, 255, 255, 0.15);
+    border-radius: 20px;
+    padding: 25px;
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.goal-input-row,
+.profile-input-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+.goal-input-row label,
+.profile-input-row label {
+    color: white;
+    font-weight: 600;
+    font-size: 0.95rem;
+    min-width: 140px;
+}
+
+.goal-input-row input,
+.goal-input-row select,
+.profile-input-row input,
+.profile-input-row select {
+    padding: 8px 12px;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.9);
+    color: #333;
+    font-size: 0.9rem;
+    width: 100px;
+    text-align: center;
+}
+
+.goals-buttons,
+.profile-buttons {
+    display: flex;
+    gap: 10px;
+    margin-top: 20px;
+    justify-content: center;
+}
+
+.btn-set,
+.btn-clear,
+.btn-reset {
+    padding: 8px 20px;
+    border: none;
+    border-radius: 20px;
+    font-weight: 600;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.btn-set {
+    background: #51cf66;
+    color: white;
+}
+
+.btn-set:hover {
+    background: #40c057;
+    transform: translateY(-1px);
+}
+
+.btn-clear {
+    background: #ff8c69;
+    color: white;
+}
+
+.btn-clear:hover {
+    background: #ff7043;
+    transform: translateY(-1px);
+}
+
+.btn-reset {
+    background: #667eea;
+    color: white;
+}
+
+.btn-reset:hover {
+    background: #5a6fd8;
+    transform: translateY(-1px);
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+    .weekly-charts-grid {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+    
+    .average-stats-row {
+        gap: 30px;
+    }
+    
+    .stat-circle {
+        width: 140px;
+        height: 140px;
+    }
+    
+    .stat-number {
+        font-size: 2.2rem;
+    }
+    
+    .bottom-row {
+        grid-template-columns: 1fr;
+        gap: 30px;
+    }
+}
+
+@media (max-width: 768px) {
+    .goals-visual-container {
+        padding: 20px;
+    }
+    
+    .goals-visual-header h1 {
+        font-size: 1.8rem;
+        color: white !important;
+    }
+    
+    .average-stats-row {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+    }
+    
+    .stat-circle {
+        width: 120px;
+        height: 120px;
+    }
+    
+    .stat-number {
+        font-size: 1.8rem;
+    }
+    
+    .goal-input-row,
+    .profile-input-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 8px;
+    }
+    
+    .goal-input-row input,
+    .profile-input-row input,
+    .profile-input-row select {
+        width: 100%;
+    }
+}
 </style>
 </head>
 
@@ -1728,140 +2125,150 @@ stroke="url(#gradient)" stroke-width="8" stroke-linecap="round"/>
 </div>
 
 <!-- Goals -->
-<!-- Replace the entire Goals Section in your HTML file -->
 <div id="goals" class="content-section">
-    <div class="goals-main-container">
+    <div class="goals-visual-container">
         <!-- Header -->
-        <div class="goals-header">
-            <h1>Hope you're doing great, here's your insights!</h1>
+        <div class="goals-visual-header">
+            <h1>Hope you're doing great, here's your insights for this week!</h1>
         </div>
         
-        <!-- Top Row: Charts and Stats (moved up from middle) -->
-        <div class="insights-section">
-            <!-- Weekly Calories Chart -->
-            <div class="chart-card">
-                <div class="chart-header">
-                    <h3>Calories</h3>
-                    <div class="current-display">
-                        <span class="current-number" id="currentCalories">0</span>
-                        <span class="current-unit">Kcal</span>
-                        <span class="target-text">Target: <span id="targetCalories">2000</span> Kcal</span>
-                    </div>
+        <!-- Top Row: Weekly Charts -->
+        <div class="weekly-charts-grid">
+            <!-- Calories Chart -->
+            <div class="chart-card-visual">
+                <div class="chart-header-visual">
+                    <div class="chart-icon">🔥</div>
+                    <h3>Calories per day</h3>
                 </div>
-                <div class="chart-area">
-                    <canvas id="caloriesChart"></canvas>
+                <div class="chart-area-visual">
+                    <canvas id="caloriesChartVisual"></canvas>
                 </div>
                 <div class="chart-days">
-                    <span>Mon</span><span>Tue</span><span>Wed</span><span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                    <span>Mon</span><span>Tues</span><span>Weds</span><span>Thurs</span><span>Fri</span><span>Sat</span><span>Sun</span>
                 </div>
             </div>
             
-            <!-- Macro Stats Cards -->
-            <div class="macro-cards">
-                <div class="macro-card protein-card">
-                    <h3>Protein stats</h3>
-                    <div class="macro-content" id="proteinStats">
-                        <!-- Will be populated by JavaScript -->
-                    </div>
-                    <div class="macro-chart">
-                        <canvas id="proteinChart"></canvas>
-                    </div>
+            <!-- Protein Chart -->
+            <div class="chart-card-visual">
+                <div class="chart-header-visual">
+                    <div class="chart-icon">🥩</div>
+                    <h3>Protein per day</h3>
                 </div>
-                <div class="macro-card carbs-card">
-                    <h3>Carbs stats</h3>
-                    <div class="macro-content" id="carbsStats">
-                        <!-- Will be populated by JavaScript -->
-                    </div>
-                    <div class="macro-chart">
-                        <canvas id="carbsChart"></canvas>
-                    </div>
+                <div class="chart-area-visual">
+                    <canvas id="proteinChartVisual"></canvas>
                 </div>
-                <div class="macro-card fats-card">
-                    <h3>Fats Stats</h3>
-                    <div class="macro-content" id="fatsStats">
-                        <!-- Will be populated by JavaScript -->
-                    </div>
-                    <div class="macro-chart">
-                        <canvas id="fatsChart"></canvas>
-                    </div>
+                <div class="chart-days">
+                    <span>Mon</span><span>Tues</span><span>Weds</span><span>Thurs</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                </div>
+            </div>
+            
+            <!-- Carbs Chart -->
+            <div class="chart-card-visual">
+                <div class="chart-header-visual">
+                    <div class="chart-icon">🍞</div>
+                    <h3>Carbs per day</h3>
+                </div>
+                <div class="chart-area-visual">
+                    <canvas id="carbsChartVisual"></canvas>
+                </div>
+                <div class="chart-days">
+                    <span>Mon</span><span>Tues</span><span>Weds</span><span>Thurs</span><span>Fri</span><span>Sat</span><span>Sun</span>
+                </div>
+            </div>
+            
+            <!-- Fats Chart -->
+            <div class="chart-card-visual">
+                <div class="chart-header-visual">
+                    <div class="chart-icon">🧈</div>
+                    <h3>Fats per day</h3>
+                </div>
+                <div class="chart-area-visual">
+                    <canvas id="fatsChartVisual"></canvas>
+                </div>
+                <div class="chart-days">
+                    <span>Mon</span><span>Tues</span><span>Weds</span><span>Thurs</span><span>Fri</span><span>Sat</span><span>Sun</span>
                 </div>
             </div>
         </div>
         
-        <!-- Middle Row: Summary Cards -->
-        <div class="summary-section">
-            <div class="summary-card">
-                <h3>Average Cal, proteins, carbs and fats stats</h3>
-                <div class="stats-layout" id="averageStats">
+        <!-- Middle Row: Average Stats -->
+        <div class="average-stats-row">
+            <div class="stat-circle">
+                <div class="stat-number" id="avgCalories">643</div>
+                <div class="stat-label">Average Calories<br>cal</div>
+            </div>
+            <div class="stat-circle">
+                <div class="stat-number" id="avgCarbs">68</div>
+                <div class="stat-label">Average Carbs<br>grams</div>
+            </div>
+            <div class="stat-circle">
+                <div class="stat-number" id="avgProtein">40</div>
+                <div class="stat-label">Average Proteins<br>grams</div>
+            </div>
+            <div class="stat-circle">
+                <div class="stat-number" id="avgFats">24</div>
+                <div class="stat-label">Average Fats<br>grams</div>
+            </div>
+        </div>
+        
+        <!-- Bottom Row: Suggestions and Goals -->
+        <div class="bottom-row">
+            <!-- Left: Suggestions -->
+            <div class="suggestions-panel">
+                <h3>Suggest level of exercise based on user's profile</h3>
+                <div class="exercise-suggestion" id="exerciseSuggestionVisual">
+                    <!-- Will be populated by JavaScript -->
+                </div>
+                
+                <h4>Suggested Recipes Based on user's goals</h4>
+                <div class="recipe-suggestions-visual" id="recipeSuggestionsVisual">
                     <!-- Will be populated by JavaScript -->
                 </div>
             </div>
-            <div class="suggestions-card">
-                <div class="exercise-section">
-                    <h3>Suggest level of exercise based on user's profile</h3>
-                    <div class="exercise-content" id="exerciseSuggestions">
-                        <!-- Will be populated by JavaScript -->
+            
+            <!-- Right: Goals Setting -->
+            <div class="goals-setting-panel">
+                <div class="goals-form-section">
+                    <div class="goal-input-row">
+                        <label>Daily Caloric Goal</label>
+                        <input type="number" id="dailyCalorieGoalVisual" placeholder="2000">
+                    </div>
+                    <div class="goal-input-row">
+                        <label>Daily Protein Goal (g)</label>
+                        <input type="number" id="dailyProteinGoalVisual" placeholder="150">
+                    </div>
+                    <div class="goal-input-row">
+                        <label>Daily Carbs Goal (g)</label>
+                        <input type="number" id="dailyCarbsGoalVisual" placeholder="250">
+                    </div>
+                    <div class="goal-input-row">
+                        <label>Daily Fats Goal (g)</label>
+                        <input type="number" id="dailyFatsGoalVisual" placeholder="65">
+                    </div>
+                    <div class="goals-buttons">
+                        <button class="btn-set" onclick="goals.setDailyGoalsVisual()">Set</button>
+                        <button class="btn-clear" onclick="goals.clearDailyGoalsVisual()">Clear</button>
                     </div>
                 </div>
-                <div class="recipes-section">
-                    <h4>Suggested Recipes Based on user's goals</h4>
-                    <div class="recipes-content" id="recipeSuggestions">
-                        <!-- Will be populated by JavaScript -->
+                
+                <div class="profile-form-section">
+                    <div class="profile-input-row">
+                        <label>Age:</label>
+                        <input type="number" id="userAgeVisual" placeholder="25">
                     </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Bottom Row: User Profile and Daily Goals (moved from top) -->
-        <div class="goals-bottom-section">
-            <!-- User Profile Section -->
-            <div class="profile-card">
-                <div class="profile-row">
-                    <div class="profile-field">
-                        <label for="userAge">Age:</label>
-                        <input type="number" id="userAge" placeholder="25">
-                    </div>
-                </div>
-                <div class="profile-row">
-                    <div class="profile-field">
-                        <label for="userGender">Gender:</label>
-                        <select id="userGender">
+                    <div class="profile-input-row">
+                        <label>Gender:</label>
+                        <select id="userGenderVisual">
                             <option value="">Select</option>
                             <option value="male">Male</option>
                             <option value="female">Female</option>
                         </select>
                     </div>
-                </div>
-                <div class="profile-buttons">
-                    <button class="btn-action btn-set btn-small" onclick="goals.setUserProfile()">SET</button>
-                    <button class="btn-action btn-clear btn-small" onclick="goals.clearUserProfile()">CLEAR</button>
-                    <button class="btn-action btn-small" onclick="resetOnboarding()" style="background: #667eea;">RESET SETUP</button>
-                </div>
-            </div>
-            
-            <!-- Daily Goals Section -->
-            <div class="goals-card">
-                <div class="goals-grid">
-                    <div class="goal-field">
-                        <label for="dailyCalorieGoal">Daily Caloric Goal</label>
-                        <input type="number" id="dailyCalorieGoal" placeholder="2000">
+                    <div class="profile-buttons">
+                        <button class="btn-set" onclick="goals.setUserProfileVisual()">SET</button>
+                        <button class="btn-clear" onclick="goals.clearUserProfileVisual()">CLEAR</button>
+                        <button class="btn-reset" onclick="resetOnboarding()">RESET SETUP</button>
                     </div>
-                    <div class="goal-field">
-                        <label for="dailyProteinGoal">Daily Protein Goal (g)</label>
-                        <input type="number" id="dailyProteinGoal" placeholder="150">
-                    </div>
-                    <div class="goal-field">
-                        <label for="dailyCarbsGoal">Daily Carbs Goal (g)</label>
-                        <input type="number" id="dailyCarbsGoal" placeholder="250">
-                    </div>
-                    <div class="goal-field">
-                        <label for="dailyFatsGoal">Daily Fats Goal (g)</label>
-                        <input type="number" id="dailyFatsGoal" placeholder="65">
-                    </div>
-                </div>
-                <div class="goals-actions">
-                    <button class="btn-action btn-set" onclick="goals.setDailyGoals()">SET</button>
-                    <button class="btn-action btn-clear" onclick="goals.clearDailyGoals()">CLEAR</button>
                 </div>
             </div>
         </div>
@@ -2275,6 +2682,20 @@ function loadUserData() {
         }
     }
 }
+
+// Force refresh goals when section is shown
+const originalShowSection = window.showSection;
+window.showSection = function(sectionId) {
+    originalShowSection(sectionId);
+    
+    if (sectionId === 'goals' && window.goals) {
+        setTimeout(() => {
+            console.log('Goals section shown, forcing refresh...');
+            window.goals.refreshGoalsDisplayVisual();
+        }, 300);
+    }
+};
+
 </script>
 </body>
 </html>
