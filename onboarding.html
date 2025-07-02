@@ -47,7 +47,14 @@
             align-items: center;
             justify-content: center;
             border: 3px solid white;
-            font-size: 40px;
+            overflow: hidden;
+        }
+
+        .logo-image {
+            width: 70px;
+            height: 70px;
+            object-fit: contain;
+            filter: brightness(0) invert(1); /* Makes the logo white */
         }
 
         h1 {
@@ -142,7 +149,9 @@
 </head>
 <body>
     <div class="onboarding-container">
-        <div class="logo">🧊</div>
+        <div class="logo">
+            <img src="assets/images/Smart Fridge.png" alt="Smart Fridge Logo" class="logo-image">
+        </div>
         <h1>Welcome to Smart Fridge!</h1>
         <p class="subtitle">Help us personalize your meal planning experience</p>
         
