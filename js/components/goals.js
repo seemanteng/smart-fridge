@@ -40,39 +40,26 @@ class Goals {
     loadUserProfile() {
         const savedProfile = localStorage.getItem('mtable_user_profile');
         if (savedProfile) {
-            return JSON.parse(savedProfile);
+            const profile = JSON.parse(savedProfile);
+            return {
+                firstName: profile.firstName || null,
+                age: profile.age || null,
+                gender: profile.gender || null,
+                weight: profile.weight || null,
+                height: profile.height || null,
+                activityLevel: profile.activityLevel || 'moderate',
+                goal: profile.goal || 'maintain'
+            };
         }
         return {
+            firstName: null,
             age: null,
             gender: null,
             weight: null,
             height: null,
-            activityLevel: 'moderate'
+            activityLevel: 'moderate',
+            goal: 'maintain'
         };
-    }
-
-    loadWeeklyStats() {
-        // Get actual data from the last 7 days
-        const weeklyData = [];
-        const today = new Date();
-        
-        for (let i = 6; i >= 0; i--) {
-            const date = new Date(today);
-            date.setDate(today.getDate() - i);
-            const dateKey = date.toISOString().split('T')[0];
-            
-            const dayStats = this.getDayStats(dateKey);
-            weeklyData.push({
-                date: dateKey,
-                day: date.toLocaleDateString('en-US', { weekday: 'short' }),
-                calories: dayStats ? dayStats.calories || 0 : 0,
-                protein: dayStats ? dayStats.protein || 0 : 0,
-                carbs: dayStats ? dayStats.carbs || 0 : 0,
-                fat: dayStats ? dayStats.fat || 0 : 0
-            });
-        }
-        
-        return weeklyData;
     }
 
     getDayStats(dateKey) {
@@ -364,27 +351,39 @@ class Goals {
         `;
     }
 
-    renderExerciseSuggestions() {
+     renderExerciseSuggestions() {
         const exerciseSuggestions = document.getElementById('exerciseSuggestions');
         if (!exerciseSuggestions) return;
-        
+
+        const userData = JSON.parse(localStorage.getItem('mtable_user_profile') || '{}');
         let suggestion = "Complete your profile for personalized exercise recommendations.";
-        
-        if (this.userProfile.age && this.userProfile.gender) {
+
+        if (userData.firstName && userData.age && userData.gender && userData.goal) {
             const today = this.weeklyStats[this.weeklyStats.length - 1] || { calories: 0 };
             const calorieDeficit = this.goals.dailyCalories - today.calories;
             
-            if (calorieDeficit > 500) {
-                suggestion = "Light cardio (20-30 min walking) to maintain energy while meeting calorie goals.";
-            } else if (calorieDeficit > 0) {
-                suggestion = "Moderate exercise (30 min cardio or strength training) to complement your nutrition.";
-            } else if (calorieDeficit < -200) {
-                suggestion = "High intensity workout (45+ min) to balance excess calorie intake.";
-            } else {
-                suggestion = "Balanced routine: 3-4 days cardio, 2-3 days strength training for optimal health.";
+            // Personalized suggestions based on user profile
+            const name = userData.firstName;
+            
+            if (userData.goal === 'lose') {
+                if (calorieDeficit > 500) {
+                    suggestion = `Hi ${name}! Try 30-45 minutes of cardio (walking, cycling) to boost your weight loss goals while maintaining energy.`;
+                } else if (calorieDeficit > 0) {
+                    suggestion = `${name}, add some strength training (2-3x/week) along with cardio to preserve muscle during weight loss.`;
+                } else {
+                    suggestion = `${name}, you're over your calorie goal. Consider a longer workout session (60+ min) or high-intensity interval training.`;
+                }
+            } else if (userData.goal === 'gain' || userData.goal === 'muscle') {
+                suggestion = `${name}, focus on strength training 4-5x/week with compound movements. Limit cardio to 2-3 sessions per week.`;
+            } else if (userData.goal === 'maintain') {
+                if (userData.activityLevel === 'sedentary') {
+                    suggestion = `${name}, aim for 150 minutes of moderate exercise per week. Start with 20-30 minute walks daily.`;
+                } else {
+                    suggestion = `${name}, maintain your current routine! Mix cardio and strength training 4-5x per week for optimal health.`;
+                }
             }
         }
-        
+
         exerciseSuggestions.innerHTML = `
             <div class="exercise-recommendation">
                 <p>${suggestion}</p>
@@ -395,9 +394,11 @@ class Goals {
     renderRecipeSuggestions() {
         const recipeSuggestions = document.getElementById('recipeSuggestions');
         if (!recipeSuggestions) return;
+
+        const userData = JSON.parse(localStorage.getItem('mtable_user_profile') || '{}');
         
-        // Get suggested recipes based on goals
-        const suggestions = this.getRecipeSuggestions();
+        // Get suggested recipes based on goals and user profile
+        const suggestions = this.getPersonalizedRecipeSuggestions(userData);
         
         if (suggestions.length === 0) {
             recipeSuggestions.innerHTML = `
@@ -416,13 +417,48 @@ class Goals {
             `;
             return;
         }
-        
+
         recipeSuggestions.innerHTML = suggestions.map(recipe => `
             <div class="recipe-suggestion-item">
                 <div class="recipe-name">${recipe.name}</div>
                 <div class="recipe-match">${recipe.reason}</div>
             </div>
         `).join('');
+    }
+
+    getPersonalizedRecipeSuggestions(userData) {
+        const today = this.weeklyStats[this.weeklyStats.length - 1] || { calories: 0, protein: 0, carbs: 0, fat: 0 };
+        const remaining = {
+            calories: this.goals.dailyCalories - today.calories,
+            protein: this.goals.dailyProtein - today.protein,
+            carbs: this.goals.dailyCarbs - today.carbs,
+            fat: this.goals.dailyFat - today.fat
+        };
+
+        const suggestions = [];
+        
+        // Personalized suggestions based on user goal
+        if (userData.goal === 'lose') {
+            suggestions.push(
+                { name: 'Quinoa Power Salad', reason: 'Perfect for weight loss: high fiber, low calories' },
+                { name: 'Baked Salmon with Asparagus', reason: 'Lean protein for fat loss goals' },
+                { name: 'Vegetable Stir Fry', reason: 'Low calorie, nutrient dense for weight loss' }
+            );
+        } else if (userData.goal === 'gain' || userData.goal === 'muscle') {
+            suggestions.push(
+                { name: 'Teriyaki Chicken Bowl', reason: 'High protein and carbs for muscle building' },
+                { name: 'Greek Yogurt Parfait', reason: 'Great post-workout protein source' },
+                { name: 'Veggie Pasta Primavera', reason: 'Good carbs for energy and recovery' }
+            );
+        } else {
+            suggestions.push(
+                { name: 'Teriyaki Chicken Bowl', reason: 'Balanced macros for maintenance' },
+                { name: 'Quinoa Power Salad', reason: 'Complete protein and healthy fats' },
+                { name: 'Baked Salmon with Asparagus', reason: 'Omega-3s for overall health' }
+            );
+        }
+
+        return suggestions.slice(0, 3);
     }
 
     getRecipeSuggestions() {

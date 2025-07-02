@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Welcome to Smart Fridge!</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            padding: 20px;
+        }
+
+        .onboarding-container {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 24px;
+            padding: 40px;
+            max-width: 500px;
+            width: 100%;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .logo {
+            width: 100px;
+            height: 100px;
+            margin: 0 auto 20px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 3px solid white;
+            font-size: 40px;
+        }
+
+        h1 {
+            font-family: 'Poppins', sans-serif;
+            font-size: 32px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .subtitle {
+            font-size: 16px;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            font-size: 14px;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px 16px;
+            border: none;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            font-size: 16px;
+            font-family: inherit;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.3);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+
+        .btn-primary {
+            width: 100%;
+            padding: 15px;
+            background: #51cf66;
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            background: #40c057;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            background: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        @media (max-width: 600px) {
+            .onboarding-container {
+                padding: 30px 20px;
+            }
+            
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            h1 {
+                font-size: 28px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="onboarding-container">
+        <div class="logo">🧊</div>
+        <h1>Welcome to Smart Fridge!</h1>
+        <p class="subtitle">Help us personalize your meal planning experience</p>
+        
+        <form id="onboardingForm">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="firstName">First Name</label>
+                    <input type="text" id="firstName" required>
+                </div>
+                <div class="form-group">
+                    <label for="age">Age</label>
+                    <input type="number" id="age" min="16" max="100" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="gender">Gender</label>
+                    <select id="gender" required>
+                        <option value="">Select...</option>
+                        <option value="male">Male</option>
+                        <option value="female">Female</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="weight">Weight (kg)</label>
+                    <input type="number" id="weight" min="30" max="300" step="0.1">
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="height">Height (cm)</label>
+                    <input type="number" id="height" min="100" max="250">
+                </div>
+                <div class="form-group">
+                    <label for="activityLevel">Activity Level</label>
+                    <select id="activityLevel" required>
+                        <option value="">Select...</option>
+                        <option value="sedentary">Sedentary</option>
+                        <option value="lightlyActive">Lightly Active</option>
+                        <option value="moderatelyActive">Moderately Active</option>
+                        <option value="veryActive">Very Active</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="goal">Primary Goal</label>
+                <select id="goal" required>
+                    <option value="">Select your goal...</option>
+                    <option value="maintain">Maintain Weight</option>
+                    <option value="lose">Lose Weight</option>
+                    <option value="gain">Gain Weight</option>
+                    <option value="muscle">Build Muscle</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn-primary">Let's Get Started!</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('onboardingForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            // Collect form data
+            const userData = {
+                firstName: document.getElementById('firstName').value,
+                age: parseInt(document.getElementById('age').value),
+                gender: document.getElementById('gender').value,
+                weight: parseFloat(document.getElementById('weight').value) || null,
+                height: parseFloat(document.getElementById('height').value) || null,
+                activityLevel: document.getElementById('activityLevel').value,
+                goal: document.getElementById('goal').value,
+                onboardingCompleted: true,
+                dateCreated: new Date().toISOString()
+            };
+            
+            // Save to localStorage
+            localStorage.setItem('mtable_user_profile', JSON.stringify(userData));
+            localStorage.setItem('mtable_onboarding_completed', 'true');
+            
+            // Calculate and save recommended goals
+            const recommendedGoals = calculateRecommendedGoals(userData);
+            localStorage.setItem('mtable_goals', JSON.stringify(recommendedGoals));
+            
+            // Redirect to main app
+            window.location.href = 'index.html';
+        });
+        
+        function calculateRecommendedGoals(userData) {
+            let bmr = 1800; // Default
+            let tdee = 2200; // Default
+            
+            // Calculate BMR if we have weight and height
+            if (userData.weight && userData.height && userData.age) {
+                if (userData.gender === 'male') {
+                    bmr = (10 * userData.weight) + (6.25 * userData.height) - (5 * userData.age) + 5;
+                } else {
+                    bmr = (10 * userData.weight) + (6.25 * userData.height) - (5 * userData.age) - 161;
+                }
+                
+                // Apply activity multiplier
+                const activityMultipliers = {
+                    sedentary: 1.2,
+                    lightlyActive: 1.375,
+                    moderatelyActive: 1.55,
+                    veryActive: 1.725
+                };
+                
+                tdee = bmr * (activityMultipliers[userData.activityLevel] || 1.375);
+                
+                // Adjust for goal
+                switch (userData.goal) {
+                    case 'lose':
+                        tdee -= 500; // 1 lb per week deficit
+                        break;
+                    case 'gain':
+                    case 'muscle':
+                        tdee += 300; // Moderate surplus
+                        break;
+                }
+            }
+            
+            // Calculate macros (40/30/30 ratio)
+            const protein = Math.round((tdee * 0.30) / 4);
+            const carbs = Math.round((tdee * 0.40) / 4);
+            const fat = Math.round((tdee * 0.30) / 9);
+            
+            return {
+                dailyCalories: Math.round(Math.max(1200, tdee)),
+                dailyProtein: Math.max(50, protein),
+                dailyCarbs: Math.max(100, carbs),
+                dailyFat: Math.max(20, fat)
+            };
+        }
+    </script>
+</body>
+</html>

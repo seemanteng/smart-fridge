@@ -1835,6 +1835,7 @@ stroke="url(#gradient)" stroke-width="8" stroke-linecap="round"/>
                 <div class="profile-buttons">
                     <button class="btn-action btn-set btn-small" onclick="goals.setUserProfile()">SET</button>
                     <button class="btn-action btn-clear btn-small" onclick="goals.clearUserProfile()">CLEAR</button>
+                    <button class="btn-action btn-small" onclick="resetOnboarding()" style="background: #667eea;">RESET SETUP</button>
                 </div>
             </div>
             
@@ -2235,6 +2236,45 @@ modal.remove();
 }
 }
 });
+</script>
+<script>
+// Check if user has completed onboarding
+document.addEventListener('DOMContentLoaded', function() {
+    const onboardingCompleted = localStorage.getItem('mtable_onboarding_completed');
+    
+    if (!onboardingCompleted) {
+        // Redirect to onboarding if not completed
+        window.location.href = 'onboarding.html';
+        return;
+    }
+    
+    // Load user data and update UI
+    loadUserData();
+});
+
+function resetOnboarding() {
+    if (confirm('This will reset your profile and take you back to the welcome screen. Continue?')) {
+        localStorage.removeItem('mtable_onboarding_completed');
+        localStorage.removeItem('mtable_user_profile');
+        window.location.href = 'onboarding.html';
+    }
+}
+
+function loadUserData() {
+    const userData = localStorage.getItem('mtable_user_profile');
+    if (userData) {
+        const user = JSON.parse(userData);
+        
+        // Update welcome message or user name display if you have one
+        console.log(`Welcome back, ${user.firstName}!`);
+        
+        // You can add a personalized greeting here
+        const headerElement = document.querySelector('.header h1');
+        if (headerElement && user.firstName) {
+            headerElement.textContent = `Welcome back, ${user.firstName}!`;
+        }
+    }
+}
 </script>
 </body>
 </html>
