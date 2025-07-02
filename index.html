@@ -1218,31 +1218,58 @@ font-size: var(--text-base);
 
 /* Mobile Responsive Fixes */
 @media (max-width: 768px) {
-    /* Hide sidebar on mobile and show mobile nav */
+    /* Hide desktop sidebar and create mobile sidebar */
     .sidebar {
         position: fixed;
         left: -100%;
         top: 0;
-        width: 280px;
+        width: 250px;
         height: 100vh;
-        z-index: 1001;
+        z-index: 1002;
         transition: left 0.3s ease;
-        background: rgba(0, 0, 0, 0.95);
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         backdrop-filter: blur(20px);
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 2px 0 10px rgba(0, 0, 0, 0.3);
     }
     
     .sidebar.active {
         left: 0;
     }
     
-    /* Adjust main content for mobile */
-    .main-content {
-        margin-left: 0;
-        width: 100%;
-        padding: 60px 15px 15px 15px;
+    /* Ensure sidebar content is visible */
+    .sidebar .logo,
+    .sidebar .nav-menu,
+    .sidebar .nav-item,
+    .sidebar .nav-item a {
+        opacity: 1;
+        visibility: visible;
+        color: white;
     }
     
-    /* Add mobile header */
+    .sidebar .nav-item a {
+        color: rgba(255, 255, 255, 0.8);
+        padding: 15px 20px;
+        margin-bottom: 5px;
+        border-radius: 12px;
+        margin-left: 10px;
+        margin-right: 10px;
+    }
+    
+    .sidebar .nav-item.active a,
+    .sidebar .nav-item a:hover {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+    }
+    
+    /* Adjust main content for mobile */
+    .main-content {
+        margin-left: 0 !important;
+        width: 100% !important;
+        padding: 70px 15px 15px 15px;
+    }
+    
+    /* Mobile header styling */
     .mobile-header {
         position: fixed;
         top: 0;
@@ -1254,28 +1281,43 @@ font-size: var(--text-base);
         align-items: center;
         justify-content: space-between;
         padding: 0 20px;
-        z-index: 1000;
-        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        z-index: 1001;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
     }
     
     .mobile-logo {
-        height: 40px;
-        width: 40px;
+        height: 35px;
+        width: 35px;
+        object-fit: contain;
     }
     
     .mobile-title {
         color: white;
-        font-size: 1.2rem;
+        font-size: 1.1rem;
         font-weight: 600;
+        flex: 1;
+        text-align: center;
+        margin: 0 20px;
     }
     
     .menu-toggle {
-        background: none;
+        background: rgba(255, 255, 255, 0.2);
         border: none;
         color: white;
-        font-size: 1.5rem;
+        font-size: 1.3rem;
         cursor: pointer;
-        padding: 5px;
+        padding: 8px 10px;
+        border-radius: 8px;
+        transition: all 0.3s ease;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .menu-toggle:hover {
+        background: rgba(255, 255, 255, 0.3);
     }
     
     /* Mobile navigation overlay */
@@ -1286,7 +1328,7 @@ font-size: var(--text-base);
         right: 0;
         bottom: 0;
         background: rgba(0, 0, 0, 0.5);
-        z-index: 1000;
+        z-index: 1001;
         opacity: 0;
         visibility: hidden;
         transition: all 0.3s ease;
@@ -1297,7 +1339,12 @@ font-size: var(--text-base);
         visibility: visible;
     }
     
-    /* Goals section mobile fixes */
+    /* Hide desktop header on mobile */
+    .header {
+        display: none !important;
+    }
+    
+    /* Rest of your existing mobile styles... */
     .goals-visual-container {
         padding: 20px 15px;
     }
@@ -1422,39 +1469,6 @@ font-size: var(--text-base);
     .recipe-grid {
         grid-template-columns: 1fr;
         gap: 20px;
-    }
-}
-
-/* Extra small mobile devices */
-@media (max-width: 480px) {
-    .mobile-header {
-        padding: 0 15px;
-    }
-    
-    .mobile-title {
-        font-size: 1rem;
-    }
-    
-    .goals-visual-header h1 {
-        font-size: 1.5rem;
-    }
-    
-    .average-stats-row {
-        grid-template-columns: 1fr;
-        gap: 15px;
-    }
-    
-    .stat-circle {
-        width: 120px;
-        height: 120px;
-    }
-    
-    .stat-number {
-        font-size: 1.8rem;
-    }
-    
-    .chart-area-visual {
-        height: 150px;
     }
 }
 
@@ -2028,7 +2042,9 @@ grid-template-columns: 1fr;
 <div class="mobile-header">
     <img src="assets/images/Smart Fridge.png" alt="Smart Fridge" class="mobile-logo">
     <div class="mobile-title">Smart Fridge</div>
-    <button class="menu-toggle" onclick="toggleMobileMenu()">☰</button>
+    <button class="menu-toggle" onclick="toggleMobileMenu()">
+        <span>☰</span>
+    </button>
 </div>
 
 <!-- Mobile Overlay -->
@@ -2898,17 +2914,29 @@ window.showSection = function(sectionId) {
 function toggleMobileMenu() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.querySelector('.mobile-overlay');
+    const body = document.body;
     
-    sidebar.classList.toggle('active');
-    overlay.classList.toggle('active');
+    const isActive = sidebar.classList.contains('active');
+    
+    if (isActive) {
+        sidebar.classList.remove('active');
+        overlay.classList.remove('active');
+        body.style.overflow = '';
+    } else {
+        sidebar.classList.add('active');
+        overlay.classList.add('active');
+        body.style.overflow = 'hidden'; // Prevent background scrolling
+    }
 }
 
 function closeMobileMenu() {
     const sidebar = document.querySelector('.sidebar');
     const overlay = document.querySelector('.mobile-overlay');
+    const body = document.body;
     
     sidebar.classList.remove('active');
     overlay.classList.remove('active');
+    body.style.overflow = '';
 }
 
 // Close mobile menu when clicking nav items
@@ -2924,6 +2952,13 @@ window.addEventListener('resize', function() {
         closeMobileMenu();
     }
 });
+
+// Prevent body scroll when menu is open
+document.addEventListener('touchmove', function(e) {
+    if (document.querySelector('.mobile-overlay.active')) {
+        e.preventDefault();
+    }
+}, { passive: false });
 </script>
 
 </body>
