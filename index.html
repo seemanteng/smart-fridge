@@ -1952,46 +1952,46 @@ grid-template-columns: 1fr;
 <img src="assets/images/Nav Smart Fridge.png" alt="Smart Fridge Logo" class="logo-image">
 </div>
 <ul class="nav-menu">
-<li class="nav-item active">
-<a href="#" onclick="showSection('dashboard')">
-<span class="nav-icon">
-<img src="assets/images/Dashboard.png" alt="Dashboard" class="nav-icon-image">
-</span>
-<span class="nav-text">Dashboard</span>
-</a>
-</li>
-<li class="nav-item">
-<a href="#" onclick="showSection('inventory')">
-<span class="nav-icon">
-<img src="assets/images/Inventory.png" alt="Inventory" class="nav-icon-image">
-</span>
-<span class="nav-text">Inventory</span>
-</a>
-</li>
-<li class="nav-item">
-<a href="#" onclick="showSection('recipes')">
-<span class="nav-icon">
-<img src="assets/images/Recipe.png" alt="Recipes" class="nav-icon-image">
-</span>
-<span class="nav-text">Recipes</span>
-</a>
-</li>
-<li class="nav-item">
-<a href="#" onclick="showSection('calendar')">
-<span class="nav-icon">
-<img src="assets/images/Calendar.png" alt="Calendar" class="nav-icon-image">
-</span>
-<span class="nav-text">Calendar</span>
-</a>
-</li>
-<li class="nav-item">
-<a href="#" onclick="showSection('goals')">
-<span class="nav-icon">
-<img src="assets/images/Goals.png" alt="Goals" class="nav-icon-image">
-</span>
-<span class="nav-text">Goals</span>
-</a>
-</li>
+    <li class="nav-item active">
+        <a href="#" data-section="dashboard">
+            <span class="nav-icon">
+                <img src="assets/images/Dashboard.png" alt="Dashboard" class="nav-icon-image">
+            </span>
+            <span class="nav-text">Dashboard</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#" data-section="inventory">
+            <span class="nav-icon">
+                <img src="assets/images/Inventory.png" alt="Inventory" class="nav-icon-image">
+            </span>
+            <span class="nav-text">Inventory</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#" data-section="recipes">
+            <span class="nav-icon">
+                <img src="assets/images/Recipe.png" alt="Recipes" class="nav-icon-image">
+            </span>
+            <span class="nav-text">Recipes</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#" data-section="calendar">
+            <span class="nav-icon">
+                <img src="assets/images/Calendar.png" alt="Calendar" class="nav-icon-image">
+            </span>
+            <span class="nav-text">Calendar</span>
+        </a>
+    </li>
+    <li class="nav-item">
+        <a href="#" data-section="goals">
+            <span class="nav-icon">
+                <img src="assets/images/Goals.png" alt="Goals" class="nav-icon-image">
+            </span>
+            <span class="nav-text">Goals</span>
+        </a>
+    </li>
 </ul>
 </nav>
 
@@ -2826,10 +2826,24 @@ function closeMobileMenu() {
     body.style.overflow = '';
 }
 
-// Close mobile menu when clicking nav items
+// Close mobile menu when clicking nav items - ENHANCED
 document.addEventListener('click', function(e) {
-    if (e.target.closest('.nav-item a')) {
+    const navLink = e.target.closest('.nav-item a');
+    if (navLink) {
+        // Close the mobile menu
         closeMobileMenu();
+        
+        // Get the data-section attribute
+        const section = navLink.getAttribute('data-section');
+        if (section) {
+            showSection(section);
+            
+            // Update active states
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            navLink.closest('.nav-item').classList.add('active');
+        }
     }
 });
 
@@ -2840,6 +2854,61 @@ window.addEventListener('resize', function() {
     }
 });
 </script>
+<script>
+// Enhanced navigation handling
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers to navigation items
+    document.querySelectorAll('.nav-item a').forEach(link => {
+        link.addEventListener('click', function(e) {
+            e.preventDefault();
+            
+            const section = this.getAttribute('data-section');
+            if (section) {
+                // Close mobile menu if open
+                closeMobileMenu();
+                
+                // Show the section
+                showSection(section);
+                
+                // Update active states
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                this.closest('.nav-item').classList.add('active');
+            }
+        });
+    });
+});
 
+// Make sure showSection function exists and works
+function showSection(sectionId) {
+    console.log('Showing section:', sectionId);
+    
+    // Hide all sections
+    const sections = document.querySelectorAll('.content-section');
+    sections.forEach(section => {
+        section.classList.remove('active');
+    });
+    
+    // Show selected section
+    const targetSection = document.getElementById(sectionId);
+    if (targetSection) {
+        targetSection.classList.add('active');
+        console.log('Section activated:', sectionId);
+    } else {
+        console.error('Section not found:', sectionId);
+    }
+    
+    // Update active tab in sidebar
+    const sidebarTabs = document.querySelectorAll('.nav-item');
+    sidebarTabs.forEach(tab => tab.classList.remove('active'));
+    
+    // Find and activate the correct sidebar tab
+    const activeTab = document.querySelector(`.nav-item a[data-section="${sectionId}"]`)?.parentElement;
+    if (activeTab) {
+        activeTab.classList.add('active');
+    }
+}
+</script>
 </body>
 </html>
