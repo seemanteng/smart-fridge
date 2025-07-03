@@ -1456,6 +1456,49 @@ opacity: 1;
     } */
 }
 
+@media (max-width: 768px) {
+    #recipes {
+        padding-top: 30px !important; /* Add space at top of recipes section */
+    }
+    
+    /* Optional: Adjust recipe filters for mobile */
+    .recipe-grid {
+        margin-top: 10px !important;
+    }
+    
+    /* Ensure recipe filter card has proper spacing */
+    #recipes .card {
+        margin-top: 0 !important; /* Reset any negative margins */
+        margin-bottom: 20px !important;
+    }
+}
+
+@media (max-width: 768px) {
+    #calendar {
+        padding-top: 30px !important; /* Add space at top of calendar section */
+    }
+    
+    /* Adjust calendar layout for mobile */
+    .calendar-new-layout {
+        flex-direction: column !important; /* Stack calendar vertically on mobile */
+        gap: 20px !important;
+    }
+    
+    .meals-today-panel,
+    .calendar-right-panel {
+        width: 100% !important; /* Full width on mobile */
+    }
+    
+    /* Ensure calendar header has proper spacing */
+    .meals-header {
+        margin-top: 0 !important; /* Reset any negative margins */
+    }
+    
+    .calendar-widget {
+        margin-top: 0 !important;
+    }
+}
+
 /* Dashboard mobile fixes */
 @media (max-width: 768px) {
     #dashboard {
