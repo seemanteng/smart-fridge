@@ -5,9 +5,7 @@
 
 // Global variables for components - DO NOT INITIALIZE HERE
 let dashboard;
-let recipes;
 let calendar;
-let goals;
 
 // Global toast notification function
 function showToast(message, type = 'success') {
@@ -78,6 +76,35 @@ function filterRecipes() {
     }
 }
 
+// Clear all MTable data function (global utility)
+function clearAllMTableData() {
+    console.log('🧹 Clearing all MTable data...');
+    
+    // Clear all localStorage with mtable prefix
+    Object.keys(localStorage).forEach(key => {
+        if (key.toLowerCase().includes('mtable')) {
+            localStorage.removeItem(key);
+            console.log(`Removed: ${key}`);
+        }
+    });
+    
+    // Refresh all components
+    setTimeout(() => {
+        if (window.dashboard && typeof window.dashboard.refreshDashboard === 'function') {
+            window.dashboard.refreshDashboard();
+        }
+        if (window.calendar && typeof window.calendar.renderCalendar === 'function') {
+            window.calendar.renderCalendar();
+        }
+        if (window.goals && typeof window.goals.refreshGoalsDisplay === 'function') {
+            window.goals.refreshGoalsDisplay();
+        }
+        
+        showToast('All data cleared successfully!', 'success');
+        console.log('✅ All MTable data cleared and components refreshed');
+    }, 100);
+}
+
 // Initialize all components when DOM is ready
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🍽️ Initializing MTable app...');
@@ -98,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Add toast styles if not present
             addToastStyles();
             
-            console.log('✅ MTable app initialized successfully!');
+            console.log('✅ Smart Fridge initialized successfully! Hello, Im Man Teng the creator of this site and thanks for using my web app!');
             console.log('Components available:', {
                 dashboard: !!dashboard,
                 inventory: !!inventory,
@@ -107,7 +134,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 goals: !!goals
             });
             
-            showToast('Welcome to MTable!', 'success');
+            showToast('Welcome to Smart Fridge!', 'success');
             
         }, 100); // Small delay to let components initialize
         
@@ -323,6 +350,11 @@ window.MTableUtils = {
             calendar: window.calendar,
             goals: window.goals
         };
+    },
+
+    // Clear all data utility
+    clearAllData() {
+        clearAllMTableData();
     }
 };
 
@@ -346,6 +378,18 @@ window.debugMTable = function() {
         helpers: typeof Helpers !== 'undefined',
         storage: typeof Storage !== 'undefined'
     });
+    
+    // Show localStorage data
+    console.log('🗄️ LocalStorage MTable Data:');
+    Object.keys(localStorage).forEach(key => {
+        if (key.toLowerCase().includes('mtable')) {
+            try {
+                console.log(`${key}:`, JSON.parse(localStorage.getItem(key)));
+            } catch (e) {
+                console.log(`${key}:`, localStorage.getItem(key));
+            }
+        }
+    });
 };
 
 // Export for modules if needed
@@ -353,6 +397,7 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         showToast,
         showSection,
-        filterRecipes
+        filterRecipes,
+        clearAllMTableData
     };
 }

@@ -56,26 +56,14 @@ class Calendar {
     }
 
     loadMeals() {
-        // Load from localStorage or return default data
+        // Load from localStorage or return empty object
         const savedMeals = localStorage.getItem('mtable_meals');
         if (savedMeals) {
             return JSON.parse(savedMeals);
         }
 
-        // Default meal data - include today's date
-        const today = new Date().toISOString().split('T')[0];
-        return {
-            [today]: [], // Start with empty today
-            '2025-06-16': [
-                { type: 'breakfast', name: 'Scrambled Eggs', emoji: '🍳', calories: 280 },
-                { type: 'lunch', name: 'Caesar Salad', emoji: '🥗', calories: 320 },
-                { type: 'dinner', name: 'Grilled Chicken', emoji: '🍗', calories: 450 }
-            ],
-            '2025-06-17': [
-                { type: 'breakfast', name: 'Pancakes', emoji: '🥞', calories: 380 },
-                { type: 'dinner', name: 'Pizza', emoji: '🍕', calories: 540 }
-            ]
-        };
+        // Return empty object - no default meal data
+        return {};
     }
 
     saveMeals() {
