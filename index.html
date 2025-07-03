@@ -463,6 +463,113 @@ gap: var(--space-4);
     box-shadow: 0 4px 8px rgba(239, 68, 68, 0.3);
 }
 
+/* Mobile Navigation Bar */
+@media (max-width: 768px) {
+  .mobile-nav {
+    display: block !important;
+    position: fixed !important;
+    top: 0 !important;
+    left: 0 !important;
+    right: 0 !important;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
+    padding: var(--space-4) var(--space-3) !important;
+    z-index: 1003 !important;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .mobile-nav-header {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    margin-bottom: var(--space-4) !important;
+    color: white !important;
+  }
+
+  .mobile-nav-logo {
+    display: flex !important;
+    align-items: center !important;
+    gap: var(--space-2) !important;
+  }
+
+  .mobile-nav-logo .fridge-icon {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-radius: 50% !important;
+    width: 32px !important;
+    height: 32px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    font-size: 1.2rem !important;
+  }
+
+  .mobile-nav-logo .logo-text {
+    font-size: var(--text-lg) !important;
+    font-weight: var(--font-bold) !important;
+  }
+
+  .mobile-nav-tabs {
+    display: flex !important;
+    gap: var(--space-2) !important;
+    overflow-x: auto !important;
+    padding: 0 var(--space-2) !important;
+    scrollbar-width: none !important;
+    -ms-overflow-style: none !important;
+  }
+
+  .mobile-nav-tabs::-webkit-scrollbar {
+    display: none !important;
+  }
+
+  .mobile-nav-tab {
+    flex-shrink: 0 !important;
+    background: rgba(255, 255, 255, 0.2) !important;
+    border: none !important;
+    border-radius: var(--radius-full) !important;
+    padding: var(--space-3) var(--space-5) !important;
+    color: rgba(255, 255, 255, 0.8) !important;
+    font-weight: var(--font-medium) !important;
+    font-size: var(--text-sm) !important;
+    cursor: pointer !important;
+    transition: all 0.3s ease !important;
+    white-space: nowrap !important;
+    min-width: 80px !important;
+  }
+
+  .mobile-nav-tab.active {
+    background: white !important;
+    color: var(--primary-color) !important;
+    font-weight: var(--font-semibold) !important;
+    transform: translateY(-1px) !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
+  }
+
+  .mobile-nav-tab:hover:not(.active) {
+    background: rgba(255, 255, 255, 0.3) !important;
+    color: white !important;
+  }
+
+  /* Hide desktop sidebar and old mobile header on mobile */
+  .sidebar {
+    display: none !important;
+  }
+  
+  .mobile-header {
+    display: none !important;
+  }
+
+  /* Adjust main content for mobile nav */
+  .main-content {
+    margin-left: 0 !important;
+    width: 100% !important;
+    padding-top: 120px !important; /* Space for mobile nav */
+  }
+}
+
+/* Show mobile nav only on mobile */
+.mobile-nav {
+  display: none;
+}
+
 /* Modal improvements */
 .modal {
 position: fixed;
@@ -1925,13 +2032,22 @@ grid-template-columns: 1fr;
 <div class="container"> -->
 
 <body>
-<!-- Mobile Header -->
-<div class="mobile-header">
-    <img src="assets/images/Smart Fridge.png" alt="Smart Fridge" class="mobile-logo">
-    <div class="mobile-title">Smart Fridge</div>
-    <button class="menu-toggle" onclick="toggleMobileMenu()">
-        <span>☰</span>
-    </button>
+
+<!-- Mobile Navigation Header -->
+<div class="mobile-nav">
+    <div class="mobile-nav-header">
+        <div class="mobile-nav-logo">
+            <div class="fridge-icon">🥗</div>
+            <div class="logo-text">Smart Fridge</div>
+        </div>
+    </div>
+    <div class="mobile-nav-tabs">
+        <button class="mobile-nav-tab active" data-section="dashboard">Dashboard</button>
+        <button class="mobile-nav-tab" data-section="inventory">Inventory</button>
+        <button class="mobile-nav-tab" data-section="recipes">Recipes</button>
+        <button class="mobile-nav-tab" data-section="calendar">Calendar</button>
+        <button class="mobile-nav-tab" data-section="goals">Goals</button>
+    </div>
 </div>
 
 <!-- Mobile Overlay -->
@@ -2855,29 +2971,54 @@ window.addEventListener('resize', function() {
 });
 </script>
 <script>
-// Enhanced navigation handling
+
+// Mobile Navigation Handler
 document.addEventListener('DOMContentLoaded', function() {
-    // Add click handlers to navigation items
-    document.querySelectorAll('.nav-item a').forEach(link => {
-        link.addEventListener('click', function(e) {
-            e.preventDefault();
-            
+    // Handle mobile nav tab clicks
+    document.querySelectorAll('.mobile-nav-tab').forEach(tab => {
+        tab.addEventListener('click', function() {
             const section = this.getAttribute('data-section');
             if (section) {
-                // Close mobile menu if open
-                closeMobileMenu();
+                // Update active tab
+                document.querySelectorAll('.mobile-nav-tab').forEach(t => t.classList.remove('active'));
+                this.classList.add('active');
                 
-                // Show the section
+                // Show section
                 showSection(section);
-                
-                // Update active states
-                document.querySelectorAll('.nav-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-                this.closest('.nav-item').classList.add('active');
             }
         });
     });
+
+    // Enhanced showSection function
+    window.showSection = function(sectionId) {
+        console.log('Showing section:', sectionId);
+        
+        // Hide all sections
+        const sections = document.querySelectorAll('.content-section');
+        sections.forEach(section => section.classList.remove('active'));
+        
+        // Show selected section
+        const targetSection = document.getElementById(sectionId);
+        if (targetSection) {
+            targetSection.classList.add('active');
+        }
+        
+        // Update desktop sidebar
+        const sidebarTabs = document.querySelectorAll('.nav-item');
+        sidebarTabs.forEach(tab => tab.classList.remove('active'));
+        const activeSidebarTab = document.querySelector(`.nav-item a[data-section="${sectionId}"]`)?.parentElement;
+        if (activeSidebarTab) {
+            activeSidebarTab.classList.add('active');
+        }
+        
+        // Update mobile tabs
+        const mobileTabs = document.querySelectorAll('.mobile-nav-tab');
+        mobileTabs.forEach(tab => tab.classList.remove('active'));
+        const activeMobileTab = document.querySelector(`.mobile-nav-tab[data-section="${sectionId}"]`);
+        if (activeMobileTab) {
+            activeMobileTab.classList.add('active');
+        }
+    };
 });
 
 // Make sure showSection function exists and works
