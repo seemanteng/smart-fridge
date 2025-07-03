@@ -1488,7 +1488,7 @@ opacity: 1;
         margin: 0 !important;
         padding: 30px !important;
         box-sizing: border-box !important;
-        overflow: hidden !important; /* Prevent overflow */
+        overflow: hidden !important;
     }
     
     /* Fix calendar grid container */
@@ -1497,7 +1497,7 @@ opacity: 1;
         max-width: 100% !important;
         display: grid !important;
         grid-template-columns: repeat(7, 1fr) !important;
-        gap: 2px !important; /* Smaller gap to fit better */
+        gap: 2px !important;
         margin-bottom: 15px !important;
         box-sizing: border-box !important;
     }
@@ -1508,7 +1508,7 @@ opacity: 1;
         max-width: 100% !important;
         display: grid !important;
         grid-template-columns: repeat(7, 1fr) !important;
-        gap: 2px !important; /* Match the dates grid gap */
+        gap: 2px !important;
         margin-bottom: 10px !important;
         box-sizing: border-box !important;
     }
@@ -1517,7 +1517,7 @@ opacity: 1;
     .calendar-date {
         width: 100% !important;
         max-width: 100% !important;
-        height: 32px !important; /* Slightly smaller */
+        height: 32px !important;
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
@@ -1536,27 +1536,24 @@ opacity: 1;
         box-sizing: border-box !important;
         overflow: hidden !important;
     }
-
-    .meals-today-panel {
-        order: 2 !important; /* Meals for today in middle */
-        max-height: 300px !important;
-        overflow-y: auto !important;
-    }
-
-    /* Make top picks section appear THIRD (bottom) */
-    .top-picks-section {
-        order: 3 !important; /* Top picks at bottom */
-    }
     
-    /* Remove the calendar-right-panel from flex ordering since we're ordering individual components */
-    .calendar-right-panel {
-        display: contents !important; /* This makes its children participate in the parent's flex layout */
-    }
-
+    /* KEEP ONLY THIS meals-today-panel rule */
     .meals-today-panel {
         order: 2 !important;
+        max-height: 300px !important;
+        overflow-y: auto !important;
         display: flex !important;
         flex-direction: column !important;
+    }
+    
+    /* Make top picks section appear THIRD (bottom) */
+    .top-picks-section {
+        order: 3 !important;
+    }
+    
+    /* Remove the calendar-right-panel from flex ordering */
+    .calendar-right-panel {
+        display: contents !important;
     }
 }
 
