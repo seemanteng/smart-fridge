@@ -1481,67 +1481,60 @@ opacity: 1;
         height: auto !important;
     }
     
-    /* Make calendar widget appear FIRST (top) */
     .calendar-widget {
         order: 1 !important;
         width: 100% !important;
         max-width: 100% !important;
-        margin: 0 auto !important;
-        padding: 15px !important;
+        margin: 0 !important;
+        padding: 30px !important;
+        box-sizing: border-box !important;
+        overflow: hidden !important; /* Prevent overflow */
+    }
+    
+    /* Fix calendar grid container */
+    .calendar-dates-grid {
+        width: 100% !important;
+        max-width: 100% !important;
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        gap: 2px !important; /* Smaller gap to fit better */
+        margin-bottom: 15px !important;
         box-sizing: border-box !important;
     }
     
-    /* Make meal details panel appear SECOND (middle) */
-    .meals-today-panel {
-        order: 2 !important; /* Meals for today in middle */
-        max-height: 300px !important;
-        overflow-y: auto !important;
-    }
-
-    /* Fix calendar header alignment */
-    .calendar-header {
-        display: flex !important;
-        justify-content: space-between !important;
-        align-items: center !important;
-        margin-bottom: 15px !important;
-        width: 100% !important;
-    }
-    
-    /* Fix calendar grid alignment */
-    .calendar-dates-grid {
-        width: 100% !important;
-        display: grid !important;
-        grid-template-columns: repeat(7, 1fr) !important;
-        gap: 4px !important;
-        margin-bottom: 15px !important;
-    }
-    
-    /* Fix weekdays alignment */
+    /* Fix weekdays grid */
     .calendar-weekdays {
         width: 100% !important;
+        max-width: 100% !important;
         display: grid !important;
         grid-template-columns: repeat(7, 1fr) !important;
-        gap: 4px !important;
+        gap: 2px !important; /* Match the dates grid gap */
         margin-bottom: 10px !important;
+        box-sizing: border-box !important;
     }
     
-    /* Fix individual calendar date squares */
+    /* Fix individual date cells */
     .calendar-date {
         width: 100% !important;
-        height: 35px !important;
+        max-width: 100% !important;
+        height: 32px !important; /* Slightly smaller */
         display: flex !important;
         align-items: center !important;
         justify-content: center !important;
         box-sizing: border-box !important;
+        font-size: 13px !important;
+        overflow: hidden !important;
     }
     
-    /* Fix weekday labels */
+    /* Fix weekday cells */
     .weekday {
         width: 100% !important;
+        max-width: 100% !important;
         text-align: center !important;
-        font-size: 12px !important;
-        padding: 4px !important;
+        font-size: 11px !important;
+        padding: 2px !important;
         box-sizing: border-box !important;
+        overflow: hidden !important;
     }
     
     /* Make top picks section appear THIRD (bottom) */
