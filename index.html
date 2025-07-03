@@ -466,117 +466,114 @@ gap: var(--space-4);
 /* Mobile Navigation Bar */
 @media (max-width: 768px) {
   .mobile-nav {
-    display: block !important;
-    position: fixed !important;
-    top: 0 !important;
-    left: 0 !important;
-    right: 0 !important;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    padding: 10px 15px !important;
-    z-index: 1003 !important;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-    height: 60px !important;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: var(--space-4) var(--space-3);
+    z-index: 1000;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
   }
-  
-  .mobile-nav-header { 
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    margin-bottom: 4px !important;
-    color: white !important;
+
+  .mobile-nav-header {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: var(--space-4);
+    color: white;
   }
-  
+
   .mobile-nav-logo {
-    display: flex !important;
-    align-items: center !important;
-    gap: 0px !important;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
   }
-  
-  .mobile-nav-logo .logo-image { /* Style for the logo image */
-    width: 30px !important;
-    height: 30px !important;
-    border-radius: 5% !important;
+
+  .mobile-nav-logo .fridge-icon {
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
   }
-  
-  .mobile-nav-tabs { /* Style for the tab container */
-    display: flex !important;
-    gap: 6px !important;
-    overflow-x: auto !important;
-    padding: 0 5px !important;
-    scrollbar-width: none !important;
-    -ms-overflow-style: none !important;
+
+  .mobile-nav-logo .logo-text {
+    font-size: var(--text-lg);
+    font-weight: var(--font-bold);
   }
-  
-  .mobile-nav-tabs::-webkit-scrollbar { 
-    display: none !important; 
+
+  .mobile-nav-tabs {
+    display: flex;
+    gap: var(--space-2);
+    overflow-x: auto;
+    padding: 0 var(--space-2);
+    scrollbar-width: none;
+    -ms-overflow-style: none;
   }
-  
-  .mobile-nav-tab { /* Style for each tab */
-    flex-shrink: 0 !important;
-    background: rgba(255, 255, 255, 0.2) !important;
-    border: none !important;
-    border-radius: 15px !important;
-    padding: 4px 8px !important;
-    color: rgba(255, 255, 255, 0.8) !important;
-    font-weight: 500 !important;
-    font-size: 12px !important;
-    cursor: pointer !important;
-    transition: all 0.3s ease !important;
-    white-space: nowrap !important;
-    min-width: 60px !important;
-    height: 30px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
+
+  .mobile-nav-tabs::-webkit-scrollbar {
+    display: none;
   }
-  
+
+  .mobile-nav-tab {
+    flex-shrink: 0;
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: var(--radius-full);
+    padding: var(--space-3) var(--space-5);
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: var(--font-medium);
+    font-size: var(--text-sm);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-width: 80px;
+  }
+
   .mobile-nav-tab.active {
-    background: white !important;
-    color: #667eea !important;
-    font-weight: 600 !important;
+    background: white;
+    color: var(--primary-color);
+    font-weight: var(--font-semibold);
+    transform: translateY(-1px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
   }
-  
+
   .mobile-nav-tab:hover:not(.active) {
-    background: rgba(255, 255, 255, 0.3) !important;
-    color: white !important;
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
   }
-  
-  /* Hide desktop sidebar and old mobile header on mobile */
+
+  /* Hide desktop sidebar on mobile */
   .sidebar {
     display: none !important;
   }
-  
-  .mobile-header {
-    display: none !important;
-  }
-  
+
   /* Adjust main content for mobile nav */
   .main-content {
     margin-left: 0 !important;
     width: 100% !important;
-    padding-top: 65px !important;
-    padding-left: 15px !important;
-    padding-right: 15px !important;
-    padding-bottom: 15px !important;
+    padding-top: 120px !important; /* Space for mobile nav */
   }
-}
 
-/* Remove the duplicate content-section rules */
-@media (max-width: 768px) {
+  /* Content sections adjustment */
   .content-section {
-    padding-top: 0 !important;
-    min-height: calc(100vh - 100px) !important;
-    overflow-y: auto !important;
-  }
-  
-  .dashboard-top-row {
-    margin-top: 0 !important;
+    padding-top: var(--space-4);
   }
 }
 
 /* Show mobile nav only on mobile */
 .mobile-nav {
   display: none;
+}
+
+@media (max-width: 768px) {
+  .mobile-nav {
+    display: block;
+  }
 }
 
 /* Modal improvements */
