@@ -472,7 +472,7 @@ gap: var(--space-4);
     left: 0 !important;
     right: 0 !important;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    padding: var(--space-4) var(--space-3) !important;
+    padding: var(--space-2) var(--space-3) !important;
     z-index: 1003 !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
   }
@@ -481,29 +481,29 @@ gap: var(--space-4);
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    margin-bottom: var(--space-4) !important;
+    margin-bottom: var(--space-2) !important;
     color: white !important;
   }
 
-  .mobile-nav-logo {
+  /* .mobile-nav-logo {
     display: flex !important;
     align-items: center !important;
     gap: var(--space-2) !important;
-  }
+  } */
 
   .mobile-nav-logo .fridge-icon {
     background: rgba(255, 255, 255, 0.2) !important;
     border-radius: 50% !important;
-    width: 32px !important;
-    height: 32px !important;
+    width: 24px !important; /* Smaller icon */
+    height: 24px !important; /* Smaller icon */
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    font-size: 1.2rem !important;
+    font-size: 1rem !important; /* Smaller font */
   }
 
   .mobile-nav-logo .logo-text {
-    font-size: var(--text-lg) !important;
+    font-size: var(--text-base) !important; /* Smaller text */
     font-weight: var(--font-bold) !important;
   }
 
@@ -525,14 +525,14 @@ gap: var(--space-4);
     background: rgba(255, 255, 255, 0.2) !important;
     border: none !important;
     border-radius: var(--radius-full) !important;
-    padding: var(--space-3) var(--space-5) !important;
+    padding: var(--space-2) var(--space-4) !important; /* Smaller padding */
     color: rgba(255, 255, 255, 0.8) !important;
     font-weight: var(--font-medium) !important;
-    font-size: var(--text-sm) !important;
+    font-size: var(--text-xs) !important; /* Smaller font */
     cursor: pointer !important;
     transition: all 0.3s ease !important;
     white-space: nowrap !important;
-    min-width: 80px !important;
+    min-width: 70px !important; /* Smaller min-width */
   }
 
   .mobile-nav-tab.active {
@@ -561,7 +561,21 @@ gap: var(--space-4);
   .main-content {
     margin-left: 0 !important;
     width: 100% !important;
-    padding-top: 120px !important; /* Space for mobile nav */
+    padding-top: 80px !important; /* Reduced from 120px to 80px */
+    padding-left: 15px !important;
+    padding-right: 15px !important;
+    padding-bottom: 15px !important;
+  }
+}
+@media (max-width: 768px) {
+  .content-section {
+    padding-top: var(--space-4) !important;
+    min-height: calc(100vh - 100px) !important;
+    overflow-y: auto !important;
+  }
+  
+  .dashboard-top-row {
+    margin-top: var(--space-4) !important;
   }
 }
 
