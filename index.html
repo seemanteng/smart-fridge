@@ -1483,7 +1483,12 @@ opacity: 1;
     
     /* Make calendar widget appear FIRST (top) */
     .calendar-widget {
-        order: 1 !important; /* Calendar at the very top */
+        order: 1 !important;
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+        padding: 15px !important;
+        box-sizing: border-box !important;
     }
     
     /* Make meal details panel appear SECOND (middle) */
@@ -1491,6 +1496,52 @@ opacity: 1;
         order: 2 !important; /* Meals for today in middle */
         max-height: 300px !important;
         overflow-y: auto !important;
+    }
+
+    /* Fix calendar header alignment */
+    .calendar-header {
+        display: flex !important;
+        justify-content: space-between !important;
+        align-items: center !important;
+        margin-bottom: 15px !important;
+        width: 100% !important;
+    }
+    
+    /* Fix calendar grid alignment */
+    .calendar-dates-grid {
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        gap: 4px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    /* Fix weekdays alignment */
+    .calendar-weekdays {
+        width: 100% !important;
+        display: grid !important;
+        grid-template-columns: repeat(7, 1fr) !important;
+        gap: 4px !important;
+        margin-bottom: 10px !important;
+    }
+    
+    /* Fix individual calendar date squares */
+    .calendar-date {
+        width: 100% !important;
+        height: 35px !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        box-sizing: border-box !important;
+    }
+    
+    /* Fix weekday labels */
+    .weekday {
+        width: 100% !important;
+        text-align: center !important;
+        font-size: 12px !important;
+        padding: 4px !important;
+        box-sizing: border-box !important;
     }
     
     /* Make top picks section appear THIRD (bottom) */
