@@ -1475,27 +1475,79 @@ opacity: 1;
 
 @media (max-width: 768px) {
     #calendar {
-        padding-top: 30px !important; /* Add space at top of calendar section */
+        padding-top: 30px !important;
     }
     
-    /* Adjust calendar layout for mobile */
+    /* Stack calendar layout vertically on mobile */
     .calendar-new-layout {
-        flex-direction: column !important; /* Stack calendar vertically on mobile */
-        gap: 20px !important;
+        flex-direction: column !important;
+        gap: 15px !important;
+        height: auto !important;
     }
     
-    .meals-today-panel,
+    /* Make meal details panel more compact */
+    .meals-today-panel {
+        order: 2 !important; /* Move below calendar */
+        max-height: 300px !important;
+        overflow-y: auto !important;
+    }
+    
     .calendar-right-panel {
-        width: 100% !important; /* Full width on mobile */
+        order: 1 !important; /* Move calendar to top */
     }
     
-    /* Ensure calendar header has proper spacing */
-    .meals-header {
-        margin-top: 0 !important; /* Reset any negative margins */
-    }
-    
+    /* Make calendar more compact */
     .calendar-widget {
-        margin-top: 0 !important;
+        padding: 15px !important;
+        border-radius: 16px !important;
+    }
+    
+    .calendar-dates-grid {
+        gap: 4px !important;
+        margin-bottom: 15px !important;
+    }
+    
+    .calendar-date {
+        min-height: 35px !important;
+        max-height: 35px !important;
+        font-size: 14px !important;
+        border-radius: 8px !important;
+    }
+    
+    .weekday {
+        font-size: 12px !important;
+        min-height: 25px !important;
+        padding: 4px !important;
+    }
+    
+    /* Make top picks section more compact */
+    .top-picks-section {
+        padding: 15px !important;
+        margin-top: 15px !important;
+    }
+    
+    .top-picks-section h3 {
+        font-size: 16px !important;
+        margin-bottom: 10px !important;
+    }
+    
+    .top-picks-grid {
+        gap: 10px !important;
+    }
+    
+    /* Calendar header adjustments */
+    .calendar-header {
+        margin-bottom: 15px !important;
+    }
+    
+    .calendar-header h2 {
+        font-size: 20px !important;
+    }
+    
+    .calendar-nav-btn {
+        width: 35px !important;
+        height: 35px !important;
+        font-size: 16px !important;
     }
 }
 
