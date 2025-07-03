@@ -1704,10 +1704,22 @@ transform: translateX(100%);
 transition: transform 0.3s ease;
 z-index: 1100;
 max-width: 300px;
+cursor: pointer;
+touch-action: pan-x; /* Allow horizontal panning */
+user-select: none;
 }
 
 .toast.show {
 transform: translateX(0);
+}
+
+.toast.swiping {
+    transition: none; /* Disable transition while swiping */
+}
+
+.toast.swiped-away {
+    transform: translateX(100%) !important;
+    opacity: 0;
 }
 
 .toast.error {
@@ -1719,17 +1731,22 @@ background: var(--warning-color);
 }
 
 @media (max-width: 480px) {
-.toast {
-left: 20px;
-right: 20px;
-top: 20px;
-transform: translateY(-100%);
-max-width: none;
-}
-
-.toast.show {
-transform: translateY(0);
-}
+    .toast {
+        left: 20px;
+        right: 20px;
+        top: 20px;
+        transform: translateY(-100%);
+        max-width: none;
+        touch-action: pan-y; /* Allow vertical panning on mobile */
+    }
+    
+    .toast.show {
+        transform: translateY(0);
+    }
+    
+    .toast.swiped-away {
+        transform: translateY(-100%) !important;
+    }
 }
 
 /* Ensure proper responsive layout */
