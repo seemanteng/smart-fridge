@@ -41,47 +41,24 @@ class Goals {
         };
     }
 
-    loadUserProfile() {
-        const savedProfile = localStorage.getItem('mtable_user_profile');
-        if (savedProfile) {
-            const profile = JSON.parse(savedProfile);
-            return {
-                firstName: profile.firstName || null,
-                age: profile.age || null,
-                gender: profile.gender || null,
-                weight: profile.weight || null,
-                height: profile.height || null,
-                activityLevel: profile.activityLevel || 'moderate',
-                goal: profile.goal || 'maintain'
-            };
-        }
-        return {
-            firstName: null,
-            age: null,
-            gender: null,
-            weight: null,
-            height: null,
-            activityLevel: 'moderate',
-            goal: 'maintain'
-        };
-    }
-
     loadWeeklyStats() {
         // Get actual data from the last 7 days - only from real sources
         const weeklyData = [];
         const today = new Date();
         
+        // Get today's date string for comparison
+        const todayDateString = this.getLocalDateString(today);
+        
         for (let i = 6; i >= 0; i--) {
             const date = new Date(today);
             date.setDate(today.getDate() - i);
-            const dateKey = date.toISOString().split('T')[0];
+            const dateKey = this.getLocalDateString(date);
             
             // Only get data from actual logged sources
             let dayStats = this.getDayStats(dateKey);
             
-            // If no stats found and it's today, check dashboard (but only if it has real data)
-            // If no stats found and it's today, check dashboard (but only if it has real data)  
-            if (!dayStats && i === 0 && window.dashboard) {
+            // If no stats found and it's TODAY (not just i === 0), check dashboard
+            if (!dayStats && dateKey === todayDateString && window.dashboard) {
                 const todayStats = window.dashboard.getTodayStats();
                 // EXTRA CHECK: Only use dashboard data if it has actual logged meals AND no fake data
                 if (todayStats && todayStats.meals && todayStats.meals.length > 0 && 
@@ -107,7 +84,40 @@ class Goals {
         }
         
         console.log('Weekly stats loaded:', weeklyData); // Debug log
+        console.log('Today date string:', todayDateString); // Debug log
         return weeklyData;
+    }
+
+    loadUserProfile() {
+        const savedProfile = localStorage.getItem('mtable_user_profile');
+        if (savedProfile) {
+            const profile = JSON.parse(savedProfile);
+            return {
+                firstName: profile.firstName || null,
+                age: profile.age || null,
+                gender: profile.gender || null,
+                weight: profile.weight || null,
+                height: profile.height || null,
+                activityLevel: profile.activityLevel || 'moderate',
+                goal: profile.goal || 'maintain'
+            };
+        }
+        return {
+            firstName: null,
+            age: null,
+            gender: null,
+            weight: null,
+            height: null,
+            activityLevel: 'moderate',
+            goal: 'maintain'
+        };
+    }
+
+    getLocalDateString(date = new Date()) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
     }
 
     // Force refresh all data and displays
@@ -793,7 +803,7 @@ class Goals {
 
     // Legacy methods for backward compatibility
     loadProgress() {
-        const today = new Date().toISOString().split('T')[0];
+        const today = this.getLocalDateString(new Date());
         const savedProgress = localStorage.getItem(`mtable_stats_${today}`);
         if (savedProgress) {
             return JSON.parse(savedProgress);

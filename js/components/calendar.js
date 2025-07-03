@@ -1,12 +1,11 @@
 /**
- * Calendar Component
- * Handles meal planning calendar functionality with improved dashboard integration
+ * Monthly Calendar Component
+ * Replaces weekly view with proper monthly calendar showing meals
  */
 
 class Calendar {
     constructor() {
         this.currentDate = new Date();
-        this.currentWeek = this.getCurrentWeek();
         this.meals = this.loadMeals();
         this.groceryList = [];
         this.init();
@@ -17,8 +16,17 @@ class Calendar {
         this.bindEvents();
         this.generateGroceryList();
         
-        // Listen for dashboard meal additions
+        // Listen for dashboard meal additions AND deletions
         window.addEventListener('dashboard-updated', () => {
+            console.log('Calendar received dashboard update');
+            this.syncWithDashboard();
+            this.renderCalendar();
+        });
+
+        // Also listen for dashboard meal removals
+        window.addEventListener('meal-removed', (event) => {
+            console.log('Calendar received meal removal:', event.detail);
+            this.removeMealFromDashboard(event.detail);
             this.renderCalendar();
         });
     }
@@ -40,19 +48,41 @@ class Calendar {
         return [];
     }
 
-    getCurrentWeek() {
-        const today = new Date();
-        const dayOfWeek = today.getDay();
-        const startOfWeek = new Date(today);
-        startOfWeek.setDate(today.getDate() - dayOfWeek + 1); // Monday as start
+    getLocalDateString(date = new Date()) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
 
-        const week = [];
-        for (let i = 0; i < 7; i++) {
-            const day = new Date(startOfWeek);
-            day.setDate(startOfWeek.getDate() + i);
-            week.push(day);
+    // Get all days in current month view (including prev/next month days to fill grid)
+    getMonthDays() {
+        const year = this.currentDate.getFullYear();
+        const month = this.currentDate.getMonth();
+        
+        // First day of current month
+        const firstDay = new Date(year, month, 1);
+        // Last day of current month
+        const lastDay = new Date(year, month + 1, 0);
+        
+        // Start from Monday of the week containing first day
+        const startDate = new Date(firstDay);
+        const dayOfWeek = (firstDay.getDay() + 6) % 7; // Make Monday = 0
+        startDate.setDate(firstDay.getDate() - dayOfWeek);
+        
+        // Generate 42 days (6 weeks) to fill calendar grid
+        const days = [];
+        for (let i = 0; i < 42; i++) {
+            const day = new Date(startDate);
+            day.setDate(startDate.getDate() + i);
+            days.push({
+                date: day,
+                isCurrentMonth: day.getMonth() === month,
+                isToday: this.getLocalDateString(day) === this.getLocalDateString(new Date())
+            });
         }
-        return week;
+        
+        return days;
     }
 
     loadMeals() {
@@ -61,8 +91,6 @@ class Calendar {
         if (savedMeals) {
             return JSON.parse(savedMeals);
         }
-
-        // Return empty object - no default meal data
         return {};
     }
 
@@ -80,22 +108,44 @@ class Calendar {
         const calendarGrid = document.querySelector('.calendar-grid');
         if (!calendarGrid) return;
 
-        calendarGrid.innerHTML = '';
-        const today = new Date().toDateString();
-        const dayNames = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+        // Update calendar header with current month/year
+        this.updateCalendarHeader();
 
-        this.currentWeek.forEach((date, index) => {
-            const dayElement = this.createDayElement(date, dayNames[index], today);
+        calendarGrid.innerHTML = '';
+        
+        const monthDays = this.getMonthDays();
+        
+        monthDays.forEach(dayInfo => {
+            const dayElement = this.createMonthDayElement(dayInfo);
             calendarGrid.appendChild(dayElement);
         });
     }
 
-    createDayElement(date, dayName, today) {
-        const dayDiv = document.createElement('div');
-        const dateKey = this.formatDateKey(date);
-        const isToday = date.toDateString() === today;
+    updateCalendarHeader() {
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                           'July', 'August', 'September', 'October', 'November', 'December'];
         
-        dayDiv.className = `calendar-day ${isToday ? 'today' : ''}`;
+        const monthYearText = `${monthNames[this.currentDate.getMonth()]} ${this.currentDate.getFullYear()}`;
+        
+        // Find and update calendar header
+        const calendarHeader = document.querySelector('.calendar-header h2');
+        if (calendarHeader) {
+            calendarHeader.textContent = monthYearText;
+        }
+        
+        // Also update any other month display elements
+        const monthDisplay = document.querySelector('.month-display');
+        if (monthDisplay) {
+            monthDisplay.textContent = monthYearText;
+        }
+    }
+
+    createMonthDayElement(dayInfo) {
+        const { date, isCurrentMonth, isToday } = dayInfo;
+        const dateKey = this.formatDateKey(date);
+        
+        const dayDiv = document.createElement('div');
+        dayDiv.className = `calendar-date ${isCurrentMonth ? '' : 'other-month'} ${isToday ? 'today' : ''}`;
         dayDiv.dataset.date = dateKey;
 
         const dayMeals = this.meals[dateKey] || [];
@@ -109,7 +159,7 @@ class Calendar {
             dashboardMeals.forEach(dashboardMeal => {
                 const exists = dayMeals.some(meal => 
                     meal.name === dashboardMeal.name && 
-                    Math.abs(new Date(meal.timestamp || 0) - new Date(dashboardMeal.timestamp)) < 60000 // Within 1 minute
+                    Math.abs(new Date(meal.timestamp || 0) - new Date(dashboardMeal.timestamp)) < 60000
                 );
                 
                 if (!exists) {
@@ -124,24 +174,23 @@ class Calendar {
             });
         }
 
-        const mealsHtml = dayMeals.length > 0 
-            ? dayMeals.map(meal => {
-                const shortName = meal.name.length > 12 ? meal.name.substring(0, 10) + '...' : meal.name;
-                return `<div class="meal-item" title="${meal.name} (${meal.calories || 0} cal)">${meal.emoji} ${shortName}</div>`;
-            }).join('')
-            : '<div class="add-meal-prompt">Add meals...</div>';
-
-        // Calculate total calories for the day
         const totalCalories = dayMeals.reduce((total, meal) => total + (meal.calories || 0), 0);
-        const caloriesDisplay = totalCalories > 0 ? `<div class="day-calories">${totalCalories} cal</div>` : '';
+        const hasMeals = dayMeals.length > 0;
+        
+        // Add has-meals class for styling
+        if (hasMeals) {
+            dayDiv.classList.add('has-meals');
+        }
 
+        // Create day content
         dayDiv.innerHTML = `
-            <div class="day-header">
-                <div class="day-number">${dayName}</div>
-                <div class="day-date">${date.getDate()}</div>
-            </div>
-            <div class="day-meals">${mealsHtml}</div>
-            ${caloriesDisplay}
+            <div class="date-number">${date.getDate()}</div>
+            ${hasMeals ? `
+                <div class="meal-indicator">
+                    <div class="meal-count">${dayMeals.length} meal${dayMeals.length > 1 ? 's' : ''}</div>
+                    <div class="calorie-count">${totalCalories} cal</div>
+                </div>
+            ` : ''}
         `;
 
         return dayDiv;
@@ -177,12 +226,15 @@ class Calendar {
     bindEvents() {
         // Calendar day click events
         document.addEventListener('click', (e) => {
-            if (e.target.closest('.calendar-day')) {
-                const dayElement = e.target.closest('.calendar-day');
+            if (e.target.closest('.calendar-date')) {
+                const dayElement = e.target.closest('.calendar-date');
                 const date = dayElement.dataset.date;
                 this.showMealPlanningModal(date);
             }
         });
+
+        // Navigation arrows
+        this.bindNavigationEvents();
 
         // Grocery list checkbox events
         document.addEventListener('change', (e) => {
@@ -190,33 +242,28 @@ class Calendar {
                 this.toggleGroceryItem(e.target);
             }
         });
-
-        // Navigation arrows (if added later)
-        this.bindNavigationEvents();
     }
 
     bindNavigationEvents() {
-        // Previous/Next week navigation
+        // Previous/Next month navigation
         const prevBtn = document.querySelector('.calendar-prev');
         const nextBtn = document.querySelector('.calendar-next');
 
         if (prevBtn) {
             prevBtn.addEventListener('click', () => {
-                this.navigateWeek(-1);
+                this.navigateMonth(-1);
             });
         }
 
         if (nextBtn) {
             nextBtn.addEventListener('click', () => {
-                this.navigateWeek(1);
+                this.navigateMonth(1);
             });
         }
     }
 
-    navigateWeek(direction) {
-        const firstDay = this.currentWeek[0];
-        firstDay.setDate(firstDay.getDate() + (direction * 7));
-        this.currentWeek = this.getCurrentWeek();
+    navigateMonth(direction) {
+        this.currentDate.setMonth(this.currentDate.getMonth() + direction);
         this.renderCalendar();
     }
 
@@ -257,7 +304,7 @@ class Calendar {
         return modal;
     }
 
-   renderMealPlanningForm(dateKey) {
+    renderMealPlanningForm(dateKey) {
         const dayMeals = this.meals[dateKey] || [];
 
         return `
@@ -300,9 +347,9 @@ class Calendar {
                 </div>
             </div>
         `;
-    } 
+    }
 
-    // Add a single meal without meal type categories
+    // Add a single meal
     addSingleMeal(dateKey) {
         const modal = document.querySelector('.modal');
         const mealInput = modal.querySelector('#mealName');
@@ -355,7 +402,7 @@ class Calendar {
             const calorieSource = customCalories ? 'custom' : 'estimated';
             showToast(`${mealName} added! (${calories} calories - ${calorieSource})`, 'success');
         }
-    } 
+    }
 
     // Remove meal by index
     removeMealByIndex(dateKey, mealIndex) {
@@ -391,141 +438,14 @@ class Calendar {
         }
     }
 
-    renderMealTypeSection(mealType, dayMeals, dateKey) {
-        const existingMeal = dayMeals.find(meal => meal.type === mealType);
-        const mealName = existingMeal ? existingMeal.name : '';
-        const mealEmoji = existingMeal ? existingMeal.emoji : this.getDefaultEmoji(mealType);
-
-        return `
-            <div class="meal-type-section">
-                <h4>${mealEmoji} ${mealType.charAt(0).toUpperCase() + mealType.slice(1)}</h4>
-                <div class="form-group">
-                    <input type="text" 
-                           class="meal-input" 
-                           data-meal-type="${mealType}"
-                           data-date="${dateKey}"
-                           placeholder="Enter ${mealType} meal..."
-                           value="${mealName}">
-                </div>
-                ${existingMeal ? `
-                    <div class="meal-info">
-                        <span class="meal-calories">${existingMeal.calories || 0} calories</span>
-                        <button class="btn btn-sm btn-danger" onclick="calendar.removeMeal('${dateKey}', '${mealType}')">Remove</button>
-                    </div>
-                ` : ''}
-            </div>
-        `;
-    }
-
-    getDefaultEmoji(mealType) {
-        const emojis = {
-            breakfast: '🍳',
-            lunch: '🥪',
-            dinner: '🍽️',
-            snack: '🍎'
-        };
-        return emojis[mealType] || '🍽️';
-    }
-
-    saveDayMeals(dateKey) {
-        const modal = document.querySelector('.modal');
-        const mealInputs = modal.querySelectorAll('.meal-input');
-        const newMeals = [];
-        
-        mealInputs.forEach(input => {
-            const mealType = input.dataset.mealType;
-            const mealName = input.value.trim();
-            if (mealName) {
-                const calories = this.estimateCalories(mealName, mealType);
-                newMeals.push({
-                    type: mealType,
-                    name: mealName,
-                    emoji: this.getEmojiForMeal(mealName) || this.getDefaultEmoji(mealType),
-                    calories: calories,
-                    timestamp: new Date().toISOString()
-                });
-            }
-        });
-        
-        this.meals[dateKey] = newMeals;
-        
-        // Calculate and save total calories for the day
-        const totalCalories = newMeals.reduce((total, meal) => total + (meal.calories || 0), 0);
-        this.saveDayTotalCalories(dateKey, totalCalories);
-        
-        this.saveMeals();
-        this.renderCalendar();
-        modal.remove();
-        
-        if (window.showToast) {
-            showToast(`Meals saved! Total: ${totalCalories} calories`, 'success');
-        }
-    }
-    
-    // Save daily total calories
-    saveDayTotalCalories(dateKey, totalCalories) {
-        const dailyTotals = this.loadDailyTotals();
-        dailyTotals[dateKey] = totalCalories;
-        localStorage.setItem('mtable_daily_totals', JSON.stringify(dailyTotals));
-    }
-
-    removeMeal(dateKey, mealType) {
-        if (this.meals[dateKey]) {
-            this.meals[dateKey] = this.meals[dateKey].filter(meal => meal.type !== mealType);
-            if (this.meals[dateKey].length === 0) {
-                delete this.meals[dateKey];
-            }
-        }
-        
-        this.saveMeals();
-        this.renderCalendar();
-        
-        // Close and reopen modal to refresh
-        const modal = document.querySelector('.modal');
-        if (modal) {
-            modal.remove();
-            setTimeout(() => this.showMealPlanningModal(dateKey), 100);
-        }
-    }
-
-    removeMealFromCalendar(dateKey, mealName) {
-        if (this.meals[dateKey]) {
-            this.meals[dateKey] = this.meals[dateKey].filter(meal => meal.name !== mealName);
-            if (this.meals[dateKey].length === 0) {
-                delete this.meals[dateKey];
-                // Remove daily total when no meals left
-                const dailyTotals = this.loadDailyTotals();
-                delete dailyTotals[dateKey];
-                localStorage.setItem('mtable_daily_totals', JSON.stringify(dailyTotals));
-            } else {
-                // Recalculate total calories
-                const totalCalories = this.meals[dateKey].reduce((total, meal) => total + (meal.calories || 0), 0);
-                this.saveDayTotalCalories(dateKey, totalCalories);
-            }
-            this.saveMeals();
-            this.renderCalendar();
-        }
-    }
-
-    // Load daily totals
-    loadDailyTotals() {
-        const saved = localStorage.getItem('mtable_daily_totals');
-        return saved ? JSON.parse(saved) : {};
-    }
-
-    // Get total calories for a specific date
-    getDayTotalCalories(dateKey) {
-        const dailyTotals = this.loadDailyTotals();
-        return dailyTotals[dateKey] || 0;
-    }
-
     estimateCalories(mealName, mealType) {
         // Simple calorie estimation based on meal type and keywords
         const baseCalories = {
             breakfast: 300,
             lunch: 400,
             dinner: 500,
-            snack: 150
+            snack: 150,
+            meal: 400
         };
 
         let calories = baseCalories[mealType] || 300;
@@ -543,6 +463,33 @@ class Calendar {
         return Math.round(calories);
     }
 
+    // Save daily total calories
+    saveDayTotalCalories(dateKey, totalCalories) {
+        const dailyTotals = this.loadDailyTotals();
+        dailyTotals[dateKey] = totalCalories;
+        localStorage.setItem('mtable_daily_totals', JSON.stringify(dailyTotals));
+    }
+
+    // Load daily totals
+    loadDailyTotals() {
+        const saved = localStorage.getItem('mtable_daily_totals');
+        return saved ? JSON.parse(saved) : {};
+    }
+
+    // Get total calories for a specific date
+    getDayTotalCalories(dateKey) {
+        const dailyTotals = this.loadDailyTotals();
+        return dailyTotals[dateKey] || 0;
+    }
+
+    formatDateKey(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
+    // Grocery list methods (unchanged)
     generateGroceryList() {
         const ingredients = this.extractIngredientsFromMeals();
         const currentInventory = this.getCurrentInventory();
@@ -713,10 +660,6 @@ class Calendar {
         }
     }
 
-    formatDateKey(date) {
-        return date.toISOString().split('T')[0];
-    }
-
     // Public methods for external access
     addMeal(date, mealType, mealName, calories = null, emoji = null) {
         const dateKey = typeof date === 'string' ? date : this.formatDateKey(date);
@@ -733,7 +676,7 @@ class Calendar {
             this.meals[dateKey].push({
                 type: mealType,
                 name: mealName,
-                emoji: emoji || this.getEmojiForMeal(mealName) || this.getDefaultEmoji(mealType),
+                emoji: emoji || this.getEmojiForMeal(mealName) || '🍽️',
                 calories: calories || this.estimateCalories(mealName, mealType),
                 timestamp: new Date().toISOString()
             });
@@ -757,65 +700,85 @@ class Calendar {
         return meals.reduce((total, meal) => total + (meal.calories || 0), 0);
     }
 
-    getWeeklyCalories() {
-        let total = 0;
-        this.currentWeek.forEach(date => {
-        total += this.getTotalCaloriesForDate(date);
-       });
-       return total;
-   }
+    // Method to sync with dashboard meals
+    syncWithDashboard() {
+        if (!window.dashboard) return;
+        
+        const today = this.getLocalDateString(new Date());
+        const todayStats = window.dashboard.getTodayStats();
+        
+        if (todayStats.meals && todayStats.meals.length > 0) {
+            const todayMeals = this.meals[today] || [];
+            
+            todayStats.meals.forEach(dashboardMeal => {
+                const exists = todayMeals.some(meal => 
+                    meal.name === dashboardMeal.name && 
+                    Math.abs(new Date(meal.timestamp || 0) - new Date(dashboardMeal.timestamp)) < 60000
+                );
+                
+                if (!exists) {
+                    this.addMeal(
+                        today, 
+                        this.determineMealTypeFromTime(dashboardMeal.timestamp),
+                        dashboardMeal.name,
+                        dashboardMeal.calories,
+                        this.getEmojiForMeal(dashboardMeal.name)
+                    );
+                }
+            });
+        } else {
+            // If dashboard has no meals for today, clear today's meals in calendar
+            if (this.meals[today]) {
+                delete this.meals[today];
+                this.saveMeals();
+            }
+        }
+    }
 
-   navigateWeek(direction) {
-       const firstDay = this.currentWeek[0];
-       firstDay.setDate(firstDay.getDate() + (direction * 7));
-       this.currentDate = new Date(firstDay);
-       this.currentWeek = this.getCurrentWeek();
-       this.renderCalendar();
-   }
-
-   // Method to sync with dashboard meals
-   syncWithDashboard() {
-       if (!window.dashboard) return;
-       
-       const today = new Date().toISOString().split('T')[0];
-       const todayStats = window.dashboard.getTodayStats();
-       
-       if (todayStats.meals && todayStats.meals.length > 0) {
-           const todayMeals = this.meals[today] || [];
-           
-           todayStats.meals.forEach(dashboardMeal => {
-               const exists = todayMeals.some(meal => 
-                   meal.name === dashboardMeal.name && 
-                   Math.abs(new Date(meal.timestamp || 0) - new Date(dashboardMeal.timestamp)) < 60000
-               );
-               
-               if (!exists) {
-                   this.addMeal(
-                       today, 
-                       this.determineMealTypeFromTime(dashboardMeal.timestamp),
-                       dashboardMeal.name,
-                       dashboardMeal.calories,
-                       this.getEmojiForMeal(dashboardMeal.name)
-                   );
-               }
-           });
-       }
-   }
+    // Remove meal from calendar when removed from dashboard
+    removeMealFromDashboard(mealData) {
+        const today = this.getLocalDateString(new Date());
+        
+        if (this.meals[today]) {
+            // Find and remove the meal by name and timestamp
+            this.meals[today] = this.meals[today].filter(meal => {
+                // Match by name and similar timestamp (within 1 minute)
+                const timeDiff = Math.abs(new Date(meal.timestamp || 0) - new Date(mealData.timestamp || 0));
+                return !(meal.name === mealData.name && timeDiff < 60000);
+            });
+            
+            // If no meals left for today, delete the day
+            if (this.meals[today].length === 0) {
+                delete this.meals[today];
+                
+                // Also remove daily total
+                const dailyTotals = this.loadDailyTotals();
+                delete dailyTotals[today];
+                localStorage.setItem('mtable_daily_totals', JSON.stringify(dailyTotals));
+            } else {
+                // Recalculate total calories
+                const totalCalories = this.meals[today].reduce((total, meal) => total + (meal.calories || 0), 0);
+                this.saveDayTotalCalories(today, totalCalories);
+            }
+            
+            this.saveMeals();
+        }
+    }
 }
 
 // Initialize calendar when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
-   window.calendar = new Calendar();
-   
-   // Sync with dashboard after a short delay
-   setTimeout(() => {
-       if (window.calendar && typeof window.calendar.syncWithDashboard === 'function') {
-           window.calendar.syncWithDashboard();
-       }
-   }, 1000);
+    window.calendar = new Calendar();
+    
+    // Sync with dashboard after a short delay
+    setTimeout(() => {
+        if (window.calendar && typeof window.calendar.syncWithDashboard === 'function') {
+            window.calendar.syncWithDashboard();
+        }
+    }, 1000);
 });
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
-   module.exports = Calendar;
+    module.exports = Calendar;
 }

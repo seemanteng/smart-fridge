@@ -33,8 +33,16 @@ class Dashboard {
         };
     }
 
+
+    getLocalDateString(date = new Date()) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0');
+        const day = String(date.getDate()).padStart(2, '0');
+        return `${year}-${month}-${day}`;
+    }
+
     loadTodayStats() {
-        const today = new Date().toISOString().split('T')[0];
+        const today = this.getLocalDateString(new Date()); // ← Add explicit parameter
         const savedStats = localStorage.getItem(`mtable_stats_${today}`);
         
         if (savedStats) {
@@ -52,7 +60,7 @@ class Dashboard {
     }
 
     saveStats() {
-        const today = new Date().toISOString().split('T')[0];
+        const today = this.getLocalDateString(new Date()); // ← Add explicit parameter
         localStorage.setItem(`mtable_stats_${today}`, JSON.stringify(this.todayStats));
     }
 
@@ -70,35 +78,78 @@ class Dashboard {
     }
 
 
-   removeMeal(mealIndex) {
-        if (mealIndex >= 0 && mealIndex < this.todayStats.meals.length) {
-            const meal = this.todayStats.meals[mealIndex];
-            // Remove the meal's nutrition from totals
-            this.todayStats.calories -= meal.calories;
-            this.todayStats.protein -= meal.protein;
-            this.todayStats.carbs -= (meal.carbs || 0);
-            this.todayStats.fat -= (meal.fat || 0);
+    // REPLACE your removeMeal method in dashboard.js with this:
+
+    removeMeal(mealIndex) {
+        console.log('Removing meal at index:', mealIndex);
+        console.log('Current meals:', this.todayStats.meals);
+        
+        // Safety check - make sure meals array exists and has items
+        if (!this.todayStats.meals || !Array.isArray(this.todayStats.meals)) {
+            console.error('todayStats.meals is not an array:', this.todayStats.meals);
+            if (window.showToast) {
+                showToast('Error: No meals to remove', 'error');
+            }
+            return;
+        }
+        
+        // Safety check - make sure index is valid
+        if (mealIndex < 0 || mealIndex >= this.todayStats.meals.length) {
+            console.error('Invalid meal index:', mealIndex, 'Array length:', this.todayStats.meals.length);
+            if (window.showToast) {
+                showToast('Error: Invalid meal selection', 'error');
+            }
+            return;
+        }
+        
+        const removedMeal = this.todayStats.meals[mealIndex];
+        
+        if (removedMeal) {
+            console.log('Removing meal:', removedMeal);
             
-            // Remove the meal from the array
+            // Remove from today's meals array
             this.todayStats.meals.splice(mealIndex, 1);
+            
+            // Update nutrition totals
+            this.todayStats.calories -= removedMeal.calories || 0;
+            this.todayStats.protein -= removedMeal.protein || 0;
+            this.todayStats.carbs -= removedMeal.carbs || 0;
+            this.todayStats.fat -= removedMeal.fat || 0;
+            
+            // Ensure no negative values
+            this.todayStats.calories = Math.max(0, this.todayStats.calories);
+            this.todayStats.protein = Math.max(0, this.todayStats.protein);
+            this.todayStats.carbs = Math.max(0, this.todayStats.carbs);
+            this.todayStats.fat = Math.max(0, this.todayStats.fat);
+            
+            // Save to localStorage
             this.saveStats();
             
-            // If no meals left, remove the entire breakdown section
-            if (this.todayStats.meals.length === 0) {
-                const breakdownContainer = document.querySelector('.meal-breakdown');
-                if (breakdownContainer) {
-                    breakdownContainer.remove();
-                }
-            }
-            
+            // Update the display
             this.refreshDashboard();
             
+            // Notify calendar about meal removal
+            window.dispatchEvent(new CustomEvent('meal-removed', {
+                detail: {
+                    name: removedMeal.name,
+                    timestamp: removedMeal.timestamp,
+                    calories: removedMeal.calories
+                }
+            }));
+            
+            // Also dispatch general update
+            window.dispatchEvent(new CustomEvent('dashboard-updated'));
+            
             if (window.showToast) {
-                showToast(`${meal.name} removed from today's meals`, 'success');
+                showToast(`${removedMeal.name} removed!`, 'success');
+            }
+        } else {
+            console.error('No meal found at index:', mealIndex);
+            if (window.showToast) {
+                showToast('Error: Could not find meal to remove', 'error');
             }
         }
-    } 
-
+    }
 
     generateSuggestedRecipes() {
         const inventory = this.getCurrentInventory();
@@ -851,7 +902,7 @@ class Dashboard {
     }
 
     reset() {
-        const today = new Date().toISOString().split('T')[0];
+        const today = this.getLocalDateString(new Date()); // ← Add explicit parameter
         this.todayStats = {
             date: today,
             calories: 0,
@@ -862,7 +913,7 @@ class Dashboard {
         };
         this.saveStats();
         this.refreshDashboard();
-    }
+    } 
 }
 
 document.addEventListener('DOMContentLoaded', function() {

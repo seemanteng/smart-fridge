@@ -1811,3 +1811,370 @@ height: 18px;
   height: 56px;
   font-size: var(--text-xl);
 }
+
+/* ===================================
+   MONTHLY CALENDAR STYLES
+   =================================== */
+
+/* Calendar Widget - Updated for Monthly View */
+.calendar-widget {
+    background: var(--primary-color);
+    border-radius: var(--radius-3xl);
+    padding: var(--space-8);
+    color: white;
+    box-shadow: var(--shadow-xl);
+}
+
+.calendar-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: var(--space-6);
+}
+
+.calendar-header h2 {
+    margin: 0;
+    color: white;
+    font-size: var(--text-2xl);
+    font-weight: var(--font-semibold);
+}
+
+.calendar-nav-btn {
+    background: rgba(255, 255, 255, 0.2);
+    border: none;
+    border-radius: var(--radius-lg);
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: var(--text-lg);
+    cursor: pointer;
+    transition: var(--transition-all);
+}
+
+.calendar-nav-btn:hover {
+    background: rgba(255, 255, 255, 0.3);
+    transform: scale(1.1);
+}
+
+/* Weekday Headers */
+.calendar-weekdays {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--space-2);
+    margin-bottom: var(--space-4);
+}
+
+.weekday {
+    text-align: center;
+    color: rgba(255, 255, 255, 0.8);
+    font-size: var(--text-sm);
+    font-weight: var(--font-medium);
+    padding: var(--space-2);
+}
+
+/* Monthly Calendar Grid */
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--space-2);
+}
+
+/* Individual Calendar Date Cells */
+.calendar-date {
+    min-height: 80px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2);
+    cursor: pointer;
+    transition: var(--transition-all);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.calendar-date:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+/* Date Numbers */
+.date-number {
+    font-weight: var(--font-semibold);
+    font-size: var(--text-base);
+    color: white;
+    margin-bottom: var(--space-1);
+    line-height: 1;
+}
+
+/* Other Month Dates (Grayed Out) */
+.calendar-date.other-month {
+    opacity: 0.4;
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.calendar-date.other-month .date-number {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Today Highlighting */
+.calendar-date.today {
+    background: white;
+    color: var(--primary-color);
+    border: 2px solid rgba(255, 255, 255, 0.8);
+}
+
+.calendar-date.today .date-number {
+    color: var(--primary-color);
+    font-weight: var(--font-bold);
+}
+
+.calendar-date.today .meal-indicator {
+    color: var(--primary-color);
+}
+
+.calendar-date.today .meal-emoji {
+    filter: none;
+}
+
+/* Meal Indicators */
+.meal-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-1);
+    margin-top: auto;
+    margin-bottom: var(--space-1);
+}
+
+.meal-count {
+    background: rgba(255, 255, 255, 0.3);
+    color: white;
+    font-size: var(--text-xs);
+    font-weight: var(--font-bold);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-full);
+    text-align: center;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.calorie-count {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.9);
+    font-weight: var(--font-medium);
+    text-align: center;
+}
+
+/* Days with Meals - Special Styling */
+.calendar-date.has-meals {
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.4);
+}
+
+.calendar-date.has-meals:hover {
+    background: rgba(255, 255, 255, 0.25);
+}
+
+/* Today with Meals */
+.calendar-date.today.has-meals {
+    background: white;
+    border: 2px solid rgba(255, 255, 255, 1);
+}
+
+.calendar-date.today .meal-count {
+    background: var(--primary-color);
+    color: white;
+}
+
+.calendar-date.today .calorie-count {
+    color: var(--primary-color);
+}
+
+/* Responsive Design for Monthly Calendar */
+@media (max-width: 768px) {
+    .calendar-widget {
+        padding: var(--space-4);
+    }
+    
+    .calendar-header h2 {
+        font-size: var(--text-xl);
+    }
+    
+    .calendar-nav-btn {
+        width: 36px;
+        height: 36px;
+        font-size: var(--text-base);
+    }
+    
+    .calendar-date {
+        min-height: 60px;
+        padding: var(--space-1);
+    }
+    
+    .date-number {
+        font-size: var(--text-sm);
+    }
+    
+    .meal-count {
+        font-size: 10px;
+        padding: 2px var(--space-1);
+        white-space: nowrap;
+    }
+    
+    .calorie-count {
+        font-size: 8px;
+    }
+    
+    .meal-emoji {
+        font-size: 12px;
+    }
+    
+    .more-meals {
+        font-size: 8px;
+        width: 12px;
+        height: 12px;
+    }
+}
+
+@media (max-width: 480px) {
+    .calendar-grid {
+        gap: 1px;
+    }
+    
+    .calendar-date {
+        min-height: 50px;
+        border-radius: var(--radius-md);
+    }
+    
+    .date-number {
+        font-size: 12px;
+    }
+    
+    .meal-indicator {
+        gap: 1px;
+    }
+    
+    .meal-count {
+        font-size: 8px;
+        padding: 1px 4px;
+        white-space: nowrap;
+    }
+    
+    .calorie-count {
+        font-size: 7px;
+    }
+    
+    .weekday {
+        font-size: 11px;
+        padding: var(--space-1);
+    }
+}
+
+/* Animation for Meal Updates */
+@keyframes mealAdded {
+    0% {
+        transform: scale(0.8);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.calendar-date.has-meals .meal-indicator {
+    animation: mealAdded 0.3s ease-out;
+}
+
+/* Loading State */
+.calendar-date.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.calendar-date.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 16px;
+    height: 16px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-top: 2px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    transform: translate(-50%, -50%);
+}
+
+@keyframes spin {
+    0% { transform: translate(-50%, -50%) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+/* Modal Enhancements for Calendar */
+.meal-planning-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.existing-meals {
+    max-height: 200px;
+    overflow-y: auto;
+    padding-right: var(--space-2);
+}
+
+.existing-meals::-webkit-scrollbar {
+    width: 4px;
+}
+
+.existing-meals::-webkit-scrollbar-track {
+    background: var(--bg-secondary);
+    border-radius: var(--radius-full);
+}
+
+.existing-meals::-webkit-scrollbar-thumb {
+    background: var(--primary-color);
+    border-radius: var(--radius-full);
+}
+
+/* Calendar with Navigation */
+.calendar-container {
+    position: relative;
+}
+
+.calendar-month-display {
+    text-align: center;
+    font-size: var(--text-xl);
+    font-weight: var(--font-bold);
+    color: white;
+    margin-bottom: var(--space-4);
+}
+
+/* Empty State for Days Without Meals */
+.calendar-date:not(.has-meals):not(.today)::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 50%;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.calendar-date:not(.has-meals):not(.today):hover::after {
+    opacity: 1;
+}

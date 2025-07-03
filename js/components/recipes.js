@@ -154,8 +154,9 @@ class Recipes {
         <button class="btn btn-primary" onclick="recipes.showRecipeModal(${recipe.id})" style="flex: 0.7;">
         View
         </button>
-        <button class="btn btn-success" onclick="recipes.addRecipeToDashboard(${recipe.id})" style="flex: 2.3; background: var(--success-color);">
-        Add to Dashboard
+        <button class="btn btn-success" onclick="window.dashboard.addRecipeToDashboard(${recipe.id})"
+            style="flex: 2.3; background: var(--success-color);">
+            Add to Dashboard
         </button>
         </div>
         </div>
