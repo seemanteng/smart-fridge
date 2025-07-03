@@ -15,13 +15,15 @@ class Goals {
         // Delay initialization to ensure DOM is ready
         setTimeout(() => {
             this.renderGoalsForm();
-            this.renderWeeklyChart();
+            // Remove this line that's causing the error:
+            // this.renderWeeklyChart(); 
+            
             this.renderMacroStats();
             this.renderSummaryStats();
             this.renderExerciseSuggestions();
             this.renderRecipeSuggestions();
             
-            // Initialize visual layout
+            // Initialize visual layout - this will handle the charts
             this.refreshGoalsDisplayVisual();
             
             this.bindEvents();
@@ -42,22 +44,36 @@ class Goals {
     }
 
     loadWeeklyStats() {
-        // Get actual data from the last 7 days - only from real sources
+        // Get actual data from the last 7 days - starting from Monday
         const weeklyData = [];
         const today = new Date();
         
         // Get today's date string for comparison
         const todayDateString = this.getLocalDateString(today);
         
-        for (let i = 6; i >= 0; i--) {
+        console.log('Today is:', today.toDateString(), 'Date string:', todayDateString);
+        
+        // Calculate how many days back to go to get to Monday
+        const todayDayOfWeek = today.getDay(); // 0=Sunday, 1=Monday, 2=Tuesday, etc.
+        const daysFromMonday = todayDayOfWeek === 0 ? 6 : todayDayOfWeek - 1; // If Sunday, go back 6 days; otherwise go back (dayOfWeek - 1) days
+        
+        console.log('Today day of week:', todayDayOfWeek, 'Days from Monday:', daysFromMonday);
+        
+        // Start from Monday of this week
+        for (let i = 0; i < 7; i++) {
             const date = new Date(today);
-            date.setDate(today.getDate() - i);
+            date.setDate(today.getDate() - daysFromMonday + i);
             const dateKey = this.getLocalDateString(date);
+            
+            // Get the day name for this date
+            const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+            
+            console.log(`Day ${i}: ${dayName} (${dateKey})`);
             
             // Only get data from actual logged sources
             let dayStats = this.getDayStats(dateKey);
             
-            // If no stats found and it's TODAY (not just i === 0), check dashboard
+            // If no stats found and it's TODAY, check dashboard
             if (!dayStats && dateKey === todayDateString && window.dashboard) {
                 const todayStats = window.dashboard.getTodayStats();
                 // EXTRA CHECK: Only use dashboard data if it has actual logged meals AND no fake data
@@ -73,20 +89,24 @@ class Goals {
             }
             
             // Default to empty stats if no real data found
-            weeklyData.push({
+            const dayData = {
                 date: dateKey,
-                day: date.toLocaleDateString('en-US', { weekday: 'short' }),
+                day: dayName,
+                dayIndex: i, // 0 = Monday, 1 = Tuesday, etc.
+                isToday: dateKey === todayDateString,
                 calories: dayStats ? dayStats.calories || 0 : 0,
                 protein: dayStats ? dayStats.protein || 0 : 0,
                 carbs: dayStats ? dayStats.carbs || 0 : 0,
                 fat: dayStats ? dayStats.fat || 0 : 0
-            });
+            };
+            
+            console.log(`${dayName} data:`, dayData);
+            weeklyData.push(dayData);
         }
         
-        console.log('Weekly stats loaded:', weeklyData); // Debug log
-        console.log('Today date string:', todayDateString); // Debug log
+        console.log('Weekly stats loaded:', weeklyData);
         return weeklyData;
-    }
+    } 
 
     loadUserProfile() {
         const savedProfile = localStorage.getItem('mtable_user_profile');
@@ -132,9 +152,23 @@ class Goals {
     }
     
     getDayStats(dateKey) {
+        // First check if calendar component has data for this date
+        if (window.calendar && window.calendar.meals && window.calendar.meals[dateKey]) {
+            const dayMeals = window.calendar.meals[dateKey];
+            const totalStats = dayMeals.reduce((total, meal) => ({
+                calories: total.calories + (meal.calories || 0),
+                protein: total.protein + (meal.protein || 0),
+                carbs: total.carbs + (meal.carbs || 0),
+                fat: total.fat + (meal.fat || 0)
+            }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+            
+            return totalStats;
+        }
+        
+        // Fallback to localStorage stats
         const savedStats = localStorage.getItem(`mtable_stats_${dateKey}`);
         return savedStats ? JSON.parse(savedStats) : null;
-    }
+    } 
 
     saveGoals() {
         localStorage.setItem('mtable_goals', JSON.stringify(this.goals));
@@ -178,28 +212,19 @@ class Goals {
         }
     }
 
-    renderWeeklyChart() {
-        const canvas = document.getElementById('caloriesChart');
+    renderWeeklyChartVisual(canvasId, dataType, color) {
+        const canvas = document.getElementById(canvasId);
         if (!canvas) {
-            console.log('Canvas not found');
-            return;
-        }
-
-        // Refresh weekly stats before rendering
-        this.weeklyStats = this.loadWeeklyStats();
-        
-        // Ensure canvas is visible and has dimensions
-        const rect = canvas.getBoundingClientRect();
-        if (rect.width === 0 || rect.height === 0) {
-            console.log('Canvas has no dimensions, retrying...');
-            setTimeout(() => this.renderWeeklyChart(), 1000);
+            console.log(`Canvas ${canvasId} not found`);
             return;
         }
 
         const ctx = canvas.getContext('2d');
         const data = this.weeklyStats;
+        
+        console.log(`Rendering ${canvasId} with data:`, data.map(d => `${d.day}: ${d[dataType]}`));
 
-        // Set canvas size properly
+        // Set canvas size
         const dpr = window.devicePixelRatio || 1;
         const displayWidth = canvas.offsetWidth;
         const displayHeight = canvas.offsetHeight;
@@ -210,70 +235,92 @@ class Goals {
         // Clear canvas
         ctx.clearRect(0, 0, displayWidth, displayHeight);
 
-        const padding = 40;
+        const padding = 20;
         const chartWidth = displayWidth - (padding * 2);
         const chartHeight = displayHeight - (padding * 2);
 
-        // Find max value for scaling
-        const maxCalories = Math.max(...data.map(d => d.calories), this.goals.dailyCalories, 100);
-        const scale = chartHeight / maxCalories;
+        // Get max value for scaling
+        let maxValue = Math.max(...data.map(d => d[dataType] || 0), 1);
+        
+        // Add some headroom
+        maxValue = maxValue * 1.2;
+        
+        const scale = chartHeight / maxValue;
 
-        // Draw bars
+        // Draw target line
+        let targetValue = 0;
+        if (dataType === 'calories') targetValue = this.goals.dailyCalories;
+        else if (dataType === 'protein') targetValue = this.goals.dailyProtein;
+        else if (dataType === 'carbs') targetValue = this.goals.dailyCarbs;
+        else if (dataType === 'fat') targetValue = this.goals.dailyFat;
+
+        if (targetValue > 0) {
+            const targetY = displayHeight - padding - (targetValue * scale);
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([5, 5]);
+            ctx.beginPath();
+            ctx.moveTo(padding, targetY);
+            ctx.lineTo(displayWidth - padding, targetY);
+            ctx.stroke();
+            ctx.setLineDash([]);
+        }
+
+        // Draw bars - one for each day in order
         const barWidth = chartWidth / 7;
         data.forEach((day, index) => {
-            const barHeight = Math.max(day.calories * scale, 3);
-            const x = padding + (index * barWidth) + (barWidth * 0.15);
+            const value = day[dataType] || 0;
+            const barHeight = Math.max(value * scale, 2);
+            const x = padding + (index * barWidth) + (barWidth * 0.2);
             const y = displayHeight - padding - barHeight;
-            const actualBarWidth = barWidth * 0.7;
+            const actualBarWidth = barWidth * 0.6;
 
-            // Determine color
-            const percentage = day.calories > 0 ? (day.calories / this.goals.dailyCalories) * 100 : 0;
-            let color;
-            if (day.calories === 0) {
-                color = '#E0E0E0'; // No data - gray
-            } else if (percentage >= 90 && percentage <= 110) {
-                color = '#4CAF50'; // Perfect - green
-            } else if (percentage < 80) {
-                color = '#FFC107'; // Under - yellow
-            } else if (percentage > 120) {
-                color = '#FF5722'; // Over - red
-            } else {
-                color = '#2196F3'; // Close - blue
+            // Determine if over/under target and if it's today
+            let barColor = color;
+            
+            if (day.isToday && value > 0) {
+                // Highlight today's bar
+                barColor = '#4CAF50'; // Green for today
+            } else if (targetValue > 0 && value > 0) {
+                const percentage = (value / targetValue) * 100;
+                if (percentage >= 90 && percentage <= 110) {
+                    barColor = '#4CAF50'; // Good
+                } else if (percentage < 70) {
+                    barColor = '#FFC107'; // Under
+                } else if (percentage > 130) {
+                    barColor = '#FF5722'; // Over
+                }
+            } else if (value === 0) {
+                barColor = '#E0E0E0'; // No data
             }
 
             // Draw bar
-            ctx.fillStyle = color;
+            ctx.fillStyle = barColor;
             ctx.fillRect(x, y, actualBarWidth, barHeight);
-
-            // Draw percentage label only if there's data
-            if (day.calories > 0) {
-                ctx.fillStyle = '#666';
-                ctx.font = '12px Arial';
+            
+            // Add value label for today
+            if (day.isToday && value > 0) {
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 10px Arial';
                 ctx.textAlign = 'center';
-                const percentText = Math.round(percentage) + '%';
-                ctx.fillText(percentText, x + actualBarWidth/2, y - 5);
+                ctx.fillText(Math.round(value), x + actualBarWidth/2, y - 5);
             }
         });
+        
+        console.log(`${canvasId} rendered successfully`);
+    }
 
-        // Draw target line
-        const targetY = displayHeight - padding - (this.goals.dailyCalories * scale);
-        ctx.strokeStyle = '#FF9800';
-        ctx.lineWidth = 2;
-        ctx.setLineDash([5, 5]);
-        ctx.beginPath();
-        ctx.moveTo(padding, targetY);
-        ctx.lineTo(displayWidth - padding, targetY);
-        ctx.stroke();
-        ctx.setLineDash([]);
-
-        // Update current calories display
-        const today = data[data.length - 1];
-        const currentCalories = document.getElementById('currentCalories');
-        if (currentCalories) {
-            currentCalories.textContent = today.calories;
-        }
-
-        console.log('Chart rendered with data:', data);
+    debugWeeklyData() {
+        console.log('=== WEEKLY DATA DEBUG ===');
+        const today = new Date();
+        console.log('Today is:', today.toDateString());
+        console.log('Today day of week:', today.getDay()); // 0=Sunday, 1=Monday, etc.
+        
+        this.weeklyStats.forEach((day, index) => {
+            const isToday = day.isToday ? ' <- TODAY' : '';
+            console.log(`Index ${index}: ${day.day} (${day.date}) - ${day.calories} cal${isToday}`);
+        });
+        console.log('=========================');
     }
 
     renderMacroStats() {
@@ -619,6 +666,31 @@ class Goals {
     }
 
     bindEvents() {
+        window.addEventListener('dashboard-updated', () => {
+        console.log('Dashboard updated, refreshing goals...');
+        setTimeout(() => {
+            this.refreshGoalsDisplay();
+            this.refreshGoalsDisplayVisual(); // Add this line
+        }, 500);
+    });
+
+    // Listen for calendar updates
+    window.addEventListener('calendar-updated', () => {
+        console.log('Calendar updated, refreshing goals...');
+        setTimeout(() => {
+            this.refreshGoalsDisplay();
+            this.refreshGoalsDisplayVisual(); // Add this line
+        }, 500);
+    });
+
+    // ADD THIS NEW LISTENER:
+    // Listen for meal additions/removals
+    window.addEventListener('meal-added', () => {
+        console.log('Meal added, refreshing goals...');
+        setTimeout(() => {
+            this.refreshGoalsDisplayVisual();
+        }, 300);
+    });
         // Listen for dashboard updates to refresh stats
         window.addEventListener('dashboard-updated', () => {
             console.log('Dashboard updated, refreshing goals...');
@@ -889,6 +961,19 @@ class Goals {
         this.renderWeeklyChartVisual('fatsChartVisual', 'fat', '#81c784');
     }
 
+    // Make sure all visual charts are rendered when section becomes active
+    renderVisualCharts() {
+        // Force reload weekly stats first
+        this.weeklyStats = this.loadWeeklyStats();
+        
+        setTimeout(() => {
+            this.renderCaloriesChartVisual();
+            this.renderProteinChartVisual();
+            this.renderCarbsChartVisual();
+            this.renderFatsChartVisual();
+        }, 100);
+    }
+
     renderWeeklyChartVisual(canvasId, dataType, color) {
         const canvas = document.getElementById(canvasId);
         if (!canvas) return;
@@ -1133,12 +1218,21 @@ class Goals {
 
     // Update the refresh method
     refreshGoalsDisplayVisual() {
+        console.log('Refreshing visual goals display...');
+        
+        // Force reload all data
         this.weeklyStats = this.loadWeeklyStats();
-        this.renderVisualCharts();
-        this.updateVisualStats();
-        this.updateVisualSuggestions();
-        this.populateVisualForms();
-    }
+        
+        console.log('Loaded weekly stats:', this.weeklyStats);
+        
+        // Render everything with a slight delay to ensure DOM is ready
+        setTimeout(() => {
+            this.renderVisualCharts();
+            this.updateVisualStats();
+            this.updateVisualSuggestions();
+            this.populateVisualForms();
+        }, 200);
+    } 
 
     populateVisualForms() {
         // Populate goals form
@@ -1173,7 +1267,17 @@ document.addEventListener('DOMContentLoaded', function() {
     }, 1000);
 });
 
-// Export for use in other modules
-if (typeof module !== 'undefined' && module.exports) {
-    module.exports = Goals;
-}
+// Force refresh when goals section becomes active
+document.addEventListener('click', function(e) {
+    if (e.target.closest('[data-section="goals"]') || 
+        (e.target.classList && e.target.classList.contains('mobile-nav-tab') && 
+         e.target.getAttribute('data-section') === 'goals')) {
+        
+        setTimeout(() => {
+            if (window.goals) {
+                console.log('Goals section clicked, forcing refresh...');
+                window.goals.refreshGoalsDisplayVisual();
+            }
+        }, 300);
+    }
+});

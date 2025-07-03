@@ -293,13 +293,44 @@ class Dashboard {
         const recipe = addedRecipes.find(r => r.id === recipeId);
         if (!recipe) return;
 
+        // Calculate nutrition values - with better fallbacks
+        let protein, carbs, fat;
+        
+        if (recipe.nutrition) {
+            // Use nutrition object if available
+            protein = recipe.nutrition.protein || 0;
+            carbs = recipe.nutrition.carbs || recipe.nutrition.carbohydrates || 0;
+            fat = recipe.nutrition.fat || recipe.nutrition.fats || 0;
+        } else {
+            // Use direct properties if available
+            protein = recipe.protein || 0;
+            carbs = recipe.carbs || recipe.carbohydrates || 0;
+            fat = recipe.fat || recipe.fats || 0;
+        }
+        
+        // If still no nutrition data, estimate based on calories
+        if (protein === 0 && carbs === 0 && fat === 0 && recipe.calories > 0) {
+            // Rough estimation: 25% protein, 45% carbs, 30% fat
+            protein = Math.round((recipe.calories * 0.25) / 4); // 4 cal per gram protein
+            carbs = Math.round((recipe.calories * 0.45) / 4);   // 4 cal per gram carbs  
+            fat = Math.round((recipe.calories * 0.30) / 9);     // 9 cal per gram fat
+        }
+
+        console.log('Logging recipe with nutrition:', {
+            name: recipe.name,
+            calories: recipe.calories,
+            protein: protein,
+            carbs: carbs,
+            fat: fat
+        });
+
         // Add to today's meals (this logs nutrition to dashboard)
         this.addMeal(
             recipe.name,
-            recipe.calories,
-            recipe.nutrition ? recipe.nutrition.protein : recipe.protein || 0,
-            recipe.nutrition ? recipe.nutrition.carbs : recipe.carbs || Math.round(recipe.calories * 0.4 / 4),
-            recipe.nutrition ? recipe.nutrition.fat : recipe.fat || Math.round(recipe.calories * 0.3 / 9)
+            recipe.calories || 0,
+            protein,
+            carbs,
+            fat
         );
 
         // Also add to calendar for today
@@ -319,8 +350,7 @@ class Dashboard {
         this.removeRecipeFromDashboard(recipeId);
 
         if (window.showToast) {
-            showToast(`${recipe.name} logged as cooked! +${recipe.calories} calories`, 'success');
-
+            showToast(`${recipe.name} logged! +${recipe.calories} cal, ${protein}g protein`, 'success');
         }
     }
 
@@ -880,10 +910,27 @@ class Dashboard {
     }
 
     addMeal(name, calories, protein, carbs, fat) {
+        // Ensure all values are numbers
+        calories = Number(calories) || 0;
+        protein = Number(protein) || 0;
+        carbs = Number(carbs) || 0;
+        fat = Number(fat) || 0;
+        
+        console.log('Adding meal with nutrition:', {
+            name: name,
+            calories: calories,
+            protein: protein,
+            carbs: carbs,
+            fat: fat
+        });
+        
+        // Update daily totals
         this.todayStats.calories += calories;
         this.todayStats.protein += protein;
         this.todayStats.carbs += carbs;
         this.todayStats.fat += fat;
+        
+        // Add to meals array
         this.todayStats.meals.push({
             name: name,
             calories: calories,
@@ -893,9 +940,11 @@ class Dashboard {
             timestamp: new Date().toISOString()
         });
 
+        console.log('Updated todayStats:', this.todayStats);
+
         this.saveStats();
         this.refreshDashboard();
-    }
+    } 
 
     getTodayStats() {
         return { ...this.todayStats };

@@ -724,26 +724,31 @@ height: 18px;
 
 /* Calendar Component */
 .calendar-grid {
-  display: grid;
-  grid-template-columns: repeat(7, 1fr);
-  gap: var(--space-3);
-  margin-top: var(--space-5);
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: var(--space-2);
+    width: 100%;
+    box-sizing: border-box;
 }
 
-.calendar-day {
-  aspect-ratio: 1;
-  background: var(--bg-glass);
-  border-radius: var(--radius-lg);
-  padding: var(--space-3);
-  text-align: center;
-  cursor: pointer;
-  transition: var(--transition-all);
-  min-height: 120px;
-  border: 2px solid var(--border-light);
-  display: flex;
-  flex-direction: column;
-  position: relative;
-  overflow: hidden;
+.calendar-date {
+    min-height: 60px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-lg);
+    padding: var(--space-2);
+    cursor: pointer;
+    transition: var(--transition-all);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    text-align: center;
+    width: 100%;
+    box-sizing: border-box;
+    aspect-ratio: 1;
 }
 
 .calendar-day:hover {
@@ -964,9 +969,12 @@ height: 18px;
 .calendar-widget {
     background: var(--primary-color);
     border-radius: var(--radius-3xl);
-    padding: var(--space-8);
+    padding: var(--space-6);
     color: white;
     box-shadow: var(--shadow-xl);
+    width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
 }
 
 .calendar-header {
@@ -1008,6 +1016,8 @@ height: 18px;
     grid-template-columns: repeat(7, 1fr);
     gap: var(--space-2);
     margin-bottom: var(--space-4);
+    width: 100%;
+    box-sizing: border-box;
 }
 
 .weekday {
@@ -1016,6 +1026,11 @@ height: 18px;
     font-size: var(--text-sm);
     font-weight: var(--font-medium);
     padding: var(--space-2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 32px;
+    box-sizing: border-box;
 }
 
 .calendar-grid {
@@ -1947,9 +1962,9 @@ height: 18px;
     display: flex;
     flex-direction: column;
     align-items: center;
-    gap: var(--space-1);
+    gap: 2px;
     margin-top: auto;
-    margin-bottom: var(--space-1);
+    width: 100%;
 }
 
 .meal-count {
@@ -1957,11 +1972,14 @@ height: 18px;
     color: white;
     font-size: var(--text-xs);
     font-weight: var(--font-bold);
-    padding: var(--space-1) var(--space-2);
+    padding: 2px var(--space-2);
     border-radius: var(--radius-full);
     text-align: center;
     line-height: 1;
     white-space: nowrap;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
 
 .calorie-count {
@@ -1969,6 +1987,7 @@ height: 18px;
     color: rgba(255, 255, 255, 0.9);
     font-weight: var(--font-medium);
     text-align: center;
+    white-space: nowrap;
 }
 
 /* Days with Meals - Special Styling */

@@ -1,6 +1,6 @@
 /**
- * Monthly Calendar Component
- * Replaces weekly view with proper monthly calendar showing meals
+ * Enhanced Calendar Component with Proper Nutrition Tracking
+ * Fixes the issue where protein, carbs, and fats aren't being logged
  */
 
 class Calendar {
@@ -55,6 +55,67 @@ class Calendar {
         return `${year}-${month}-${day}`;
     }
 
+    // Enhanced nutrition estimation with realistic values
+    estimateNutrition(mealName, calories) {
+        const lowerName = mealName.toLowerCase();
+        
+        // Base nutrition ratios (protein:carbs:fat as percentages of calories)
+        let proteinRatio = 0.20; // 20% protein
+        let carbRatio = 0.45;    // 45% carbs  
+        let fatRatio = 0.35;     // 35% fat
+
+        // Adjust ratios based on meal type
+        if (lowerName.includes('salad') || lowerName.includes('quinoa')) {
+            proteinRatio = 0.25;
+            carbRatio = 0.35;
+            fatRatio = 0.40;
+        } else if (lowerName.includes('chicken') || lowerName.includes('salmon') || lowerName.includes('protein')) {
+            proteinRatio = 0.40;
+            carbRatio = 0.25;
+            fatRatio = 0.35;
+        } else if (lowerName.includes('pasta') || lowerName.includes('rice') || lowerName.includes('bread')) {
+            proteinRatio = 0.15;
+            carbRatio = 0.65;
+            fatRatio = 0.20;
+        } else if (lowerName.includes('egg') || lowerName.includes('cheese')) {
+            proteinRatio = 0.30;
+            carbRatio = 0.10;
+            fatRatio = 0.60;
+        }
+
+        // Calculate grams (4 cal/g for protein and carbs, 9 cal/g for fat)
+        const protein = Math.round((calories * proteinRatio) / 4);
+        const carbs = Math.round((calories * carbRatio) / 4);
+        const fat = Math.round((calories * fatRatio) / 9);
+
+        return { protein, carbs, fat };
+    }
+
+    // Enhanced calorie estimation
+    estimateCalories(mealName, mealType) {
+        const baseCalories = {
+            breakfast: 300,
+            lunch: 400,
+            dinner: 500,
+            snack: 150,
+            meal: 400
+        };
+
+        let calories = baseCalories[mealType] || 300;
+        const lowCalKeywords = ['salad', 'soup', 'fruit', 'vegetable', 'green'];
+        const highCalKeywords = ['pizza', 'burger', 'pasta', 'fried', 'cheese'];
+
+        const lowerMeal = mealName.toLowerCase();
+        
+        if (lowCalKeywords.some(keyword => lowerMeal.includes(keyword))) {
+            calories *= 0.7;
+        } else if (highCalKeywords.some(keyword => lowerMeal.includes(keyword))) {
+            calories *= 1.3;
+        }
+
+        return Math.round(calories);
+    }
+
     // Get all days in current month view (including prev/next month days to fill grid)
     getMonthDays() {
         const year = this.currentDate.getFullYear();
@@ -89,9 +150,42 @@ class Calendar {
         // Load from localStorage or return empty object
         const savedMeals = localStorage.getItem('mtable_meals');
         if (savedMeals) {
-            return JSON.parse(savedMeals);
+            const meals = JSON.parse(savedMeals);
+            // Auto-migrate existing meals that don't have nutrition data
+            this.autoMigrateNutritionData(meals);
+            return meals;
         }
         return {};
+    }
+
+    // Automatically add nutrition data to meals that don't have it
+    autoMigrateNutritionData(meals) {
+        let needsUpdate = false;
+        
+        Object.keys(meals).forEach(dateKey => {
+            const dayMeals = meals[dateKey];
+            
+            dayMeals.forEach(meal => {
+                // Check if meal is missing nutrition data
+                if (meal.protein === undefined || meal.carbs === undefined || meal.fat === undefined) {
+                    const calories = meal.calories || 300;
+                    const nutrition = this.estimateNutrition(meal.name, calories);
+                    
+                    meal.protein = nutrition.protein;
+                    meal.carbs = nutrition.carbs;
+                    meal.fat = nutrition.fat;
+                    
+                    needsUpdate = true;
+                    console.log(`Auto-migrated nutrition for ${meal.name}: ${nutrition.protein}g protein, ${nutrition.carbs}g carbs, ${nutrition.fat}g fat`);
+                }
+            });
+        });
+        
+        // Save updated meals if any were migrated
+        if (needsUpdate) {
+            localStorage.setItem('mtable_meals', JSON.stringify(meals));
+            console.log('Auto-migration complete - all meals now have nutrition data');
+        }
     }
 
     saveMeals() {
@@ -168,6 +262,9 @@ class Calendar {
                         name: dashboardMeal.name,
                         emoji: this.getEmojiForMeal(dashboardMeal.name),
                         calories: dashboardMeal.calories,
+                        protein: dashboardMeal.protein || 0,
+                        carbs: dashboardMeal.carbs || 0,
+                        fat: dashboardMeal.fat || 0,
                         timestamp: dashboardMeal.timestamp
                     });
                 }
@@ -328,13 +425,48 @@ class Calendar {
                         step="1"
                         value="">
                 </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div class="form-group">
+                        <label for="mealProtein">Protein (g)</label>
+                        <input type="number" 
+                            id="mealProtein"
+                            class="meal-input" 
+                            placeholder="Auto"
+                            min="0"
+                            step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="mealCarbs">Carbs (g)</label>
+                        <input type="number" 
+                            id="mealCarbs"
+                            class="meal-input" 
+                            placeholder="Auto"
+                            min="0"
+                            step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label for="mealFat">Fat (g)</label>
+                        <input type="number" 
+                            id="mealFat"
+                            class="meal-input" 
+                            placeholder="Auto"
+                            min="0"
+                            step="0.1">
+                    </div>
+                </div>
                 
                 ${dayMeals.length > 0 ? `
                     <div class="existing-meals" style="margin-top: var(--space-4);">
                         <h4 style="margin-bottom: var(--space-3); color: var(--text-primary);">Current Meals:</h4>
                         ${dayMeals.map((meal, index) => `
                             <div class="meal-info" style="display: flex; justify-content: space-between; align-items: center; padding: var(--space-2) var(--space-3); margin-bottom: var(--space-2); background: var(--bg-secondary); border-radius: var(--radius-md);">
-                                <span>${meal.emoji} ${meal.name} (${meal.calories || 0} calories)</span>
+                                <div>
+                                    <div>${meal.emoji} ${meal.name} (${meal.calories || 0} cal)</div>
+                                    <div style="font-size: 0.85em; color: var(--text-secondary); margin-top: 2px;">
+                                        ${meal.protein || 0}g protein • ${meal.carbs || 0}g carbs • ${meal.fat || 0}g fat
+                                    </div>
+                                </div>
                                 <button class="btn btn-sm btn-danger" onclick="calendar.removeMealByIndex('${dateKey}', ${index})">Remove</button>
                             </div>
                         `).join('')}
@@ -349,13 +481,20 @@ class Calendar {
         `;
     }
 
-    // Add a single meal
+    // Enhanced add single meal with proper nutrition tracking
     addSingleMeal(dateKey) {
         const modal = document.querySelector('.modal');
         const mealInput = modal.querySelector('#mealName');
         const calorieInput = modal.querySelector('#mealCalories');
+        const proteinInput = modal.querySelector('#mealProtein');
+        const carbsInput = modal.querySelector('#mealCarbs');
+        const fatInput = modal.querySelector('#mealFat');
+        
         const mealName = mealInput.value.trim();
         const customCalories = calorieInput.value.trim();
+        const customProtein = proteinInput.value.trim();
+        const customCarbs = carbsInput.value.trim();
+        const customFat = fatInput.value.trim();
         
         if (!mealName) {
             if (window.showToast) {
@@ -373,11 +512,30 @@ class Calendar {
             parseInt(customCalories) : 
             this.estimateCalories(mealName, 'meal');
         
+        // Get nutrition values - use custom if provided, otherwise estimate
+        let protein, carbs, fat;
+        
+        if (customProtein || customCarbs || customFat) {
+            // Use custom values if any are provided
+            protein = customProtein && !isNaN(customProtein) ? parseFloat(customProtein) : 0;
+            carbs = customCarbs && !isNaN(customCarbs) ? parseFloat(customCarbs) : 0;
+            fat = customFat && !isNaN(customFat) ? parseFloat(customFat) : 0;
+        } else {
+            // Estimate nutrition based on calories and meal type
+            const nutrition = this.estimateNutrition(mealName, calories);
+            protein = nutrition.protein;
+            carbs = nutrition.carbs;
+            fat = nutrition.fat;
+        }
+        
         const newMeal = {
             type: 'meal',
             name: mealName,
             emoji: this.getEmojiForMeal(mealName) || '🍽',
             calories: calories,
+            protein: protein,
+            carbs: carbs,
+            fat: fat,
             timestamp: new Date().toISOString()
         };
         
@@ -393,14 +551,17 @@ class Calendar {
         // Clear inputs and refresh modal
         mealInput.value = '';
         calorieInput.value = '';
+        proteinInput.value = '';
+        carbsInput.value = '';
+        fatInput.value = '';
         
         // Close and reopen modal to show updated meals
         modal.remove();
         setTimeout(() => this.showMealPlanningModal(dateKey), 100);
         
         if (window.showToast) {
-            const calorieSource = customCalories ? 'custom' : 'estimated';
-            showToast(`${mealName} added! (${calories} calories - ${calorieSource})`, 'success');
+            const nutritionSource = (customProtein || customCarbs || customFat) ? 'custom' : 'estimated';
+            showToast(`${mealName} added! (${calories} cal, ${protein}g protein - ${nutritionSource})`, 'success');
         }
     }
 
@@ -438,31 +599,6 @@ class Calendar {
         }
     }
 
-    estimateCalories(mealName, mealType) {
-        // Simple calorie estimation based on meal type and keywords
-        const baseCalories = {
-            breakfast: 300,
-            lunch: 400,
-            dinner: 500,
-            snack: 150,
-            meal: 400
-        };
-
-        let calories = baseCalories[mealType] || 300;
-        const lowCalKeywords = ['salad', 'soup', 'fruit', 'vegetable', 'green'];
-        const highCalKeywords = ['pizza', 'burger', 'pasta', 'fried', 'cheese'];
-
-        const lowerMeal = mealName.toLowerCase();
-        
-        if (lowCalKeywords.some(keyword => lowerMeal.includes(keyword))) {
-            calories *= 0.7;
-        } else if (highCalKeywords.some(keyword => lowerMeal.includes(keyword))) {
-            calories *= 1.3;
-        }
-
-        return Math.round(calories);
-    }
-
     // Save daily total calories
     saveDayTotalCalories(dateKey, totalCalories) {
         const dailyTotals = this.loadDailyTotals();
@@ -489,7 +625,146 @@ class Calendar {
         return `${year}-${month}-${day}`;
     }
 
-    // Grocery list methods (unchanged)
+    // Enhanced public method to add meal with nutrition
+    addMeal(date, mealType, mealName, calories = null, emoji = null, nutrition = null) {
+        const dateKey = typeof date === 'string' ? date : this.formatDateKey(date);
+        if (!this.meals[dateKey]) {
+            this.meals[dateKey] = [];
+        }
+
+        // Check if meal already exists to avoid duplicates
+        const existingMeal = this.meals[dateKey].find(meal =>
+            meal.name === mealName && meal.type === mealType
+        );
+        
+        if (!existingMeal) {
+            const estimatedCalories = calories || this.estimateCalories(mealName, mealType);
+            const estimatedNutrition = nutrition || this.estimateNutrition(mealName, estimatedCalories);
+            
+            this.meals[dateKey].push({
+                type: mealType,
+                name: mealName,
+                emoji: emoji || this.getEmojiForMeal(mealName) || '🍽️',
+                calories: estimatedCalories,
+                protein: estimatedNutrition.protein,
+                carbs: estimatedNutrition.carbs,
+                fat: estimatedNutrition.fat,
+                timestamp: new Date().toISOString()
+            });
+            
+            // Calculate and save daily total
+            const totalCalories = this.meals[dateKey].reduce((total, meal) => total + (meal.calories || 0), 0);
+            this.saveDayTotalCalories(dateKey, totalCalories);
+            
+            this.saveMeals();
+            this.renderCalendar();
+        }
+    }
+
+    getMealsForDate(date) {
+        const dateKey = typeof date === 'string' ? date : this.formatDateKey(date);
+        return this.meals[dateKey] || [];
+    }
+
+    getTotalCaloriesForDate(date) {
+        const meals = this.getMealsForDate(date);
+        return meals.reduce((total, meal) => total + (meal.calories || 0), 0);
+    }
+
+    // Get total nutrition for a date
+    getTotalNutritionForDate(date) {
+        const meals = this.getMealsForDate(date);
+        return meals.reduce((total, meal) => ({
+            calories: total.calories + (meal.calories || 0),
+            protein: total.protein + (meal.protein || 0),
+            carbs: total.carbs + (meal.carbs || 0),
+            fat: total.fat + (meal.fat || 0)
+        }), { calories: 0, protein: 0, carbs: 0, fat: 0 });
+    }
+
+    // Enhanced sync with dashboard to include nutrition and auto-migrate
+    syncWithDashboard() {
+        if (!window.dashboard) return;
+        
+        const today = this.getLocalDateString(new Date());
+        const todayStats = window.dashboard.getTodayStats();
+        
+        if (todayStats.meals && todayStats.meals.length > 0) {
+            if (!this.meals[today]) {
+                this.meals[today] = [];
+            }
+            
+            todayStats.meals.forEach(dashboardMeal => {
+                const exists = this.meals[today].some(meal => 
+                    meal.name === dashboardMeal.name && 
+                    Math.abs(new Date(meal.timestamp || 0) - new Date(dashboardMeal.timestamp)) < 60000
+                );
+                
+                if (!exists) {
+                    const estimatedCalories = dashboardMeal.calories || this.estimateCalories(dashboardMeal.name, 'meal');
+                    const nutrition = this.estimateNutrition(dashboardMeal.name, estimatedCalories);
+                    
+                    // Create meal with complete nutrition data
+                    const newMeal = {
+                        type: this.determineMealTypeFromTime(dashboardMeal.timestamp),
+                        name: dashboardMeal.name,
+                        emoji: this.getEmojiForMeal(dashboardMeal.name),
+                        calories: estimatedCalories,
+                        protein: dashboardMeal.protein || nutrition.protein,
+                        carbs: dashboardMeal.carbs || nutrition.carbs,
+                        fat: dashboardMeal.fat || nutrition.fat,
+                        timestamp: dashboardMeal.timestamp
+                    };
+                    
+                    this.meals[today].push(newMeal);
+                    console.log(`Synced meal with nutrition: ${newMeal.name} - ${newMeal.protein}g protein, ${newMeal.carbs}g carbs, ${newMeal.fat}g fat`);
+                }
+            });
+            
+            // Calculate and save total calories
+            const totalCalories = this.meals[today].reduce((total, meal) => total + (meal.calories || 0), 0);
+            this.saveDayTotalCalories(today, totalCalories);
+            this.saveMeals();
+        } else {
+            // If dashboard has no meals for today, clear today's meals in calendar
+            if (this.meals[today]) {
+                delete this.meals[today];
+                this.saveMeals();
+            }
+        }
+    }
+
+    // Remove meal from calendar when removed from dashboard
+    removeMealFromDashboard(mealData) {
+        const today = this.getLocalDateString(new Date());
+        
+        if (this.meals[today]) {
+            // Find and remove the meal by name and timestamp
+            this.meals[today] = this.meals[today].filter(meal => {
+                // Match by name and similar timestamp (within 1 minute)
+                const timeDiff = Math.abs(new Date(meal.timestamp || 0) - new Date(mealData.timestamp || 0));
+                return !(meal.name === mealData.name && timeDiff < 60000);
+            });
+            
+            // If no meals left for today, delete the day
+            if (this.meals[today].length === 0) {
+                delete this.meals[today];
+                
+                // Also remove daily total
+                const dailyTotals = this.loadDailyTotals();
+                delete dailyTotals[today];
+                localStorage.setItem('mtable_daily_totals', JSON.stringify(dailyTotals));
+            } else {
+                // Recalculate total calories
+                const totalCalories = this.meals[today].reduce((total, meal) => total + (meal.calories || 0), 0);
+                this.saveDayTotalCalories(today, totalCalories);
+            }
+            
+            this.saveMeals();
+        }
+    }
+
+    // Grocery list methods (unchanged but included for completeness)
     generateGroceryList() {
         const ingredients = this.extractIngredientsFromMeals();
         const currentInventory = this.getCurrentInventory();
@@ -659,123 +934,27 @@ class Calendar {
             item.classList.remove('checked');
         }
     }
-
-    // Public methods for external access
-    addMeal(date, mealType, mealName, calories = null, emoji = null) {
-        const dateKey = typeof date === 'string' ? date : this.formatDateKey(date);
-        if (!this.meals[dateKey]) {
-            this.meals[dateKey] = [];
-        }
-
-        // Check if meal already exists to avoid duplicates
-        const existingMeal = this.meals[dateKey].find(meal =>
-            meal.name === mealName && meal.type === mealType
-        );
-        
-        if (!existingMeal) {
-            this.meals[dateKey].push({
-                type: mealType,
-                name: mealName,
-                emoji: emoji || this.getEmojiForMeal(mealName) || '🍽️',
-                calories: calories || this.estimateCalories(mealName, mealType),
-                timestamp: new Date().toISOString()
-            });
-            
-            // Calculate and save daily total
-            const totalCalories = this.meals[dateKey].reduce((total, meal) => total + (meal.calories || 0), 0);
-            this.saveDayTotalCalories(dateKey, totalCalories);
-            
-            this.saveMeals();
-            this.renderCalendar();
-        }
-    }
-
-    getMealsForDate(date) {
-        const dateKey = typeof date === 'string' ? date : this.formatDateKey(date);
-        return this.meals[dateKey] || [];
-    }
-
-    getTotalCaloriesForDate(date) {
-        const meals = this.getMealsForDate(date);
-        return meals.reduce((total, meal) => total + (meal.calories || 0), 0);
-    }
-
-    // Method to sync with dashboard meals
-    syncWithDashboard() {
-        if (!window.dashboard) return;
-        
-        const today = this.getLocalDateString(new Date());
-        const todayStats = window.dashboard.getTodayStats();
-        
-        if (todayStats.meals && todayStats.meals.length > 0) {
-            const todayMeals = this.meals[today] || [];
-            
-            todayStats.meals.forEach(dashboardMeal => {
-                const exists = todayMeals.some(meal => 
-                    meal.name === dashboardMeal.name && 
-                    Math.abs(new Date(meal.timestamp || 0) - new Date(dashboardMeal.timestamp)) < 60000
-                );
-                
-                if (!exists) {
-                    this.addMeal(
-                        today, 
-                        this.determineMealTypeFromTime(dashboardMeal.timestamp),
-                        dashboardMeal.name,
-                        dashboardMeal.calories,
-                        this.getEmojiForMeal(dashboardMeal.name)
-                    );
-                }
-            });
-        } else {
-            // If dashboard has no meals for today, clear today's meals in calendar
-            if (this.meals[today]) {
-                delete this.meals[today];
-                this.saveMeals();
-            }
-        }
-    }
-
-    // Remove meal from calendar when removed from dashboard
-    removeMealFromDashboard(mealData) {
-        const today = this.getLocalDateString(new Date());
-        
-        if (this.meals[today]) {
-            // Find and remove the meal by name and timestamp
-            this.meals[today] = this.meals[today].filter(meal => {
-                // Match by name and similar timestamp (within 1 minute)
-                const timeDiff = Math.abs(new Date(meal.timestamp || 0) - new Date(mealData.timestamp || 0));
-                return !(meal.name === mealData.name && timeDiff < 60000);
-            });
-            
-            // If no meals left for today, delete the day
-            if (this.meals[today].length === 0) {
-                delete this.meals[today];
-                
-                // Also remove daily total
-                const dailyTotals = this.loadDailyTotals();
-                delete dailyTotals[today];
-                localStorage.setItem('mtable_daily_totals', JSON.stringify(dailyTotals));
-            } else {
-                // Recalculate total calories
-                const totalCalories = this.meals[today].reduce((total, meal) => total + (meal.calories || 0), 0);
-                this.saveDayTotalCalories(today, totalCalories);
-            }
-            
-            this.saveMeals();
-        }
-    }
 }
 
-// Initialize calendar when DOM is loaded
+    // Initialize calendar when DOM is loaded with auto-migration
 document.addEventListener('DOMContentLoaded', function() {
     window.calendar = new Calendar();
     
-    // Sync with dashboard after a short delay
+    // Force a save to trigger any auto-migration on first load
     setTimeout(() => {
-        if (window.calendar && typeof window.calendar.syncWithDashboard === 'function') {
-            window.calendar.syncWithDashboard();
+        if (window.calendar) {
+            // Trigger auto-migration by calling loadMeals again
+            window.calendar.meals = window.calendar.loadMeals();
+            window.calendar.renderCalendar();
+            
+            // Sync with dashboard after migration
+            if (typeof window.calendar.syncWithDashboard === 'function') {
+                window.calendar.syncWithDashboard();
+            }
+            
+            console.log('Calendar initialized with automatic nutrition migration');
         }
-    }, 1000);
+    }, 500);
 });
 
 // Export for use in other modules
