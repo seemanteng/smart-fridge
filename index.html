@@ -1536,7 +1536,13 @@ opacity: 1;
         box-sizing: border-box !important;
         overflow: hidden !important;
     }
-    
+
+    .meals-today-panel {
+        order: 2 !important; /* Meals for today in middle */
+        max-height: 300px !important;
+        overflow-y: auto !important;
+    }
+
     /* Make top picks section appear THIRD (bottom) */
     .top-picks-section {
         order: 3 !important; /* Top picks at bottom */
@@ -1545,6 +1551,12 @@ opacity: 1;
     /* Remove the calendar-right-panel from flex ordering since we're ordering individual components */
     .calendar-right-panel {
         display: contents !important; /* This makes its children participate in the parent's flex layout */
+    }
+
+    .meals-today-panel {
+        order: 2 !important;
+        display: flex !important;
+        flex-direction: column !important;
     }
 }
 
