@@ -1474,10 +1474,6 @@ opacity: 1;
 }
 
 @media (max-width: 768px) {
-    #calendar {
-        padding-top: 30px !important;
-    }
-    
     /* Stack calendar layout vertically on mobile */
     .calendar-new-layout {
         flex-direction: column !important;
@@ -1485,69 +1481,26 @@ opacity: 1;
         height: auto !important;
     }
     
-    /* Make meal details panel more compact */
+    /* Make calendar widget appear FIRST (top) */
+    .calendar-widget {
+        order: 1 !important; /* Calendar at the very top */
+    }
+    
+    /* Make meal details panel appear SECOND (middle) */
     .meals-today-panel {
-        order: 2 !important; /* Move below calendar */
+        order: 2 !important; /* Meals for today in middle */
         max-height: 300px !important;
         overflow-y: auto !important;
     }
     
-    .calendar-right-panel {
-        order: 1 !important; /* Move calendar to top */
-    }
-    
-    /* Make calendar more compact */
-    .calendar-widget {
-        padding: 15px !important;
-        border-radius: 16px !important;
-    }
-    
-    .calendar-dates-grid {
-        gap: 4px !important;
-        margin-bottom: 15px !important;
-    }
-    
-    .calendar-date {
-        min-height: 35px !important;
-        max-height: 35px !important;
-        font-size: 14px !important;
-        border-radius: 8px !important;
-    }
-    
-    .weekday {
-        font-size: 12px !important;
-        min-height: 25px !important;
-        padding: 4px !important;
-    }
-    
-    /* Make top picks section more compact */
+    /* Make top picks section appear THIRD (bottom) */
     .top-picks-section {
-        padding: 15px !important;
-        margin-top: 15px !important;
+        order: 3 !important; /* Top picks at bottom */
     }
     
-    .top-picks-section h3 {
-        font-size: 16px !important;
-        margin-bottom: 10px !important;
-    }
-    
-    .top-picks-grid {
-        gap: 10px !important;
-    }
-    
-    /* Calendar header adjustments */
-    .calendar-header {
-        margin-bottom: 15px !important;
-    }
-    
-    .calendar-header h2 {
-        font-size: 20px !important;
-    }
-    
-    .calendar-nav-btn {
-        width: 35px !important;
-        height: 35px !important;
-        font-size: 16px !important;
+    /* Remove the calendar-right-panel from flex ordering since we're ordering individual components */
+    .calendar-right-panel {
+        display: contents !important; /* This makes its children participate in the parent's flex layout */
     }
 }
 
