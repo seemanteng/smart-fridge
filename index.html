@@ -468,61 +468,43 @@ gap: var(--space-4);
   .mobile-nav {
     display: block !important;
     position: fixed !important;
-    top: env(safe-area-inset-top, 0) !important;
+    top: 0 !important;
     left: 0 !important;
     right: 0 !important;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%) !important;
-    padding: 12px 12px 8px 12px !important;  /* ← More top padding, less bottom */
+    padding: 10px 15px !important;
     z-index: 1003 !important;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1) !important;
-    height: 80px !important;  /* ← Increased height to fit everything */
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: space-between !important;
+    height: 80px !important;
   }
   
   .mobile-nav-header {
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    margin-bottom: 0 !important;  /* ← Removed margin */
+    margin-bottom: 8px !important;
     color: white !important;
-    height: auto !important;  /* ← Let it size naturally */
-    flex-shrink: 0 !important;
   }
   
   .mobile-nav-logo {
     display: flex !important;
     align-items: center !important;
-    gap: 8px !important;  /* ← Added gap between icon and text */
+    gap: 8px !important;
   }
   
-  .mobile-nav-logo .fridge-icon {
-    background: rgba(255, 255, 255, 0.2) !important;
+  .mobile-nav-logo .logo-image {
+    width: 30px !important;
+    height: 30px !important;
     border-radius: 50% !important;
-    width: 28px !important;
-    height: 28px !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    font-size: 1.1rem !important;
-  }
-  
-  .mobile-nav-logo .logo-text {
-    font-size: 1rem !important;
-    font-weight: 600 !important;
   }
   
   .mobile-nav-tabs {
     display: flex !important;
     gap: 6px !important;
     overflow-x: auto !important;
-    padding: 0 8px !important;
+    padding: 0 5px !important;
     scrollbar-width: none !important;
     -ms-overflow-style: none !important;
-    height: 32px !important;  /* ← Fixed height for tabs */
-    align-items: center !important;
-    flex-shrink: 0 !important;
   }
   
   .mobile-nav-tabs::-webkit-scrollbar {
@@ -533,16 +515,16 @@ gap: var(--space-4);
     flex-shrink: 0 !important;
     background: rgba(255, 255, 255, 0.2) !important;
     border: none !important;
-    border-radius: 16px !important;
-    padding: 6px 14px !important;
+    border-radius: 15px !important;
+    padding: 6px 12px !important;
     color: rgba(255, 255, 255, 0.8) !important;
     font-weight: 500 !important;
     font-size: 12px !important;
     cursor: pointer !important;
     transition: all 0.3s ease !important;
     white-space: nowrap !important;
-    min-width: 65px !important;
-    height: 32px !important;  /* ← Match container height */
+    min-width: 60px !important;
+    height: 30px !important;
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
@@ -552,8 +534,6 @@ gap: var(--space-4);
     background: white !important;
     color: #667eea !important;
     font-weight: 600 !important;
-    transform: translateY(-1px) !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1) !important;
   }
   
   .mobile-nav-tab:hover:not(.active) {
@@ -574,22 +554,23 @@ gap: var(--space-4);
   .main-content {
     margin-left: 0 !important;
     width: 100% !important;
-    padding-top: 100px !important;  /* ← Increased to 100px (80px nav + 20px buffer) */
+    padding-top: 95px !important;
     padding-left: 15px !important;
     padding-right: 15px !important;
     padding-bottom: 15px !important;
   }
 }
 
+/* Remove the duplicate content-section rules */
 @media (max-width: 768px) {
   .content-section {
-    padding-top: 16px !important;  /* ← Fixed value instead of variable */
+    padding-top: 0 !important;
     min-height: calc(100vh - 100px) !important;
     overflow-y: auto !important;
   }
   
   .dashboard-top-row {
-    margin-top: 16px !important;  /* ← Fixed value instead of variable */
+    margin-top: 0 !important;
   }
 }
 
