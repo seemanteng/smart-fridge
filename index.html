@@ -2904,37 +2904,130 @@ displayMealsForDate(selectedDate);
 
 // Global toast function (fallback if not available from main.js)
 if (typeof showToast === 'undefined') {
-function showToast(message, type = 'success') {
-// Remove existing toast
-const existingToast = document.querySelector('.toast.show');
-if (existingToast) {
-existingToast.remove();
+    function showToast(message, type = 'success') {
+    // Remove existing toast
+        const existingToast = document.querySelector('.toast.show');
+        if (existingToast) {
+            existingToast.remove();
+        }
+
+        // Create new toast
+        const toast = document.createElement('div');
+        toast.className = `toast ${type}`;
+        toast.innerHTML = `
+            <div class="toast-content">
+            <span class="toast-message">${message}</span>
+            <button class="toast-close" onclick="this.closest('.toast').remove()">&times;</button>
+            </div>
+        `;
+
+        addSwipeToast(toast);
+
+        // Add to page
+        document.body.appendChild(toast);
+
+        // Show toast
+        setTimeout(() => toast.classList.add('show'), 5);
+
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            if (toast.classList.contains('show') && toast.parentNode) {
+                dismissToast(toast);
+            }
+        }, 3000);
+    }
+
+    // Add swipe functionality to toast
+function addSwipeToast(toast) {
+    let startX = 0;
+    let startY = 0;
+    let currentX = 0;
+    let currentY = 0;
+    let isDragging = false;
+    let isMobile = window.innerWidth <= 480;
+
+    // Touch start
+    toast.addEventListener('touchstart', (e) => {
+        startX = e.touches[0].clientX;
+        startY = e.touches[0].clientY;
+        currentX = startX;
+        currentY = startY;
+        isDragging = true;
+        toast.classList.add('swiping');
+    });
+
+    // Touch move
+    toast.addEventListener('touchmove', (e) => {
+        if (!isDragging) return;
+        
+        e.preventDefault();
+        currentX = e.touches[0].clientX;
+        currentY = e.touches[0].clientY;
+        
+        const deltaX = currentX - startX;
+        const deltaY = currentY - startY;
+        
+        if (isMobile) {
+            // Mobile: swipe up to dismiss
+            if (deltaY < 0) {
+                const translateY = Math.max(deltaY, -100);
+                toast.style.transform = `translateY(${translateY}px)`;
+                toast.style.opacity = 1 + (deltaY / 100);
+            }
+        } else {
+            // Desktop: swipe right to dismiss
+            if (deltaX > 0) {
+                const translateX = Math.min(deltaX, 100);
+                toast.style.transform = `translateX(${translateX}px)`;
+                toast.style.opacity = 1 - (deltaX / 100);
+            }
+        }
+    });
+
+    // Touch end
+    toast.addEventListener('touchend', (e) => {
+        if (!isDragging) return;
+        
+        isDragging = false;
+        toast.classList.remove('swiping');
+        
+        const deltaX = currentX - startX;
+        const deltaY = currentY - startY;
+        
+        // Threshold for dismissing (30% of swipe distance)
+        const dismissThreshold = 50;
+        
+        if (isMobile && deltaY < -dismissThreshold) {
+            // Swiped up enough on mobile
+            dismissToast(toast);
+        } else if (!isMobile && deltaX > dismissThreshold) {
+            // Swiped right enough on desktop
+            dismissToast(toast);
+        } else {
+            // Snap back to original position
+            toast.style.transform = isMobile ? 'translateY(0)' : 'translateX(0)';
+            toast.style.opacity = '1';
+        }
+    });
+
+    // Click to dismiss
+    toast.addEventListener('click', () => {
+        if (!isDragging) {
+            dismissToast(toast);
+        }
+    });
 }
 
-// Create new toast
-const toast = document.createElement('div');
-toast.className = `toast ${type}`;
-toast.innerHTML = `
-<div class="toast-content">
-<span class="toast-message">${message}</span>
-<button class="toast-close" onclick="this.closest('.toast').remove()">&times;</button>
-</div>
-`;
+    // Dismiss toast function
+    function dismissToast(toast) {
+        toast.classList.remove('show');
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 300); // Match the CSS transition duration
+    }
 
-// Add to page
-document.body.appendChild(toast);
-
-// Show toast
-setTimeout(() => toast.classList.add('show'), 10);
-
-// Auto-hide after 3 seconds
-setTimeout(() => {
-if (toast.parentNode) {
-toast.classList.remove('show');
-setTimeout(() => toast.remove(), 300);
-}
-}, 3000);
-}
 }
 
 // Navigation function (fallback if not available from main.js)
