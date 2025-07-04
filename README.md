@@ -20,8 +20,8 @@ The addition of YouTube videos was because I personally enjoy watching meal prep
 - Ingredient Tracking: Keep track of all your food items with quantities and units!
 - Smart Categorization: Offers both manual and automatic categorization of ingredients (Proteins, Vegetables, Grains, etc.)
 - Visual Interface: Beautiful card-based layout with category-specific background images
-- Search & F![Inventory Tab](https://github.com/user-attachments/assets/c901f63c-7574-45ef-bf1b-ffdb850b007e)
-ilter: Easily find ingredients with search and category filters
+- Search & Filter: Easily find ingredients with search and category filters
+![Inventory Tab](https://github.com/user-attachments/assets/c901f63c-7574-45ef-bf1b-ffdb850b007e)
 
 3. Recipes
 - Video-Enhanced Recipes: Integration with YouTube cooking tutorials to make recipes easy to follow
