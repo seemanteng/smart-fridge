@@ -9,47 +9,47 @@ one stop for calorie logging and recipes while taking into account what you have
 The addition of YouTube videos was because I personally enjoy watching meal prep videos and fitness vlogs on YouTube and I think that giving a visual demonstration of how to cook a dish may be even more helpful than reading pure text (it is definitely a skill issue of mine to be very insecure with purely text based cooking instructions). 
 
 # Features
-1. Dashboard
+**1. Dashboard**
 - Daily Progress Tracking: Monitor calories, protein, carbs, and fat intake with interactive circular progress charts
 - Meal Logging: Track your daily meals with detailed nutrition information
 - Recipe Suggestions: Get personalized recipe recommendations based on your available ingredients
 - Smart Shopping List: Auto-generated grocery lists from your planned recipes to make it easier for users to know what to buy at one glance.
 ![Dashboard Tab](https://github.com/user-attachments/assets/501edf40-b4e2-4705-8a25-483e2fe0b071)
 
-2. Inventory
+**2. Inventory**
 - Ingredient Tracking: Keep track of all your food items with quantities and units!
 - Smart Categorization: Offers both manual and automatic categorization of ingredients (Proteins, Vegetables, Grains, etc.)
 - Visual Interface: Beautiful card-based layout with category-specific background images
 - Search & Filter: Easily find ingredients with search and category filters
 ![Inventory Tab](https://github.com/user-attachments/assets/c901f63c-7574-45ef-bf1b-ffdb850b007e)
 
-3. Recipes
+**3. Recipes**
 - Video-Enhanced Recipes: Integration with YouTube cooking tutorials to make recipes easy to follow
 - Smart Filtering: Filter recipes by calories, protein content, cuisine type, and cook time to instantly find meals that you like and are the best for you
 - Ingredient Matching: See which recipes you can make with your current inventory
 - Nutrition Information: Detailed nutritional breakdown for each recipe
 ![Recipes Tab](https://github.com/user-attachments/assets/92f22284-cf59-403f-8237-81f5ca606dc0)
 
-3. Calendar
+**3. Calendar**
 - Monthly View: Visual calendar showing your planned meals
 - Meal Details: Click any date to view detailed meal information
 - Top Picks: Track your most frequently cooked meals
 - Progress Tracking: Monitor daily calorie and nutrition goals
 ![Calendar Tab](https://github.com/user-attachments/assets/aa3a4060-e7dd-4b65-bcd8-30e02208e5c8)
 
-4. Goals
+**4. Goals**
 - Personal Goals: Set custom daily targets for calories, protein, carbs, and fat but when you input profile details at the start, the backend would have already suggested ideal dietary goals for you, so even novice users have something to start with :)
 - Weekly Insights: Visual charts showing your nutrition trends over the week
 - Progress Analytics: Track your consistency and average intake
 - Personalized Recommendations: Exercise and recipe suggestions based on your profile
 ![Goals Tab](https://github.com/user-attachments/assets/07055a52-1610-4ddc-b93e-bddb8d80cd5e)
 
-5. Admin
+**5. Admin**
 - Custom Recipe Manager: Add my own recipes with ingredients, instructions, and nutrition info so I can keep adding new recipes to this web app!
 - Secret page: In order to not make the interface too messy and so only restricted individuals can edit the recipes tab, I made the admin page password protected, only accessible by the consol.
 ![Admin Tab](https://github.com/user-attachments/assets/38a17030-d247-4b97-b611-36b0b1223336)
 
-6. Onboarding
+**6. Onboarding**
 - To get user profile details that will be used for recipe suggestions and reccommendations in the goal tab
 - Once off form to fill up when users first access the web app
 ![Onboarding](https://github.com/user-attachments/assets/71d64ddc-5be8-4499-ad2b-7067d8cb2deb)
