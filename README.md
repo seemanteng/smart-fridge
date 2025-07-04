@@ -133,6 +133,7 @@ CSS Custom Properties: Maintainable theming system
 
 # Data Models
 **Meal Object**
+<pre>
 javascript{
   id: 1,
   name: "Teriyaki Chicken Bowl",
@@ -143,7 +144,9 @@ javascript{
   fat: 12,
   timestamp: "2025-01-01T18:00:00Z"
 }
+</pre>
 **Recipe Object**
+<pre>
 javascript{
   id: 1,
   name: "Teriyaki Chicken Bowl",
@@ -156,7 +159,7 @@ javascript{
   instructions: [...],
   videoUrl: "https://youtu.be/..."
 }
-
+</pre>
 **Contributing**
 1. Fork the repository
 2. Create a feature branch (git checkout -b feature/AmazingFeature)
