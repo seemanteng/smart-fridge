@@ -117,12 +117,13 @@ Recipe Matching: Smart algorithm to match recipes with available ingredients
 
 
 # Technologies Used
+<pre>
 Vanilla JavaScript: No frameworks, lightweight and fast
 CSS Grid & Flexbox: Modern layout techniques
 LocalStorage API: Client-side data persistence
 Canvas API: Chart rendering for analytics
 CSS Custom Properties: Maintainable theming system
-
+</pre>
 
 **Browser Support**
 1. Chrome 80+
