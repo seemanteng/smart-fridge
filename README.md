@@ -49,6 +49,11 @@ ilter: Easily find ingredients with search and category filters
 - Secret page: In order to not make the interface too messy and so only restricted individuals can edit the recipes tab, I made the admin page password protected, only accessible by the consol.
 ![Admin Tab](https://github.com/user-attachments/assets/38a17030-d247-4b97-b611-36b0b1223336)
 
+6. Onboarding
+- To get user profile details that will be used for recipe suggestions and reccommendations in the goal tab
+- Once off form to fill up when users first access the web app
+![Onboarding](https://github.com/user-attachments/assets/71d64ddc-5be8-4499-ad2b-7067d8cb2deb)
+
 # 🚀 Getting Started
 **Prerequisites**
 Modern web browser (Chrome, Firefox, Safari, Edge)
@@ -78,6 +83,9 @@ Touch-friendly interface with swipe gestures
 Mobile navigation with easy access to all features
 Responsive design that works on phones, tablets, and desktops
 Offline functionality using localStorage
+<div align="center">
+<img src="https://github.com/user-attachments/assets/f5729263-94bb-4cc9-89b0-b78bcb40c878" width="300" alt="Mobile App">
+</div>
 
 # Project Structure
 <pre>
