@@ -1,4 +1,9 @@
 # Smart Fridge
+Currently Hosted on: https://shimmering-frangollo-b5711a.netlify.app/
+<br>
+<div align="center">
+<img src="https://github.com/user-attachments/assets/902b3c65-e1b1-402b-b598-1c30c902b5cc" width="400" alt="Smart Fridge Logo">
+</div>
 This web app is a a modern, intelligent meal planning and nutrition tracking web application that helps you manage your ingredients, discover recipes, and achieve your health goals. I wanted an applicaton that is able to be a
 one stop for calorie logging and recipes while taking into account what you have in your fridge as I get annoyed sometimes when fitness apps suggets recipes that I have 0 ingredients available. 
 The addition of YouTube videos was because I personally enjoy watching meal prep videos and fitness vlogs on YouTube and I think that giving a visual demonstration of how to cook a dish may be even more helpful than reading pure text (it is definitely a skill issue of mine to be very insecure with purely text based cooking instructions). 
