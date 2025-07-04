@@ -358,9 +358,341 @@ window.MTableUtils = {
     }
 };
 
+// Recipe Manager Class
+class CustomRecipeManager {
+    constructor() {
+        this.customRecipes = this.loadCustomRecipes();
+        this.nextId = this.getNextId();
+        this.init();
+    }
+
+    init() {
+        this.bindEvents();
+        this.renderCustomRecipes();
+        this.updateRecipeCount();
+    }
+
+    loadCustomRecipes() {
+        const saved = localStorage.getItem('mtable_custom_recipes');
+        return saved ? JSON.parse(saved) : [];
+    }
+
+    saveCustomRecipes() {
+        localStorage.setItem('mtable_custom_recipes', JSON.stringify(this.customRecipes));
+        this.updateRecipeCount();
+        this.updateMainRecipeDatabase();
+    }
+
+    getNextId() {
+        const maxId = this.customRecipes.reduce((max, recipe) => Math.max(max, recipe.id || 0), 0);
+        return Math.max(maxId + 1, 1000); // Start custom recipes at 1000+
+    }
+
+    bindEvents() {
+        const form = document.getElementById('recipeManagerForm');
+        if (form) {
+            form.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.addCustomRecipe();
+            });
+        }
+    }
+
+    addCustomRecipe() {
+        const formData = this.getFormData();
+        
+        if (!this.validateFormData(formData)) {
+            return;
+        }
+
+        const recipe = {
+            id: this.nextId++,
+            name: formData.name,
+            videoUrl: formData.videoUrl,
+            cuisine: formData.cuisine,
+            difficulty: formData.difficulty,
+            cookTime: parseInt(formData.cookTime),
+            servings: parseInt(formData.servings),
+            calories: parseInt(formData.calories),
+            nutrition: {
+                protein: parseFloat(formData.protein),
+                carbs: parseFloat(formData.carbs) || 0,
+                fat: parseFloat(formData.fat) || 0
+            },
+            ingredients: formData.ingredients,
+            instructions: formData.instructions,
+            tags: formData.tags,
+            dateAdded: new Date().toISOString(),
+            isCustom: true
+        };
+
+        this.customRecipes.push(recipe);
+        this.saveCustomRecipes();
+        this.renderCustomRecipes();
+        this.clearForm();
+        
+        if (window.showToast) {
+            showToast('Recipe added successfully!', 'success');
+        }
+    }
+
+    getFormData() {
+        const formData = {
+            name: document.getElementById('newRecipeName').value.trim(),
+            videoUrl: document.getElementById('newVideoUrl').value.trim(),
+            cuisine: document.getElementById('newCuisine').value,
+            difficulty: document.getElementById('newDifficulty').value,
+            cookTime: document.getElementById('newCookTime').value,
+            servings: document.getElementById('newServings').value,
+            calories: document.getElementById('newCalories').value,
+            protein: document.getElementById('newProtein').value,
+            carbs: document.getElementById('newCarbs').value,
+            fat: document.getElementById('newFat').value,
+            tags: document.getElementById('newTags').value.trim()
+        };
+
+        // Get ingredients
+        formData.ingredients = [];
+        document.querySelectorAll('#newIngredientsList .ingredient-input').forEach(input => {
+            const name = input.querySelector('.ingredient-name').value.trim();
+            const amount = input.querySelector('.ingredient-amount').value.trim();
+            const unit = input.querySelector('.ingredient-unit').value.trim();
+            
+            if (name && amount && unit) {
+                formData.ingredients.push({
+                    name: name,
+                    amount: parseFloat(amount),
+                    unit: unit
+                });
+            }
+        });
+
+        // Get instructions
+        formData.instructions = [];
+        document.querySelectorAll('#newInstructionsList .instruction-text').forEach(textarea => {
+            const instruction = textarea.value.trim();
+            if (instruction) {
+                formData.instructions.push(instruction);
+            }
+        });
+
+        // Process tags
+        if (formData.tags) {
+            formData.tags = formData.tags.split(',').map(tag => tag.trim()).filter(tag => tag);
+        } else {
+            formData.tags = [];
+        }
+
+        return formData;
+    }
+
+    validateFormData(formData) {
+        if (!formData.name) {
+            if (window.showToast) showToast('Recipe name is required', 'error');
+            return false;
+        }
+        if (!formData.cuisine) {
+            if (window.showToast) showToast('Cuisine type is required', 'error');
+            return false;
+        }
+        if (!formData.cookTime || formData.cookTime < 1) {
+            if (window.showToast) showToast('Valid cook time is required', 'error');
+            return false;
+        }
+        if (formData.ingredients.length === 0) {
+            if (window.showToast) showToast('At least one ingredient is required', 'error');
+            return false;
+        }
+        if (formData.instructions.length === 0) {
+            if (window.showToast) showToast('At least one instruction is required', 'error');
+            return false;
+        }
+        return true;
+    }
+
+    renderCustomRecipes() {
+        const container = document.getElementById('customRecipesList');
+        if (!container) return;
+
+        if (this.customRecipes.length === 0) {
+            container.innerHTML = `
+                <div style="grid-column: 1 / -1; text-align: center; padding: 2rem; color: var(--text-secondary);">
+                    <div style="font-size: 3rem; margin-bottom: 1rem;">🍽</div>
+                    <div>No custom recipes added yet</div>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = this.customRecipes.map(recipe => `
+            <div class="ingredient-card">
+                <div class="card-content">
+                    <div class="ingredient-info">
+                        <h4>${recipe.name}</h4>
+                        <div class="ingredient-quantity">${recipe.calories} cal • ${recipe.nutrition.protein}g protein • ${recipe.cookTime} min</div>
+                    </div>
+                    <div class="ingredient-actions">
+                        <button class="btn btn-edit" onclick="customRecipeManager.viewRecipe(${recipe.id})">View</button>
+                        <button class="btn btn-delete" onclick="customRecipeManager.deleteRecipe(${recipe.id})">Delete</button>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    viewRecipe(id) {
+        const recipe = this.customRecipes.find(r => r.id === id);
+        if (!recipe) return;
+
+        const modal = document.createElement('div');
+        modal.className = 'modal active';
+        modal.innerHTML = `
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 class="modal-title">${recipe.name}</h3>
+                    <button class="modal-close" onclick="this.closest('.modal').remove()">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Details:</strong> ${recipe.cuisine} • ${recipe.difficulty} • ${recipe.cookTime} min • ${recipe.servings} servings
+                    </div>
+                    
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Nutrition:</strong> ${recipe.calories} cal, ${recipe.nutrition.protein}g protein, ${recipe.nutrition.carbs}g carbs, ${recipe.nutrition.fat}g fat
+                    </div>
+
+                    ${recipe.videoUrl ? `
+                        <div style="margin-bottom: 1rem;">
+                            <strong>Video:</strong> <a href="${recipe.videoUrl}" target="_blank">Watch on YouTube</a>
+                        </div>
+                    ` : ''}
+
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Ingredients:</strong>
+                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                            ${recipe.ingredients.map(ing => `<li>${ing.amount} ${ing.unit} ${ing.name}</li>`).join('')}
+                        </ul>
+                    </div>
+
+                    <div style="margin-bottom: 1rem;">
+                        <strong>Instructions:</strong>
+                        <ol style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                            ${recipe.instructions.map(instruction => `<li style="margin-bottom: 0.5rem;">${instruction}</li>`).join('')}
+                        </ol>
+                    </div>
+
+                    ${recipe.tags.length > 0 ? `
+                        <div><strong>Tags:</strong> ${recipe.tags.join(', ')}</div>
+                    ` : ''}
+                </div>
+            </div>
+        `;
+        document.body.appendChild(modal);
+    }
+
+    deleteRecipe(id) {
+        if (confirm('Are you sure you want to delete this recipe?')) {
+            this.customRecipes = this.customRecipes.filter(r => r.id !== id);
+            this.saveCustomRecipes();
+            this.renderCustomRecipes();
+            if (window.showToast) showToast('Recipe deleted', 'success');
+        }
+    }
+
+    updateRecipeCount() {
+        const countElement = document.getElementById('customRecipeCount');
+        if (countElement) {
+            countElement.textContent = this.customRecipes.length;
+        }
+    }
+
+    updateMainRecipeDatabase() {
+        // Merge custom recipes with existing RECIPE_DATABASE
+        if (typeof RECIPE_DATABASE !== 'undefined') {
+            this.customRecipes.forEach(recipe => {
+                const key = recipe.name.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+                RECIPE_DATABASE[key] = recipe;
+            });
+        }
+    }
+
+    clearForm() {
+        document.getElementById('recipeManagerForm').reset();
+        // Reset ingredients and instructions to have one empty field each
+        document.getElementById('newIngredientsList').innerHTML = `
+            <div class="ingredient-input" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                <input type="text" placeholder="Name" class="ingredient-name" style="flex: 2;">
+                <input type="number" placeholder="Amount" step="0.1" class="ingredient-amount" style="flex: 1;">
+                <input type="text" placeholder="Unit" class="ingredient-unit" style="flex: 1;">
+                <button type="button" onclick="removeNewIngredient(this)" class="btn btn-secondary" style="flex: 0;">Remove</button>
+            </div>
+        `;
+        document.getElementById('newInstructionsList').innerHTML = `
+            <div class="instruction-input" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: start;">
+                <textarea placeholder="Step 1: Cook rice according to package directions..." class="instruction-text" style="flex: 1; min-height: 60px;"></textarea>
+                <button type="button" onclick="removeNewInstruction(this)" class="btn btn-secondary">Remove</button>
+            </div>
+        `;
+    }
+}
+
+// Helper functions for dynamic ingredients/instructions
+function addNewIngredient() {
+    const container = document.getElementById('newIngredientsList');
+    const div = document.createElement('div');
+    div.className = 'ingredient-input';
+    div.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px;';
+    div.innerHTML = `
+        <input type="text" placeholder="Name" class="ingredient-name" style="flex: 2;">
+        <input type="number" placeholder="Amount" step="0.1" class="ingredient-amount" style="flex: 1;">
+        <input type="text" placeholder="Unit" class="ingredient-unit" style="flex: 1;">
+        <button type="button" onclick="removeNewIngredient(this)" class="btn btn-secondary" style="flex: 0;">Remove</button>
+    `;
+    container.appendChild(div);
+}
+
+function removeNewIngredient(button) {
+    const container = document.getElementById('newIngredientsList');
+    if (container.children.length > 1) {
+        button.closest('.ingredient-input').remove();
+    }
+}
+
+function addNewInstruction() {
+    const container = document.getElementById('newInstructionsList');
+    const div = document.createElement('div');
+    div.className = 'instruction-input';
+    div.style.cssText = 'display: flex; gap: 10px; margin-bottom: 10px; align-items: start;';
+    div.innerHTML = `
+        <textarea placeholder="Step ${container.children.length + 1}: ..." class="instruction-text" style="flex: 1; min-height: 60px;"></textarea>
+        <button type="button" onclick="removeNewInstruction(this)" class="btn btn-secondary">Remove</button>
+    `;
+    container.appendChild(div);
+}
+
+function removeNewInstruction(button) {
+    const container = document.getElementById('newInstructionsList');
+    if (container.children.length > 1) {
+        button.closest('.instruction-input').remove();
+    }
+}
+
+function clearRecipeForm() {
+    if (window.customRecipeManager) {
+        window.customRecipeManager.clearForm();
+    }
+}
+
+// Initialize Custom Recipe Manager
+document.addEventListener('DOMContentLoaded', function() {
+    setTimeout(() => {
+        window.customRecipeManager = new CustomRecipeManager();
+    }, 1000);
+});
+
 // Debug helper
 window.debugMTable = function() {
-    console.log('🔍 MTable Debug Info:');
+    console.log('🔍 Smart Fridge Debug Info:');
     console.log('Components:', {
         dashboard: window.dashboard,
         inventory: window.inventory,
@@ -400,4 +732,133 @@ if (typeof module !== 'undefined' && module.exports) {
         filterRecipes,
         clearAllMTableData
     };
+}
+
+// Secret admin access - Use activateAdminMode('password') in browser console
+function activateAdminMode(password) {
+    // Check if password is provided and correct
+    if (password !== 'smartfridgeadmin') {
+        console.error('❌ Access denied: Invalid password');
+        if (window.showToast) {
+            showToast('Access denied: Invalid password', 'error');
+        }
+        return false;
+    }
+    
+    // Show desktop navigation
+    const desktopNavItem = document.querySelector('.nav-item[data-section="recipe-manager"]');
+    if (!desktopNavItem) {
+        const desktopNav = document.querySelector('.nav-menu');
+        if (desktopNav) {
+            const adminNavItem = document.createElement('li');
+            adminNavItem.className = 'nav-item';
+            adminNavItem.setAttribute('data-section', 'recipe-manager');
+            adminNavItem.innerHTML = `
+                <a href="#" data-section="recipe-manager">
+                    <span class="nav-icon">➕</span>
+                    <span class="nav-text">Add Recipes</span>
+                </a>
+            `;
+            desktopNav.appendChild(adminNavItem);
+        }
+    }
+    
+    // Show mobile navigation
+    const mobileNavTab = document.querySelector('.mobile-nav-tab[data-section="recipe-manager"]');
+    if (!mobileNavTab) {
+        const mobileNavTabs = document.querySelector('.mobile-nav-tabs');
+        if (mobileNavTabs) {
+            const adminMobileTab = document.createElement('button');
+            adminMobileTab.className = 'mobile-nav-tab';
+            adminMobileTab.setAttribute('data-section', 'recipe-manager');
+            adminMobileTab.textContent = 'Add Recipes';
+            mobileNavTabs.appendChild(adminMobileTab);
+        }
+    }
+    
+    // Show success message
+    if (window.showToast) {
+        showToast('🔧 Admin mode activated! Recipe manager unlocked.', 'success');
+    }
+    
+    console.log('✅ Admin mode activated - Recipe manager is now accessible');
+    
+    // Store admin mode in session storage
+    sessionStorage.setItem('admin_mode_active', 'true');
+    
+    return true;
+}
+
+// Check if admin mode was previously activated in this session
+document.addEventListener('DOMContentLoaded', function() {
+    if (sessionStorage.getItem('admin_mode_active') === 'true') {
+        setTimeout(() => {
+            // Reactivate admin mode without password check (already authenticated this session)
+            activateAdminModeWithoutPassword();
+        }, 500);
+    }
+});
+
+// Helper function to reactivate admin mode without password (for session persistence)
+function activateAdminModeWithoutPassword() {
+    // Same logic as activateAdminMode but without password check
+    const desktopNavItem = document.querySelector('.nav-item[data-section="recipe-manager"]');
+    if (!desktopNavItem) {
+        const desktopNav = document.querySelector('.nav-menu');
+        if (desktopNav) {
+            const adminNavItem = document.createElement('li');
+            adminNavItem.className = 'nav-item';
+            adminNavItem.setAttribute('data-section', 'recipe-manager');
+            adminNavItem.innerHTML = `
+                <a href="#" data-section="recipe-manager">
+                    <span class="nav-icon">➕</span>
+                    <span class="nav-text">Add Recipes</span>
+                </a>
+            `;
+            desktopNav.appendChild(adminNavItem);
+        }
+    }
+    
+    const mobileNavTab = document.querySelector('.mobile-nav-tab[data-section="recipe-manager"]');
+    if (!mobileNavTab) {
+        const mobileNavTabs = document.querySelector('.mobile-nav-tabs');
+        if (mobileNavTabs) {
+            const adminMobileTab = document.createElement('button');
+            adminMobileTab.className = 'mobile-nav-tab';
+            adminMobileTab.setAttribute('data-section', 'recipe-manager');
+            adminMobileTab.textContent = 'Add Recipes';
+            mobileNavTabs.appendChild(adminMobileTab);
+        }
+    }
+    
+    console.log('✅ Admin mode restored from session');
+}
+
+// Function to deactivate admin mode
+function deactivateAdminMode() {
+    // Remove desktop navigation item
+    const desktopNavItem = document.querySelector('.nav-item[data-section="recipe-manager"]');
+    if (desktopNavItem) {
+        desktopNavItem.remove();
+    }
+
+    // Remove mobile navigation tab
+    const mobileNavTab = document.querySelector('.mobile-nav-tab[data-section="recipe-manager"]');
+    if (mobileNavTab) {
+        mobileNavTab.remove();
+    }
+
+    // Remove from session storage
+    sessionStorage.removeItem('admin_mode_active');
+    
+    // Go back to dashboard if currently on admin section
+    if (document.getElementById('recipe-manager').classList.contains('active')) {
+        showSection('dashboard');
+    }
+    
+    if (window.showToast) {
+        showToast('Admin mode deactivated', 'success');
+    }
+    
+    console.log('❌ Admin mode deactivated');
 }

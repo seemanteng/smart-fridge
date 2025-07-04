@@ -2472,7 +2472,7 @@ stroke="url(#gradient)" stroke-width="8" stroke-linecap="round"/>
     </div>
 </div>
 
-<!-- Goals -->
+<!-- Goals Section -->
 <div id="goals" class="content-section">
     <div class="goals-visual-container">
         <!-- Header -->
@@ -2618,6 +2618,128 @@ stroke="url(#gradient)" stroke-width="8" stroke-linecap="round"/>
                         <button class="btn-reset" onclick="resetOnboarding()">RESET SETUP</button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recipe Manager Section -->
+<div id="recipe-manager" class="content-section">
+    <div class="inventory-container">
+        <!-- Add Recipe Form -->
+        <div class="add-ingredient-card">
+            <h3>Add New Recipe</h3>
+            <form id="recipeManagerForm" class="ingredient-form-grid">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newRecipeName">Recipe Name:</label>
+                        <input type="text" id="newRecipeName" placeholder="e.g., Spicy Thai Curry" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newVideoUrl">YouTube Video URL:</label>
+                        <input type="url" id="newVideoUrl" placeholder="https://youtu.be/...">
+                    </div>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newCuisine">Cuisine:</label>
+                        <select id="newCuisine" required>
+                            <option value="">Select cuisine...</option>
+                            <option value="asian">Asian</option>
+                            <option value="italian">Italian</option>
+                            <option value="mexican">Mexican</option>
+                            <option value="american">American</option>
+                            <option value="mediterranean">Mediterranean</option>
+                            <option value="indian">Indian</option>
+                            <option value="french">French</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="newDifficulty">Difficulty:</label>
+                        <select id="newDifficulty">
+                            <option value="easy">Easy</option>
+                            <option value="medium">Medium</option>
+                            <option value="hard">Hard</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newCookTime">Cook Time (minutes):</label>
+                        <input type="number" id="newCookTime" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newServings">Servings:</label>
+                        <input type="number" id="newServings" min="1" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newCalories">Calories:</label>
+                        <input type="number" id="newCalories" min="1" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="newProtein">Protein (g):</label>
+                        <input type="number" id="newProtein" step="0.1" min="0" required>
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="newCarbs">Carbs (g):</label>
+                        <input type="number" id="newCarbs" step="0.1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="newFat">Fat (g):</label>
+                        <input type="number" id="newFat" step="0.1" min="0">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Ingredients:</label>
+                    <div id="newIngredientsList">
+                        <div class="ingredient-input" style="display: flex; gap: 10px; margin-bottom: 10px;">
+                            <input type="text" placeholder="Name" class="ingredient-name" style="flex: 2;">
+                            <input type="number" placeholder="Amount" step="0.1" class="ingredient-amount" style="flex: 1;">
+                            <input type="text" placeholder="Unit" class="ingredient-unit" style="flex: 1;">
+                            <button type="button" onclick="removeNewIngredient(this)" class="btn btn-secondary" style="flex: 0;">Remove</button>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addNewIngredient()" class="btn btn-secondary">Add Ingredient</button>
+                </div>
+
+                <div class="form-group">
+                    <label>Instructions:</label>
+                    <div id="newInstructionsList">
+                        <div class="instruction-input" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: start;">
+                            <textarea placeholder="Step 1: Cook rice according to package directions..." class="instruction-text" style="flex: 1; min-height: 60px;"></textarea>
+                            <button type="button" onclick="removeNewInstruction(this)" class="btn btn-secondary">Remove</button>
+                        </div>
+                    </div>
+                    <button type="button" onclick="addNewInstruction()" class="btn btn-secondary">Add Step</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="newTags">Tags (comma-separated):</label>
+                    <input type="text" id="newTags" placeholder="high-protein, quick, vegetarian">
+                </div>
+
+                <div class="form-buttons">
+                    <button type="submit" class="btn btn-primary">Add Recipe</button>
+                    <button type="button" class="btn btn-secondary" onclick="clearRecipeForm()">Clear Form</button>
+                    <button type="button" class="btn btn-secondary" onclick="deactivateAdminMode()" style="background: #ff6b6b; color: white;">Hide Admin Panel</button>
+                </div>
+            </form>
+        </div>
+
+        <!-- Custom Recipes List -->
+        <div class="add-ingredient-card">
+            <h3>Your Custom Recipes (<span id="customRecipeCount">0</span>)</h3>
+            <div class="inventory-grid" id="customRecipesList">
+                <!-- Custom recipes will be displayed here -->
             </div>
         </div>
     </div>
@@ -3276,6 +3398,84 @@ function showSection(sectionId) {
         activeTab.classList.add('active');
     }
 }
+
+function activateAdminMode() {
+    // Create and add desktop navigation item
+    const desktopNav = document.querySelector('.nav-menu');
+    if (desktopNav && !document.querySelector('.nav-item[data-section="recipe-manager"]')) {
+        const adminNavItem = document.createElement('li');
+        adminNavItem.className = 'nav-item';
+        adminNavItem.setAttribute('data-section', 'recipe-manager');
+        adminNavItem.innerHTML = `
+            <a href="#" data-section="recipe-manager">
+                <span class="nav-icon">➕</span>
+                <span class="nav-text">Add Recipes</span>
+            </a>
+        `;
+        desktopNav.appendChild(adminNavItem);
+        
+        // Add click event to the new desktop nav item
+        adminNavItem.querySelector('a').addEventListener('click', function(e) {
+            e.preventDefault();
+            showSection('recipe-manager');
+            // Update active states
+            document.querySelectorAll('.nav-item').forEach(item => item.classList.remove('active'));
+            adminNavItem.classList.add('active');
+        });
+    }
+
+    // Create and add mobile navigation tab
+    const mobileNavTabs = document.querySelector('.mobile-nav-tabs');
+    if (mobileNavTabs && !document.querySelector('.mobile-nav-tab[data-section="recipe-manager"]')) {
+        const adminMobileTab = document.createElement('button');
+        adminMobileTab.className = 'mobile-nav-tab';
+        adminMobileTab.setAttribute('data-section', 'recipe-manager');
+        adminMobileTab.textContent = 'Add Recipes';
+        
+        // Add click event to the new mobile nav tab
+        adminMobileTab.addEventListener('click', function() {
+            document.querySelectorAll('.mobile-nav-tab').forEach(t => t.classList.remove('active'));
+            this.classList.add('active');
+            showSection('recipe-manager');
+        });
+        
+        mobileNavTabs.appendChild(adminMobileTab);
+    }
+
+    // Show success message
+    if (window.showToast) {
+        showToast('🔧 Admin mode activated! Recipe manager unlocked.', 'success');
+    }
+    console.log('Admin mode activated - Recipe manager is now accessible');
+    
+    // Store admin mode in session storage
+    sessionStorage.setItem('admin_mode_active', 'true');
+}
+
+function deactivateAdminMode() {
+    // Remove desktop navigation item
+    const desktopNavItem = document.querySelector('.nav-item[data-section="recipe-manager"]');
+    if (desktopNavItem) {
+        desktopNavItem.remove();
+    }
+
+    // Remove mobile navigation tab
+    const mobileNavTab = document.querySelector('.mobile-nav-tab[data-section="recipe-manager"]');
+    if (mobileNavTab) {
+        mobileNavTab.remove();
+    }
+
+    // Remove from session storage
+    sessionStorage.removeItem('admin_mode_active');
+    
+    // Go back to dashboard
+    showSection('dashboard');
+    
+    if (window.showToast) {
+        showToast('Admin mode deactivated', 'success');
+    }
+}
+
 </script>
 </body>
 </html>
