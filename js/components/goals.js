@@ -150,6 +150,13 @@ class Goals {
         this.renderExerciseSuggestions();
         this.renderRecipeSuggestions();
     }
+
+    // Add this missing method
+    renderWeeklyChart() {
+        // Legacy method - redirect to visual charts
+        console.log('Legacy renderWeeklyChart called, redirecting to visual charts');
+        this.renderVisualCharts();
+    }
     
     getDayStats(dateKey) {
         // First check if calendar component has data for this date
@@ -239,31 +246,44 @@ class Goals {
         const chartWidth = displayWidth - (padding * 2);
         const chartHeight = displayHeight - (padding * 2);
 
-        // Get max value for scaling
-        let maxValue = Math.max(...data.map(d => d[dataType] || 0), 1);
-        
-        // Add some headroom
-        maxValue = maxValue * 1.2;
-        
-        const scale = chartHeight / maxValue;
-
-        // Draw target line
+        // Get target value first
         let targetValue = 0;
         if (dataType === 'calories') targetValue = this.goals.dailyCalories;
         else if (dataType === 'protein') targetValue = this.goals.dailyProtein;
         else if (dataType === 'carbs') targetValue = this.goals.dailyCarbs;
         else if (dataType === 'fat') targetValue = this.goals.dailyFat;
 
+        // Get max value for scaling - include target value in calculation
+        let maxDataValue = Math.max(...data.map(d => d[dataType] || 0), 1);
+        let maxValue = Math.max(maxDataValue, targetValue || 1);
+
+        // Add some headroom (20% above the highest value)
+        maxValue = maxValue * 1.2;
+
+        const scale = chartHeight / maxValue;
+
+        console.log(`${dataType} - Target: ${targetValue}, Max Data: ${maxDataValue}, Scale Max: ${maxValue}`); 
+
         if (targetValue > 0) {
             const targetY = displayHeight - padding - (targetValue * scale);
-            ctx.strokeStyle = 'rgba(255, 255, 255, 0.4)';
-            ctx.lineWidth = 2;
-            ctx.setLineDash([5, 5]);
+            
+            // Make the target line more visible
+            ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+            ctx.lineWidth = 3;
+            ctx.setLineDash([8, 4]);
             ctx.beginPath();
             ctx.moveTo(padding, targetY);
             ctx.lineTo(displayWidth - padding, targetY);
             ctx.stroke();
             ctx.setLineDash([]);
+            
+            // Add target value label
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+            ctx.font = 'bold 10px Arial';
+            ctx.textAlign = 'right';
+            ctx.fillText(`Goal: ${targetValue}`, displayWidth - padding - 5, targetY - 5);
+            
+            console.log(`${dataType} target line drawn at Y: ${targetY} (target: ${targetValue})`);
         }
 
         // Draw bars - one for each day in order
@@ -939,11 +959,19 @@ class Goals {
 
     // New visual chart rendering methods
     renderVisualCharts() {
-        this.renderCaloriesChartVisual();
-        this.renderProteinChartVisual();
-        this.renderCarbsChartVisual();
-        this.renderFatsChartVisual();
-    }
+        // Force reload weekly stats first
+        this.weeklyStats = this.loadWeeklyStats();
+        
+        setTimeout(() => {
+            this.renderCaloriesChartVisual();
+            this.renderProteinChartVisual();
+            this.renderCarbsChartVisual();
+            this.renderFatsChartVisual();
+            
+            // Setup hover functionality after charts are rendered
+            this.setupChartHover();
+        }, 100);
+    } 
 
     renderCaloriesChartVisual() {
         this.renderWeeklyChartVisual('caloriesChartVisual', 'calories', '#ff7043');
@@ -961,25 +989,17 @@ class Goals {
         this.renderWeeklyChartVisual('fatsChartVisual', 'fat', '#81c784');
     }
 
-    // Make sure all visual charts are rendered when section becomes active
-    renderVisualCharts() {
-        // Force reload weekly stats first
-        this.weeklyStats = this.loadWeeklyStats();
-        
-        setTimeout(() => {
-            this.renderCaloriesChartVisual();
-            this.renderProteinChartVisual();
-            this.renderCarbsChartVisual();
-            this.renderFatsChartVisual();
-        }, 100);
-    }
-
     renderWeeklyChartVisual(canvasId, dataType, color) {
         const canvas = document.getElementById(canvasId);
-        if (!canvas) return;
+        if (!canvas) {
+            console.log(`Canvas ${canvasId} not found`);
+            return;
+        }
 
         const ctx = canvas.getContext('2d');
         const data = this.weeklyStats;
+        
+        console.log(`Rendering ${canvasId} with data:`, data.map(d => `${d.day}: ${d[dataType]}`));
 
         // Set canvas size
         const dpr = window.devicePixelRatio || 1;
@@ -1023,7 +1043,10 @@ class Goals {
             ctx.setLineDash([]);
         }
 
-        // Draw bars
+        // Store bar information for hover detection
+        const barInfo = [];
+
+        // Draw bars - one for each day in order
         const barWidth = chartWidth / 7;
         data.forEach((day, index) => {
             const value = day[dataType] || 0;
@@ -1032,9 +1055,24 @@ class Goals {
             const y = displayHeight - padding - barHeight;
             const actualBarWidth = barWidth * 0.6;
 
-            // Determine if over/under target
+            // Store bar coordinates for hover detection
+            barInfo.push({
+                x: x,
+                y: y,
+                width: actualBarWidth,
+                height: barHeight,
+                value: value,
+                day: day.day,
+                dataType: dataType
+            });
+
+            // Determine if over/under target and if it's today
             let barColor = color;
-            if (targetValue > 0 && value > 0) {
+            
+            if (day.isToday && value > 0) {
+                // Highlight today's bar
+                barColor = '#4CAF50'; // Green for today
+            } else if (targetValue > 0 && value > 0) {
                 const percentage = (value / targetValue) * 100;
                 if (percentage >= 90 && percentage <= 110) {
                     barColor = '#4CAF50'; // Good
@@ -1050,9 +1088,96 @@ class Goals {
             // Draw bar
             ctx.fillStyle = barColor;
             ctx.fillRect(x, y, actualBarWidth, barHeight);
+            
+            // Add value label for today
+            if (day.isToday && value > 0) {
+                ctx.fillStyle = 'white';
+                ctx.font = 'bold 10px Arial';
+                ctx.textAlign = 'center';
+                ctx.fillText(Math.round(value), x + actualBarWidth/2, y - 5);
+            }
+        });
+
+        // Store bar info on canvas for hover detection
+        canvas._barInfo = barInfo;
+        canvas._dataType = dataType;
+        
+        console.log(`${canvasId} rendered successfully`);
+    } 
+
+    // Add hover functionality to charts
+    setupChartHover() {
+        const chartIds = ['caloriesChartVisual', 'proteinChartVisual', 'carbsChartVisual', 'fatsChartVisual'];
+        
+        chartIds.forEach(chartId => {
+            const canvas = document.getElementById(chartId);
+            if (!canvas) return;
+
+            // Create tooltip element if it doesn't exist
+            let tooltip = document.getElementById('chart-tooltip');
+            if (!tooltip) {
+                tooltip = document.createElement('div');
+                tooltip.id = 'chart-tooltip';
+                tooltip.style.cssText = `
+                    position: fixed;
+                    background: rgba(0, 0, 0, 0.8);
+                    color: white;
+                    padding: 8px 12px;
+                    border-radius: 6px;
+                    font-size: 12px;
+                    font-weight: bold;
+                    pointer-events: none;
+                    z-index: 9999;
+                    opacity: 0;
+                    transition: opacity 0.2s ease;
+                    white-space: nowrap;
+                `;
+                document.body.appendChild(tooltip);
+            }
+
+            // Mouse move event for hover detection
+            canvas.addEventListener('mousemove', (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const mouseX = e.clientX - rect.left;
+                const mouseY = e.clientY - rect.top;
+                
+                const barInfo = canvas._barInfo;
+                const dataType = canvas._dataType;
+                
+                if (!barInfo) return;
+
+                // Check if mouse is over any bar
+                let hoverBar = null;
+                for (let bar of barInfo) {
+                    if (mouseX >= bar.x && mouseX <= bar.x + bar.width &&
+                        mouseY >= bar.y && mouseY <= bar.y + bar.height) {
+                        hoverBar = bar;
+                        break;
+                    }
+                }
+
+                if (hoverBar) {
+                    // Show tooltip
+                    const unit = dataType === 'calories' ? 'cal' : 'g';
+                    tooltip.innerHTML = `${hoverBar.day}: ${Math.round(hoverBar.value)}${unit}`;
+                    tooltip.style.left = (e.clientX + 10) + 'px';
+                    tooltip.style.top = (e.clientY - 30) + 'px';
+                    tooltip.style.opacity = '1';
+                    canvas.style.cursor = 'pointer';
+                } else {
+                    // Hide tooltip
+                    tooltip.style.opacity = '0';
+                    canvas.style.cursor = 'default';
+                }
+            });
+
+            // Mouse leave event
+            canvas.addEventListener('mouseleave', () => {
+                tooltip.style.opacity = '0';
+                canvas.style.cursor = 'default';
+            });
         });
     }
-
     // Update visual stats
     updateVisualStats() {
         const weeklyData = this.weeklyStats;
