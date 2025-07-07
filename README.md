@@ -4,7 +4,7 @@ Currently Hosted on: https://shimmering-frangollo-b5711a.netlify.app/
 <div align="center">
 <img src="https://github.com/user-attachments/assets/902b3c65-e1b1-402b-b598-1c30c902b5cc" width="400" alt="Smart Fridge Logo">
 </div>
-Smart Fridge is the meal planning app that actually looks at what's in your kitchen first. No more grocery store runs for exotic ingredients—just delicious, healthy meals made from what you already have, complete with YouTube tutorials because while text based instructions are great, learning visually is usually more fool-proof and fun.
+Smart Fridge is the meal planning app that actually looks at what's in your kitchen first. No more grocery store runs for a long list of ingredients you don't have—just delicious, healthy meals made from what you already have, complete with YouTube tutorials because while text based instructions are great, learning visually is usually more fool-proof and fun.
 
 # Features
 **1. Dashboard**
